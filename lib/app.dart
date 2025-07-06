@@ -6,6 +6,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/signup_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/home/presentation/pages/settings_page.dart';
 
 class SkillSwapApp extends StatelessWidget {
   const SkillSwapApp({super.key});

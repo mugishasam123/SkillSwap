@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,21 +11,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _pages = <Widget>[
+  static List<Widget> _pagesBuilder(Function(int) onTabChange) => [
     Center(child: Text('Home Page', style: TextStyle(fontSize: 24))),
     Center(child: Text('Messages Page', style: TextStyle(fontSize: 24))),
     Center(child: Text('Profile Page', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Settings Page', style: TextStyle(fontSize: 24))),
+    SettingsPage(onBackToHome: () => onTabChange(0)),
   ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final pages = _pagesBuilder((i) => setState(() => _selectedIndex = i));
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -121,7 +117,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              Expanded(child: _pages[_selectedIndex]),
+              Expanded(child: pages[_selectedIndex]),
             ],
           ),
         ),
@@ -145,7 +141,7 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
+            onTap: (i) => setState(() => _selectedIndex = i),
             selectedItemColor: const Color(0xFF225B4B),
             unselectedItemColor: Colors.black,
             showUnselectedLabels: true,
