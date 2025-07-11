@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsPage extends StatelessWidget {
   final VoidCallback? onBackToHome;
-  const SettingsPage({Key? key, this.onBackToHome}) : super(key: key);
+  const SettingsPage({super.key, this.onBackToHome});
 
   Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
@@ -29,7 +29,9 @@ class SettingsPage extends StatelessWidget {
                         if (onBackToHome != null) {
                           onBackToHome!();
                         } else {
-                          Navigator.of(context).popUntil((route) => route.isFirst);
+                          Navigator.of(
+                            context,
+                          ).popUntil((route) => route.isFirst);
                         }
                       },
                     ),
@@ -56,7 +58,9 @@ class SettingsPage extends StatelessWidget {
                 const SizedBox(height: 16),
                 const CircleAvatar(
                   radius: 48,
-                  backgroundImage: AssetImage('assets/images/onboarding_1.png'), // Placeholder
+                  backgroundImage: AssetImage(
+                    'assets/images/onboarding_1.png',
+                  ), // Placeholder
                 ),
                 const SizedBox(height: 12),
                 const Text(
@@ -69,10 +73,7 @@ class SettingsPage extends StatelessWidget {
                 ),
                 const Text(
                   '@johnkinggraphics',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
                 const SizedBox(height: 24),
                 _SettingsCard(
@@ -155,7 +156,11 @@ class _SettingsCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                Icon(icon, size: 28, color: iconColor ?? const Color(0xFF225B4B)),
+                Icon(
+                  icon,
+                  size: 28,
+                  color: iconColor ?? const Color(0xFF225B4B),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -188,4 +193,4 @@ class _SettingsCard extends StatelessWidget {
       ),
     );
   }
-} 
+}
