@@ -70,66 +70,69 @@ class _ChatPageState extends State<ChatPage> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 final messages = snapshot.data!;
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 8,
-                  ),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == userId;
-                    return Align(
-                      alignment: isMe
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Row(
-                        mainAxisAlignment: isMe
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (!isMe)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 4.0),
-                              child: CircleAvatar(
-                                radius: 16,
-                                backgroundImage: AssetImage(
-                                  widget.otherUserAvatar,
+                return Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 8,
+                    ),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isMe = message.senderId == userId;
+                      return Align(
+                        alignment: isMe
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Row(
+                          mainAxisAlignment: isMe
+                              ? MainAxisAlignment.end
+                              : MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (!isMe)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 4.0),
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundImage: AssetImage(
+                                    widget.otherUserAvatar,
+                                  ),
+                                ),
+                              ),
+                            Flexible(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isMe ? Colors.blue : Colors.orange,
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: Text(
+                                  message.text,
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
                             ),
-                          Flexible(
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
+                            if (isMe)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 4.0),
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundImage: AssetImage(
+                                    'assets/images/logo.png',
+                                  ), // Placeholder for self
+                                ),
                               ),
-                              decoration: BoxDecoration(
-                                color: isMe ? Colors.blue : Colors.orange,
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: Text(
-                                message.text,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                          if (isMe)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 4.0),
-                              child: CircleAvatar(
-                                radius: 16,
-                                backgroundImage: AssetImage(
-                                  'assets/images/logo.png',
-                                ), // Placeholder for self
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),

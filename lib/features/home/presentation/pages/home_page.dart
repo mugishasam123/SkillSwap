@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import '../../../messages/presentation/pages/message_list_page.dart';
+import '../../../forum/presentation/pages/forum_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,7 +14,84 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   static List<Widget> _pagesBuilder(Function(int) onTabChange) => [
-    Center(child: Text('Home Page', style: TextStyle(fontSize: 24))),
+    Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 24,
+            left: 20,
+            right: 20,
+            bottom: 8,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // Search icon in white circle with shadow
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.search, color: Colors.black, size: 24),
+                  onPressed: () {},
+                  tooltip: 'Search',
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Notification icon with badge
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.notifications_none,
+                        color: Colors.black,
+                        size: 24,
+                      ),
+                      onPressed: () {},
+                      tooltip: 'Notifications',
+                    ),
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const Expanded(child: HomeTabs()),
+      ],
+    ),
     MessageListPage(),
     Center(child: Text('Profile Page', style: TextStyle(fontSize: 24))),
     SettingsPage(onBackToHome: () => onTabChange(0)),
@@ -37,97 +115,6 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-              if (_selectedIndex != 1 &&
-                  _selectedIndex !=
-                      3) // Only show header if not on Messages or Settings
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Hi Sipho!',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Lets find your next Swap!',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          // Search icon in white circle with shadow
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.search,
-                                color: Colors.black,
-                                size: 28,
-                              ),
-                              onPressed: () {},
-                              tooltip: 'Search',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Notification icon with badge
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.notifications_none,
-                                  color: Colors.black,
-                                  size: 28,
-                                ),
-                                onPressed: () {},
-                                tooltip: 'Notifications',
-                              ),
-                              Positioned(
-                                right: 8,
-                                top: 12,
-                                child: Container(
-                                  width: 10,
-                                  height: 10,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               if (_selectedIndex != 1 && _selectedIndex != 3)
                 const SizedBox(height: 16),
               Expanded(child: pages[_selectedIndex]),
@@ -183,6 +170,62 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class HomeTabs extends StatelessWidget {
+  const HomeTabs({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 100.0),
+            child: TabBar(
+              labelColor: Colors.black,
+              unselectedLabelColor: const Color(0xFF617D8A),
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                fontSize: 16,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                fontSize: 16,
+              ),
+              indicatorColor: Colors.transparent,
+              tabs: const [
+                Tab(text: 'Suggested'),
+                Tab(text: 'All'),
+                Tab(text: 'Forum'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: TabBarView(
+              children: [
+                Center(
+                  child: Text(
+                    'Suggested Content',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+                Center(
+                  child: Text('All Content', style: TextStyle(fontSize: 18)),
+                ),
+                ForumPage(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
