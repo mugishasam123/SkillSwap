@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import '../../../messages/presentation/pages/message_list_page.dart';
 import '../../../forum/presentation/pages/forum_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
 import 'all_swaps_page.dart';
-import 'suggested_swaps_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
       ],
     ),
     MessageListPage(),
-    Center(child: Text('Profile Page', style: TextStyle(fontSize: 24))),
+    ProfilePage(onBackToHome: () => onTabChange(0)),
     SettingsPage(onBackToHome: () => onTabChange(0)),
   ];
 
