@@ -144,71 +144,75 @@ class MessageListPage extends StatelessWidget {
                 if (chats.isEmpty) {
                   return const Center(child: Text('No messages yet.'));
                 }
-                return ListView.builder(
-                  itemCount: chats.length,
-                  itemBuilder: (context, index) {
-                    final chat = chats[index];
-                    final otherUserId = chat.userIds.firstWhere(
-                      (id) => id != userId,
-                    );
-                    return FutureBuilder<Map<String, dynamic>?>(
-                      future: _getUserInfo(otherUserId),
-                      builder: (context, userSnapshot) {
-                        final userData = userSnapshot.data;
-                        final avatar =
-                            userData?['avatarUrl'] ?? 'assets/images/logo.png';
-                        final name = userData?['name'] ?? 'User';
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: avatar.startsWith('http')
-                                ? NetworkImage(avatar)
-                                : AssetImage(avatar) as ImageProvider,
-                          ),
-                          title: Text(name),
-                          subtitle: Text(chat.lastMessage),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(_formatTime(chat.lastMessageTime)),
-                              if ((chat.unreadCount[userId] ?? 0) > 0)
-                                Container(
-                                  margin: const EdgeInsets.only(top: 4),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '${chat.unreadCount[userId]}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
+                return Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    itemCount: chats.length,
+                    itemBuilder: (context, index) {
+                      final chat = chats[index];
+                      final otherUserId = chat.userIds.firstWhere(
+                        (id) => id != userId,
+                      );
+                      return FutureBuilder<Map<String, dynamic>?>(
+                        future: _getUserInfo(otherUserId),
+                        builder: (context, userSnapshot) {
+                          final userData = userSnapshot.data;
+                          final avatar =
+                              userData?['avatarUrl'] ??
+                              'assets/images/logo.png';
+                          final name = userData?['name'] ?? 'User';
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: avatar.startsWith('http')
+                                  ? NetworkImage(avatar)
+                                  : AssetImage(avatar) as ImageProvider,
+                            ),
+                            title: Text(name),
+                            subtitle: Text(chat.lastMessage),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(_formatTime(chat.lastMessageTime)),
+                                if ((chat.unreadCount[userId] ?? 0) > 0)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '${chat.unreadCount[userId]}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    chatId: chat.id,
+                                    otherUserId: otherUserId,
+                                    otherUserName: name,
+                                    otherUserAvatar: avatar,
+                                    userIds: chat.userIds,
+                                  ),
                                 ),
-                            ],
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatPage(
-                                  chatId: chat.id,
-                                  otherUserId: otherUserId,
-                                  otherUserName: name,
-                                  otherUserAvatar: avatar,
-                                  userIds: chat.userIds,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
                 );
               },
             ),
