@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/swap_repository.dart';
+import '../../data/firebase_data_helper.dart';
 import '../../models/swap.dart';
 
 class AllSwapsPage extends StatefulWidget {
@@ -24,7 +25,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_1.png',
       skillOffered: 'cook',
       skillWanted: 'designing flyers',
-      description: 'I love cooking and want to learn graphic design to create beautiful flyers for my events.',
+      description: 'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
       createdAt: DateTime.now().subtract(Duration(hours: 2)),
       location: 'Lagos, Nigeria',
       tags: ['cooking', 'graphic design', 'events'],
@@ -39,7 +40,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_2.png',
       skillOffered: 'dance',
       skillWanted: 'video editing',
-      description: 'I\'m a passionate dancer and want to learn video editing to create amazing dance videos.',
+      description: 'I am good at dancing and want to learn video editing to create amazing dance videos.',
       createdAt: DateTime.now().subtract(Duration(hours: 1)),
       location: 'Nairobi, Kenya',
       tags: ['dance', 'video editing', 'content creation'],
@@ -54,7 +55,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_1.png',
       skillOffered: 'cook',
       skillWanted: 'designing flyers',
-      description: 'I love cooking and want to learn graphic design to create beautiful flyers for my events.',
+      description: 'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
       createdAt: DateTime.now().subtract(Duration(minutes: 30)),
       location: 'Lagos, Nigeria',
       tags: ['cooking', 'graphic design', 'events'],
@@ -69,7 +70,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_2.png',
       skillOffered: 'dance',
       skillWanted: 'video editing',
-      description: 'I\'m a passionate dancer and want to learn video editing to create amazing dance videos.',
+      description: 'I am good at dancing and want to learn video editing to create amazing dance videos.',
       createdAt: DateTime.now().subtract(Duration(minutes: 15)),
       location: 'Nairobi, Kenya',
       tags: ['dance', 'video editing', 'content creation'],
@@ -128,6 +129,29 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
     }
   }
 
+  String _formatSkill(String skill) {
+    // Convert skill names to proper format
+    switch (skill.toLowerCase()) {
+      case 'cook':
+        return 'cooking';
+      case 'dance':
+        return 'dancing';
+      case 'code':
+      case 'coding':
+        return 'coding';
+      case 'photography':
+        return 'photography';
+      case 'designing flyers':
+        return 'designing flyers';
+      case 'video editing':
+        return 'video editing';
+      case 'web design':
+        return 'web design';
+      default:
+        return skill.toLowerCase();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -135,18 +159,18 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text(
-                'All Swaps',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 26,
-                  color: Color(0xFF121717),
-                  fontFamily: 'Poppins',
-                ),
-              ),
+                    Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Text(
+            'All Swaps',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              color: Color(0xFF121717),
+              fontFamily: 'Poppins',
             ),
+          ),
+        ),
             Expanded(
               child: _showOfflineMockData ? _buildMockSwapsList() : _buildSwapsList(),
             ),
@@ -155,31 +179,94 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
         Positioned(
           bottom: 20,
           right: 20,
-          child: FloatingActionButton(
-            onPressed: () async {
-              try {
-                await _repository.createSampleSwaps();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Sample swaps created!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error creating sample swaps: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            backgroundColor: const Color(0xFF225B4B),
-            child: const Icon(Icons.add, color: Colors.white),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FloatingActionButton(
+                onPressed: () async {
+                  try {
+                    await FirebaseDataHelper.addSampleSwaps();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('✅ Sample swaps added to Firebase!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('❌ Error: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+                backgroundColor: const Color(0xFF225B4B),
+                child: const Icon(Icons.add, color: Colors.white),
+                tooltip: 'Add Sample Data to Firebase',
+              ),
+              const SizedBox(height: 8),
+                              FloatingActionButton(
+                  onPressed: () async {
+                    try {
+                      await FirebaseDataHelper.clearAllSwaps();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('🗑️ All swaps cleared from Firebase'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('❌ Error: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  backgroundColor: Colors.orange,
+                  child: const Icon(Icons.delete, color: Colors.white),
+                  tooltip: 'Clear All Data',
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  onPressed: () async {
+                    try {
+                      await FirebaseDataHelper.clearAllSwaps();
+                      await FirebaseDataHelper.addSampleSwaps();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('🔄 Refreshed with new format!'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('❌ Error: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  backgroundColor: Colors.blue,
+                  child: const Icon(Icons.refresh, color: Colors.white),
+                  tooltip: 'Refresh with New Format',
+                ),
+            ],
           ),
         ),
       ],
@@ -323,14 +410,18 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +458,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            '${swap.userName} is a great ${swap.skillOffered.toLowerCase()}, and ${swap.userName.toLowerCase()} wants to learn about ${swap.skillWanted.toLowerCase()}.',
+            '${swap.userName} is good at ${_formatSkill(swap.skillOffered)}, and ${swap.userName} wants to learn ${_formatSkill(swap.skillWanted)}.',
             style: const TextStyle(
               fontSize: 14,
               color: Colors.black87,

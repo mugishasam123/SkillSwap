@@ -63,6 +63,29 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
     }
   }
 
+  String _formatSkill(String skill) {
+    // Convert skill names to proper format
+    switch (skill.toLowerCase()) {
+      case 'cook':
+        return 'cooking';
+      case 'dance':
+        return 'dancing';
+      case 'code':
+      case 'coding':
+        return 'coding';
+      case 'photography':
+        return 'photography';
+      case 'designing flyers':
+        return 'designing flyers';
+      case 'video editing':
+        return 'video editing';
+      case 'web design':
+        return 'web design';
+      default:
+        return skill.toLowerCase();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -210,7 +233,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            '${swap.userName} is a great ${swap.skillOffered.toLowerCase()}, and ${swap.userName.toLowerCase()} wants to learn about ${swap.skillWanted.toLowerCase()}.',
+            '${swap.userName} is good at ${_formatSkill(swap.skillOffered)}, and ${swap.userName} wants to learn ${_formatSkill(swap.skillWanted)}.',
             style: const TextStyle(
               fontSize: 14,
               color: Colors.black87,

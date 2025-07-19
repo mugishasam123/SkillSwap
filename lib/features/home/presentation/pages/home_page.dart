@@ -180,6 +180,56 @@ class _HomePageState extends State<HomePage> {
 class HomeTabs extends StatelessWidget {
   const HomeTabs({Key? key}) : super(key: key);
 
+  Widget _buildSuggestedTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.lightbulb_outline,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          SizedBox(height: 24),
+          Text(
+            'Suggested for You',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Personalized recommendations\ncoming soon...',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[500],
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 32),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: Color(0xFF225B4B).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'Complete your profile to get started',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF225B4B),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -187,22 +237,31 @@ class HomeTabs extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 100.0),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: TabBar(
-              labelColor: Colors.black,
+              labelColor: Colors.white,
               unselectedLabelColor: const Color(0xFF617D8A),
               labelStyle: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
-                fontSize: 16,
+                fontSize: 14,
               ),
               unselectedLabelStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
-                fontSize: 16,
+                fontSize: 14,
               ),
-              indicatorColor: Colors.transparent,
+              indicator: BoxDecoration(
+                color: const Color(0xFF225B4B),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
               tabs: const [
                 Tab(text: 'Suggested'),
                 Tab(text: 'All'),
@@ -214,24 +273,7 @@ class HomeTabs extends StatelessWidget {
           Expanded(
             child: TabBarView(
               children: [
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.lightbulb_outline, size: 64, color: Colors.grey[400]),
-                      SizedBox(height: 16),
-                      Text(
-                        'Suggested for You',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Coming soon...',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildSuggestedTab(),
                 AllSwapsPage(),
                 ForumPage(),
               ],

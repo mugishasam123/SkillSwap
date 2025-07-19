@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to swaps collection for testing
+    match /swaps/{document} {
+      allow read, write: if true;
+    }
+    
+    // Allow read/write access to swapRequests collection for testing
+    match /swapRequests/{document} {
+      allow read, write: if true;
+    }
+    
+    // Allow read/write access to users collection for testing
+    match /users/{document} {
+      allow read, write: if true;
+    }
+    
+    // Allow read/write access to discussions collection for testing
+    match /discussions/{document} {
+      allow read, write: if true;
+    }
+    
+    // Allow read/write access to replies collection for testing
+    match /replies/{document} {
+      allow read, write: if true;
+    }
+    
+    // Allow read/write access to chats collection for testing
+    match /chats/{document} {
+      allow read, write: if true;
+    }
+    
+    // Allow read/write access to messages subcollection for testing
+    match /chats/{chatId}/messages/{messageId} {
+      allow read, write: if true;
+    }
+  }
+} 
