@@ -5,6 +5,7 @@ import 'features/onboarding/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/signup_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
 class SkillSwapApp extends StatelessWidget {
@@ -42,12 +43,7 @@ class MessagesPage extends StatelessWidget {
       const Scaffold(body: Center(child: Text('Messages Page')));
 }
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Profile Page')));
-}
+
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
