@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'settings_page.dart';
 import '../../../messages/presentation/pages/message_list_page.dart';
 import '../../../forum/presentation/pages/forum_page.dart';
+import 'all_swaps_page.dart';
+import 'suggested_swaps_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -213,14 +215,24 @@ class HomeTabs extends StatelessWidget {
             child: TabBarView(
               children: [
                 Center(
-                  child: Text(
-                    'Suggested Content',
-                    style: TextStyle(fontSize: 18),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lightbulb_outline, size: 64, color: Colors.grey[400]),
+                      SizedBox(height: 16),
+                      Text(
+                        'Suggested for You',
+                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Coming soon...',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                      ),
+                    ],
                   ),
                 ),
-                Center(
-                  child: Text('All Content', style: TextStyle(fontSize: 18)),
-                ),
+                AllSwapsPage(),
                 ForumPage(),
               ],
             ),

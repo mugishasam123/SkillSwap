@@ -1,0 +1,629 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../data/swap_repository.dart';
+import '../../models/swap.dart';
+
+class AllSwapsPage extends StatefulWidget {
+  const AllSwapsPage({Key? key}) : super(key: key);
+
+  @override
+  State<AllSwapsPage> createState() => _AllSwapsPageState();
+}
+
+class _AllSwapsPageState extends State<AllSwapsPage> {
+  final SwapRepository _repository = SwapRepository();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _showOfflineMockData = false;
+
+  // Mock data for offline testing
+  List<Swap> get _mockSwaps => [
+    Swap(
+      id: 'mock_1',
+      userId: 'tobi_123',
+      userName: 'Tobi',
+      userAvatar: 'assets/images/onboarding_1.png',
+      skillOffered: 'cook',
+      skillWanted: 'designing flyers',
+      description: 'I love cooking and want to learn graphic design to create beautiful flyers for my events.',
+      createdAt: DateTime.now().subtract(Duration(hours: 2)),
+      location: 'Lagos, Nigeria',
+      tags: ['cooking', 'graphic design', 'events'],
+      isActive: true,
+      views: 15,
+      requests: 3,
+    ),
+    Swap(
+      id: 'mock_2',
+      userId: 'agnes_456',
+      userName: 'Agnes',
+      userAvatar: 'assets/images/onboarding_2.png',
+      skillOffered: 'dance',
+      skillWanted: 'video editing',
+      description: 'I\'m a passionate dancer and want to learn video editing to create amazing dance videos.',
+      createdAt: DateTime.now().subtract(Duration(hours: 1)),
+      location: 'Nairobi, Kenya',
+      tags: ['dance', 'video editing', 'content creation'],
+      isActive: true,
+      views: 8,
+      requests: 1,
+    ),
+    Swap(
+      id: 'mock_3',
+      userId: 'tobi_789',
+      userName: 'Tobi',
+      userAvatar: 'assets/images/onboarding_1.png',
+      skillOffered: 'cook',
+      skillWanted: 'designing flyers',
+      description: 'I love cooking and want to learn graphic design to create beautiful flyers for my events.',
+      createdAt: DateTime.now().subtract(Duration(minutes: 30)),
+      location: 'Lagos, Nigeria',
+      tags: ['cooking', 'graphic design', 'events'],
+      isActive: true,
+      views: 5,
+      requests: 0,
+    ),
+    Swap(
+      id: 'mock_4',
+      userId: 'agnes_012',
+      userName: 'Agnes',
+      userAvatar: 'assets/images/onboarding_2.png',
+      skillOffered: 'dance',
+      skillWanted: 'video editing',
+      description: 'I\'m a passionate dancer and want to learn video editing to create amazing dance videos.',
+      createdAt: DateTime.now().subtract(Duration(minutes: 15)),
+      location: 'Nairobi, Kenya',
+      tags: ['dance', 'video editing', 'content creation'],
+      isActive: true,
+      views: 2,
+      requests: 0,
+    ),
+  ];
+
+  void _viewSwap(Swap swap) {
+    // Increment view count
+    _repository.incrementViews(swap.id);
+    
+    // Show swap details dialog
+    showDialog(
+      context: context,
+      builder: (context) => _SwapDetailsDialog(swap: swap),
+    );
+  }
+
+  void _requestSwap(Swap swap) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to request swaps')),
+      );
+      return;
+    }
+
+    if (currentUser.uid == swap.userId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You cannot request your own swap')),
+      );
+      return;
+    }
+
+    try {
+      await _repository.requestSwap(swap.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Swap request sent successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to send request: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Text(
+                'All Swaps',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  color: Color(0xFF121717),
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+            Expanded(
+              child: _showOfflineMockData ? _buildMockSwapsList() : _buildSwapsList(),
+            ),
+          ],
+        ),
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: FloatingActionButton(
+            onPressed: () async {
+              try {
+                await _repository.createSampleSwaps();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Sample swaps created!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error creating sample swaps: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            backgroundColor: const Color(0xFF225B4B),
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSwapsList() {
+    return StreamBuilder<List<Swap>>(
+      stream: _repository.getAllSwaps(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
+                SizedBox(height: 16),
+                Text(
+                  'Error loading swaps: ${snapshot.error}',
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final swaps = snapshot.data!;
+        print('Loaded ${swaps.length} swaps from Firebase');
+        
+        if (swaps.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.swap_horiz, size: 64, color: Colors.grey[400]),
+                SizedBox(height: 16),
+                Text(
+                  'No swaps available yet',
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Tap the + button to create sample data',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => _showMockData(),
+                  child: Text('Show Mock Data (Offline)'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          itemCount: swaps.length,
+          itemBuilder: (context, index) {
+            return _buildSwapCard(swaps[index]);
+          },
+        );
+      },
+    );
+  }
+
+  void _showMockData() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Mock Data'),
+        content: Text('This will show sample swaps without Firebase.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _showOfflineMockData = true;
+              });
+            },
+            child: Text('Show Mock Data'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMockSwapsList() {
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.orange.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.orange.withOpacity(0.3)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.orange, size: 20),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Showing mock data (offline mode)',
+                  style: TextStyle(color: Colors.orange[800], fontWeight: FontWeight.w500),
+                ),
+              ),
+              TextButton(
+                onPressed: () => setState(() => _showOfflineMockData = false),
+                child: Text('Switch to Firebase', style: TextStyle(color: Colors.orange[800])),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            itemCount: _mockSwaps.length,
+            itemBuilder: (context, index) {
+              return _buildSwapCard(_mockSwaps[index]);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSwapCard(Swap swap) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundImage: AssetImage(swap.userAvatar),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      swap.userName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      _repository.getTimeAgo(swap.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '${swap.userName} is a great ${swap.skillOffered.toLowerCase()}, and ${swap.userName.toLowerCase()} wants to learn about ${swap.skillWanted.toLowerCase()}.',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => _viewSwap(swap),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1DA1F2),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'View',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => _requestSwap(swap),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF8A00),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'Request Swap',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SwapDetailsDialog extends StatelessWidget {
+  final Swap swap;
+
+  const _SwapDetailsDialog({required this.swap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundImage: AssetImage(swap.userAvatar),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        swap.userName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Text(
+                        swap.location.isNotEmpty ? swap.location : 'Location not specified',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _DetailRow(
+              icon: Icons.school,
+              title: 'Skill Offered',
+              value: swap.skillOffered,
+              color: Colors.green,
+            ),
+            const SizedBox(height: 16),
+            _DetailRow(
+              icon: Icons.psychology,
+              title: 'Skill Wanted',
+              value: swap.skillWanted,
+              color: Colors.blue,
+            ),
+            const SizedBox(height: 16),
+            if (swap.description.isNotEmpty) ...[
+              Text(
+                'Description',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                swap.description,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (swap.tags.isNotEmpty) ...[
+              Text(
+                'Tags',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: swap.tags.map((tag) => Chip(
+                  label: Text(tag),
+                  backgroundColor: Colors.grey[200],
+                  labelStyle: TextStyle(fontSize: 12),
+                )).toList(),
+              ),
+              const SizedBox(height: 16),
+            ],
+            Row(
+              children: [
+                Icon(Icons.remove_red_eye, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  '${swap.views} views',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                const SizedBox(width: 16),
+                Icon(Icons.handshake, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  '${swap.requests} requests',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Here you could navigate to a detailed swap page or start a chat
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF8A00),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text(
+                  'Request Swap',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+  final Color color;
+
+  const _DetailRow({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+} 
