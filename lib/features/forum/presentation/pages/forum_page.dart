@@ -55,16 +55,13 @@ class _ForumPageState extends State<ForumPage> {
           children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Community Discussions",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26,
-                    color: Color(0xFF121717),
-                    fontFamily: 'Poppins',
-                  ),
+              child: Text(
+                "Community Discussions",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  color: Color(0xFF121717),
+                  fontFamily: 'Poppins',
                 ),
               ),
             ),
@@ -128,14 +125,18 @@ class _ForumPageState extends State<ForumPage> {
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 8,
-              offset: Offset(0, 2),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: Offset(0, 4),
             ),
           ],
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.1),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
