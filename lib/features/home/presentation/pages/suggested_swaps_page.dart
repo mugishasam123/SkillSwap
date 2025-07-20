@@ -15,7 +15,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   void _viewSwap(Swap swap) {
-    // Increment view count
+    // Increment view count..
     _repository.incrementViews(swap.id);
     
     // Show swap details dialog
