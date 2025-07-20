@@ -49,8 +49,8 @@ class ImageUploadService {
     }
   }
 
-  /// Upload image to Firebase Storage
-  Future<String?> uploadImage(File imageFile) async {
+  /// Upload image to Firebase Storage with custom folder
+  Future<String?> uploadImage(File imageFile, {String folder = 'profile_images'}) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
@@ -58,12 +58,12 @@ class ImageUploadService {
       }
 
       // Create a unique filename
-      final String fileName = 'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String fileName = '${folder}_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       
       // Reference to the storage location
       final Reference storageRef = _storage
           .ref()
-          .child('profile_images')
+          .child(folder)
           .child(fileName);
 
       // Set metadata for the upload
@@ -72,6 +72,7 @@ class ImageUploadService {
         customMetadata: {
           'uploadedBy': user.uid,
           'uploadedAt': DateTime.now().toIso8601String(),
+          'folder': folder,
         },
       );
 
@@ -116,10 +117,20 @@ class ImageUploadService {
     }
   }
 
-  /// Delete old profile image from storage
-  Future<void> deleteOldImage(String imageUrl) async {
+  /// Upload profile image (backward compatibility)
+  Future<String?> uploadProfileImage(File imageFile) async {
+    return uploadImage(imageFile, folder: 'profile_images');
+  }
+
+  /// Upload swap image
+  Future<String?> uploadSwapImage(File imageFile) async {
+    return uploadImage(imageFile, folder: 'swap_images');
+  }
+
+  /// Delete old image from storage
+  Future<void> deleteOldImage(String imageUrl, {String folder = 'profile_images'}) async {
     try {
-      if (imageUrl.isNotEmpty && imageUrl.contains('profile_images')) {
+      if (imageUrl.isNotEmpty && imageUrl.contains(folder)) {
         final Reference storageRef = _storage.refFromURL(imageUrl);
         await storageRef.delete();
       }
@@ -129,5 +140,13 @@ class ImageUploadService {
     }
   }
 
+  /// Delete old profile image from storage (backward compatibility)
+  Future<void> deleteOldProfileImage(String imageUrl) async {
+    return deleteOldImage(imageUrl, folder: 'profile_images');
+  }
 
+  /// Delete old swap image from storage
+  Future<void> deleteOldSwapImage(String imageUrl) async {
+    return deleteOldImage(imageUrl, folder: 'swap_images');
+  }
 } 

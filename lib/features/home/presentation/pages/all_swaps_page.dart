@@ -32,6 +32,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       isActive: true,
       views: 15,
       requests: 3,
+      imageUrl: 'assets/images/onboarding_1.png',
     ),
     Swap(
       id: 'mock_2',
@@ -47,6 +48,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       isActive: true,
       views: 8,
       requests: 1,
+      imageUrl: 'assets/images/onboarding_2.png',
     ),
     Swap(
       id: 'mock_3',
@@ -62,6 +64,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       isActive: true,
       views: 5,
       requests: 0,
+      imageUrl: 'assets/images/onboarding_3.png',
     ),
     Swap(
       id: 'mock_4',
@@ -77,6 +80,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       isActive: true,
       views: 2,
       requests: 0,
+      imageUrl: 'assets/images/onboarding_1.png',
     ),
   ];
 
@@ -404,6 +408,17 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
     );
   }
 
+  void _showFullScreenImage(String imageUrl, String userName) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => _FullScreenImageView(
+          imageUrl: imageUrl,
+          userName: userName,
+        ),
+      ),
+    );
+  }
+
   Widget _buildSwapCard(Swap swap) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -465,6 +480,64 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               height: 1.4,
             ),
           ),
+          // Display image if available
+          if (swap.imageUrl != null) ...[
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () => _showFullScreenImage(swap.imageUrl!, swap.userName),
+              child: Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.grey[100],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: swap.imageUrl!.startsWith('http')
+                      ? Image.network(
+                          swap.imageUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: Icon(
+                                Icons.image_not_supported,
+                                size: 50,
+                                color: Colors.grey[600],
+                              ),
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          swap.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: Icon(
+                                Icons.image_not_supported,
+                                size: 50,
+                                color: Colors.grey[600],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Row(
             children: [
@@ -522,6 +595,17 @@ class _SwapDetailsDialog extends StatelessWidget {
 
   const _SwapDetailsDialog({required this.swap});
 
+  void _showFullScreenImage(BuildContext context, String imageUrl, String userName) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => _FullScreenImageView(
+          imageUrl: imageUrl,
+          userName: userName,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -576,6 +660,73 @@ class _SwapDetailsDialog extends StatelessWidget {
               value: swap.skillWanted,
               color: Colors.blue,
             ),
+            // Display image if available
+            if (swap.imageUrl != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Image',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () => _showFullScreenImage(context, swap.imageUrl!, swap.userName),
+                child: Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[100],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: swap.imageUrl!.startsWith('http')
+                        ? Image.network(
+                            swap.imageUrl!,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                  color: Colors.grey[600],
+                                ),
+                              );
+                            },
+                          )
+                        : Image.asset(
+                            swap.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                  color: Colors.grey[600],
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             if (swap.description.isNotEmpty) ...[
               Text(
@@ -715,6 +866,76 @@ class _DetailRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FullScreenImageView extends StatelessWidget {
+  final String imageUrl;
+  final String userName;
+
+  const _FullScreenImageView({
+    required this.imageUrl,
+    required this.userName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          '$userName\'s Image',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          child: imageUrl.startsWith('http')
+              ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[900],
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 100,
+                        color: Colors.grey[600],
+                      ),
+                    );
+                  },
+                )
+              : Image.asset(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[900],
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 100,
+                        color: Colors.grey[600],
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ),
     );
   }
 } 

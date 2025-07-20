@@ -4,6 +4,8 @@ import '../../../messages/presentation/pages/message_list_page.dart';
 import '../../../forum/presentation/pages/forum_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import 'all_swaps_page.dart';
+import 'suggested_swaps_page.dart';
+import 'create_swap_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -123,6 +125,17 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+        floatingActionButton: _selectedIndex == 0 ? FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const CreateSwapPage(),
+              ),
+            );
+          },
+          backgroundColor: const Color(0xFFFF8A00),
+          child: const Icon(Icons.add, color: Colors.white),
+        ) : null,
         bottomNavigationBar: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -180,56 +193,6 @@ class _HomePageState extends State<HomePage> {
 class HomeTabs extends StatelessWidget {
   const HomeTabs({Key? key}) : super(key: key);
 
-  Widget _buildSuggestedTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.lightbulb_outline,
-            size: 80,
-            color: Colors.grey[400],
-          ),
-          SizedBox(height: 24),
-          Text(
-            'Suggested for You',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
-            ),
-          ),
-          SizedBox(height: 12),
-          Text(
-            'Personalized recommendations\ncoming soon...',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[500],
-              height: 1.4,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 32),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: Color(0xFF225B4B).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'Complete your profile to get started',
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF225B4B),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -273,7 +236,7 @@ class HomeTabs extends StatelessWidget {
           Expanded(
             child: TabBarView(
               children: [
-                _buildSuggestedTab(),
+                SuggestedSwapsPage(),
                 AllSwapsPage(),
                 ForumPage(),
               ],

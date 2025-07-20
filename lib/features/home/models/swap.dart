@@ -14,6 +14,7 @@ class Swap {
   final bool isActive;
   final int views;
   final int requests;
+  final String? imageUrl; // New field for swap image
 
   Swap({
     required this.id,
@@ -29,6 +30,7 @@ class Swap {
     required this.isActive,
     required this.views,
     required this.requests,
+    this.imageUrl, // Optional image URL
   });
 
   factory Swap.fromJson(Map<String, dynamic> json, String id) {
@@ -46,6 +48,7 @@ class Swap {
       isActive: json['isActive'] ?? true,
       views: json['views'] ?? 0,
       requests: json['requests'] ?? 0,
+      imageUrl: json['imageUrl'], // Parse image URL
     );
   }
 
@@ -63,6 +66,7 @@ class Swap {
       'isActive': isActive,
       'views': views,
       'requests': requests,
+      'imageUrl': imageUrl, // Include image URL in JSON
     };
   }
 
@@ -80,6 +84,7 @@ class Swap {
     bool? isActive,
     int? views,
     int? requests,
+    String? imageUrl, // Add imageUrl to copyWith
   }) {
     return Swap(
       id: id ?? this.id,
@@ -95,6 +100,7 @@ class Swap {
       isActive: isActive ?? this.isActive,
       views: views ?? this.views,
       requests: requests ?? this.requests,
+      imageUrl: imageUrl ?? this.imageUrl, // Include in copyWith
     );
   }
 } 

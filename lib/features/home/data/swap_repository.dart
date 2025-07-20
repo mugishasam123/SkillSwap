@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
 import '../models/swap.dart';
+import '../../profile/data/image_upload_service.dart';
 
 class SwapRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ImageUploadService _imageUploadService = ImageUploadService();
 
   // Get all active swaps
   Stream<List<Swap>> getAllSwaps() {
@@ -41,13 +44,14 @@ class SwapRepository {
         );
   }
 
-  // Create a new swap
+  // Create a new swap with optional image
   Future<void> createSwap({
     required String skillOffered,
     required String skillWanted,
     required String description,
     required String location,
     required List<String> tags,
+    File? imageFile, // Optional image file
   }) async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -56,6 +60,17 @@ class SwapRepository {
     final userData = userDoc.data();
     final userName = userData?['name'] ?? 'Anonymous';
     final userAvatar = userData?['avatarUrl'] ?? 'assets/images/logo.png';
+
+    // Upload image if provided
+    String? imageUrl;
+    if (imageFile != null) {
+      try {
+        imageUrl = await _imageUploadService.uploadSwapImage(imageFile);
+      } catch (e) {
+        print('Error uploading swap image: $e');
+        // Continue without image if upload fails
+      }
+    }
 
     await _firestore.collection('swaps').add({
       'userId': user.uid,
@@ -70,6 +85,7 @@ class SwapRepository {
       'isActive': true,
       'views': 0,
       'requests': 0,
+      'imageUrl': imageUrl, // Include image URL if available
     });
   }
 
@@ -131,6 +147,7 @@ class SwapRepository {
         'description': 'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
         'location': 'Lagos, Nigeria',
         'tags': ['cooking', 'graphic design', 'events'],
+        'imageUrl': 'assets/images/onboarding_1.png', // Add sample image
       },
       {
         'userName': 'Agnes',
@@ -140,6 +157,7 @@ class SwapRepository {
         'description': 'I am good at dancing and want to learn video editing to create amazing dance videos.',
         'location': 'Nairobi, Kenya',
         'tags': ['dance', 'video editing', 'content creation'],
+        'imageUrl': 'assets/images/onboarding_2.png', // Add sample image
       },
       {
         'userName': 'Tobi',
@@ -149,6 +167,7 @@ class SwapRepository {
         'description': 'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
         'location': 'Lagos, Nigeria',
         'tags': ['cooking', 'graphic design', 'events'],
+        'imageUrl': 'assets/images/onboarding_3.png', // Add sample image
       },
       {
         'userName': 'Agnes',
@@ -158,6 +177,7 @@ class SwapRepository {
         'description': 'I am good at dancing and want to learn video editing to create amazing dance videos.',
         'location': 'Nairobi, Kenya',
         'tags': ['dance', 'video editing', 'content creation'],
+        'imageUrl': 'assets/images/onboarding_1.png', // Add sample image
       },
     ];
 
@@ -175,6 +195,7 @@ class SwapRepository {
         'isActive': true,
         'views': 0,
         'requests': 0,
+        'imageUrl': swapData['imageUrl'], // Include image URL
       });
     }
   }
