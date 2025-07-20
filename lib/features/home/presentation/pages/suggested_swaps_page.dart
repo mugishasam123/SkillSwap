@@ -909,3 +909,4 @@ class _DetailRow extends StatelessWidget {
     );
   }
 }
+// 
