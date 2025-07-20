@@ -393,20 +393,20 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () => _requestSwap(swap),
+                        onPressed: () => Navigator.pushNamed(context, '/swap', arguments: swap.id),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF8A00),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: const Text(
                           'Request Swap',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
                         ),
                       ),
@@ -762,7 +762,7 @@ class _SwapDetailsDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Here you could navigate to a detailed swap page or start a chat
+                  Navigator.pushNamed(context, '/swap', arguments: swap.id);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF8A00),

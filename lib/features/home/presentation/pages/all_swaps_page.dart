@@ -564,7 +564,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => _requestSwap(swap),
+                  onPressed: () => Navigator.pushNamed(context, '/swap', arguments: swap.id),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8A00),
                     foregroundColor: Colors.white,
@@ -792,7 +792,7 @@ class _SwapDetailsDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Here you could navigate to a detailed swap page or start a chat
+                  Navigator.pushNamed(context, '/swap', arguments: swap.id);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF8A00),

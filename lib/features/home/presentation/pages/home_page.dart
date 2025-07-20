@@ -127,11 +127,7 @@ class _HomePageState extends State<HomePage> {
         ),
         floatingActionButton: _selectedIndex == 0 ? FloatingActionButton(
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const CreateSwapPage(),
-              ),
-            );
+            Navigator.pushNamed(context, '/create-swap');
           },
           backgroundColor: const Color(0xFFFF8A00),
           child: const Icon(Icons.add, color: Colors.white),
