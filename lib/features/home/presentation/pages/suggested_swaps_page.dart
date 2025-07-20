@@ -23,7 +23,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
     // Increment view count
     _repository.incrementViews(swap.id);
     
-    // Show swap details dialogg
+    // Show swap details dialog
     showDialog(
       context: context,
       builder: (context) => _SwapDetailsDialog(swap: swap),
