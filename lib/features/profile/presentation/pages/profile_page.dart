@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../data/profile_repository.dart';
 import '../../models/user_profile.dart';
 import 'edit_profile_page.dart';
+import '../../../swap/presentation/pages/swap_library_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -296,11 +297,18 @@ class _ProfilePageState extends State<ProfilePage> {
             color: Colors.white.withOpacity(0.3),
           ),
           Expanded(
-            child: _buildInfoColumn(
-              'Swap Library',
-              '${userProfile.skillLibrary.length} skills',
-              Icons.library_books,
-              Colors.white,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const SwapLibraryPage()),
+                );
+              },
+              child: _buildInfoColumn(
+                'Swap Library',
+                '${userProfile.skillLibrary.length} skills',
+                Icons.library_books,
+                Colors.white,
+              ),
             ),
           ),
         ],

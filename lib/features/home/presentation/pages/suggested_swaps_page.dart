@@ -113,7 +113,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           
           // New Swaps Section
           Text(
-            'New Swaps',
+            'Suggested Swaps',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 24,
