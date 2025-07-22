@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import '../models/swap.dart';
 import '../../profile/data/image_upload_service.dart';
+import 'package:flutter/material.dart';
 
 class SwapRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -90,7 +91,13 @@ class SwapRepository {
   }
 
   // Request a swap
-  Future<void> requestSwap(String swapId) async {
+  Future<void> requestSwap(
+    String swapId, {
+    String? platform,
+    DateTime? date,
+    TimeOfDay? time,
+    String? learn,
+  }) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
@@ -104,6 +111,10 @@ class SwapRepository {
       'requesterId': user.uid,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
+      if (platform != null) 'platform': platform,
+      if (date != null) 'date': Timestamp.fromDate(date),
+      if (time != null) 'time': '${time.hour}:${time.minute}',
+      if (learn != null) 'learn': learn,
     });
   }
 

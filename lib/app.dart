@@ -6,6 +6,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/signup_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
+import 'features/swap/presentation/pages/swap_page.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
 class SkillSwapApp extends StatelessWidget {
@@ -19,6 +20,7 @@ class SkillSwapApp extends StatelessWidget {
         title: 'SkillSwap',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          fontFamily: 'Poppins',
         ),
         initialRoute: '/splash',
         routes: {
@@ -27,6 +29,7 @@ class SkillSwapApp extends StatelessWidget {
           '/login': (context) => const LoginPage(),
           '/signup': (context) => const SignupPage(),
           '/home': (context) => const HomePage(),
+          '/swap': (context) => const SwapPage(),
           '/messages': (context) => const MessagesPage(),
           '/profile': (context) => const ProfilePage(),
           '/settings': (context) => const SettingsPage(),
@@ -42,8 +45,6 @@ class MessagesPage extends StatelessWidget {
   Widget build(BuildContext context) =>
       const Scaffold(body: Center(child: Text('Messages Page')));
 }
-
-
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});

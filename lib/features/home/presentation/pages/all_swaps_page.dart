@@ -163,116 +163,24 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-                    Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Text(
-            'All Swaps',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 26,
-              color: Color(0xFF121717),
-              fontFamily: 'Poppins',
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Text(
+                'All Swaps',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  color: Color(0xFF121717),
+                  fontFamily: 'Poppins',
+                ),
+              ),
             ),
-          ),
-        ),
             Expanded(
               child: _showOfflineMockData ? _buildMockSwapsList() : _buildSwapsList(),
             ),
           ],
         ),
-        Positioned(
-          bottom: 20,
-          right: 20,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FloatingActionButton(
-                onPressed: () async {
-                  try {
-                    await FirebaseDataHelper.addSampleSwaps();
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('✅ Sample swaps added to Firebase!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('❌ Error: $e'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  }
-                },
-                backgroundColor: const Color(0xFF225B4B),
-                child: const Icon(Icons.add, color: Colors.white),
-                tooltip: 'Add Sample Data to Firebase',
-              ),
-              const SizedBox(height: 8),
-                              FloatingActionButton(
-                  onPressed: () async {
-                    try {
-                      await FirebaseDataHelper.clearAllSwaps();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('🗑️ All swaps cleared from Firebase'),
-                            backgroundColor: Colors.orange,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('❌ Error: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  backgroundColor: Colors.orange,
-                  child: const Icon(Icons.delete, color: Colors.white),
-                  tooltip: 'Clear All Data',
-                ),
-                const SizedBox(height: 8),
-                FloatingActionButton(
-                  onPressed: () async {
-                    try {
-                      await FirebaseDataHelper.clearAllSwaps();
-                      await FirebaseDataHelper.addSampleSwaps();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('🔄 Refreshed with new format!'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('❌ Error: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  backgroundColor: Colors.blue,
-                  child: const Icon(Icons.refresh, color: Colors.white),
-                  tooltip: 'Refresh with New Format',
-                ),
-            ],
-          ),
-        ),
+        // Removed the Positioned widget with FloatingActionButtons
       ],
     );
   }
@@ -564,7 +472,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => _requestSwap(swap),
+                  onPressed: () => Navigator.pushNamed(context, '/swap', arguments: swap.id),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8A00),
                     foregroundColor: Colors.white,
@@ -792,7 +700,7 @@ class _SwapDetailsDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Here you could navigate to a detailed swap page or start a chat
+                  Navigator.pushNamed(context, '/swap', arguments: swap.id);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF8A00),

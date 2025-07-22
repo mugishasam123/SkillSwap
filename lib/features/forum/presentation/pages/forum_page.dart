@@ -68,6 +68,7 @@ class _ForumPageState extends State<ForumPage> {
             Expanded(child: _buildDiscussionList()),
           ],
         ),
+        // Only keep the message input bar at the bottom
         Positioned(
           left: 0,
           right: 0,
