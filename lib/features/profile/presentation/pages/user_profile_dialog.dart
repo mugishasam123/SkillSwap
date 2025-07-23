@@ -116,8 +116,8 @@ class UserProfileDialog extends StatelessWidget {
           Container(width: 1, height: 36, color: Colors.white.withOpacity(0.3)),
           Expanded(
             child: _buildInfoColumn(
-              'Swap Library',
-              '${userProfile.skillLibrary.length} skills',
+              'Skills Offered',
+              '${userProfile.skillsOffered.length} skills',
               Icons.library_books,
               Colors.white,
             ),
@@ -143,23 +143,45 @@ class UserProfileDialog extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Skill Library', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black)),
+        const Text('Skills Offered', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black)),
         const SizedBox(height: 10),
-        if (userProfile.skillLibrary.isEmpty)
+        if (userProfile.skillsOffered.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(10)),
-            child: const Text('No skills added yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+            child: const Text('No skills offered yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
           )
         else
           Wrap(
             spacing: 10,
             runSpacing: 10,
-            children: userProfile.skillLibrary.map((skill) {
+            children: userProfile.skillsOffered.map((skill) {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(color: const Color(0xFF225B4B), borderRadius: BorderRadius.circular(20)),
+                child: Text(skill, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+              );
+            }).toList(),
+          ),
+        const SizedBox(height: 16),
+        const Text('Skills Wanted', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black)),
+        const SizedBox(height: 10),
+        if (userProfile.skillsWanted.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(10)),
+            child: const Text('No skills wanted yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+          )
+        else
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: userProfile.skillsWanted.map((skill) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(20)),
                 child: Text(skill, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
               );
             }).toList(),

@@ -243,8 +243,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
   }
 
   Widget _buildUserCard(UserProfile user) {
-    final String skillOffered = (user.skillLibrary.isNotEmpty) ? user.skillLibrary.first : 'not specified';
-    final String skillWanted = 'not specified';
+    final String skillOffered = (user.skillsOffered.isNotEmpty) ? user.skillsOffered.first : 'not specified';
+    final String skillWanted = (user.skillsWanted.isNotEmpty) ? user.skillsWanted.first : 'not specified';
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
