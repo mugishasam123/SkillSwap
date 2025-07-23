@@ -29,8 +29,8 @@ class Chat {
     }
     return Chat(
       id: id,
-      userIds: List<String>.from(json['userIds'] as List),
-      lastMessage: json['lastMessage'] as String,
+      userIds: List<String>.from(json['userIds'] as List? ?? []),
+      lastMessage: json['lastMessage'] as String? ?? '',
       lastMessageTime: lastMessageTime,
       unreadCount: Map<String, int>.from(json['unreadCount'] ?? {}),
     );

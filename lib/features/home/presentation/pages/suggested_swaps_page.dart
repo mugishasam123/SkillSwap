@@ -4,7 +4,7 @@ import '../../data/swap_repository.dart';
 import '../../models/swap.dart';
 
 class SuggestedSwapsPage extends StatefulWidget {
-  const SuggestedSwapsPage({Key? key}) : super(key: key);
+  const SuggestedSwapsPage({super.key});
 
   @override
   State<SuggestedSwapsPage> createState() => _SuggestedSwapsPageState();

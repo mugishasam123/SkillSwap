@@ -32,37 +32,68 @@ class MessageRepository {
         );
   }
 
+  Future<String?> createChat({required List<String> userIds}) async {
+    try {
+      final newChatRef = _firestore.collection('chats').doc();
+      final unreadCount = {for (final id in userIds) id: 0};
+      await newChatRef.set({
+        'userIds': userIds,
+        'lastMessage': '',
+        'lastMessageTime': FieldValue.serverTimestamp(),
+        'unreadCount': unreadCount,
+      });
+      return newChatRef.id;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> sendMessage({
     required String chatId,
     required String senderId,
     required String text,
     required List<String> userIds,
   }) async {
-    final messageRef = _firestore
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .doc();
-    final now = FieldValue.serverTimestamp();
-    await messageRef.set({
-      'senderId': senderId,
-      'text': text,
-      'timestamp': now,
-    });
-    await _firestore.collection('chats').doc(chatId).set({
-      'userIds': userIds,
-      'lastMessage': text,
-      'lastMessageTime': now,
-      'unreadCount': {
-        for (var id in userIds)
-          id: id == senderId ? 0 : FieldValue.increment(1),
-      },
-    }, SetOptions(merge: true));
+    try {
+      final messageRef = _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .doc();
+      final now = FieldValue.serverTimestamp();
+      await messageRef.set({
+        'senderId': senderId,
+        'text': text,
+        'timestamp': now,
+      });
+
+      // Increment unreadCount for all users except sender
+      final unreadCountUpdates = <String, dynamic>{};
+      for (final id in userIds) {
+        if (id != senderId) {
+          unreadCountUpdates['unreadCount.$id'] = FieldValue.increment(1);
+        }
+      }
+      // Always set sender's unreadCount to 0
+      unreadCountUpdates['unreadCount.$senderId'] = 0;
+
+      await _firestore.collection('chats').doc(chatId).update({
+        'lastMessage': text,
+        'lastMessageTime': now,
+        ...unreadCountUpdates,
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> markMessagesAsRead(String chatId, String userId) async {
-    await _firestore.collection('chats').doc(chatId).set({
-      'unreadCount.$userId': 0,
-    }, SetOptions(merge: true));
+    try {
+      await _firestore.collection('chats').doc(chatId).update({
+        'unreadCount.$userId': 0,
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 }

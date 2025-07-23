@@ -44,6 +44,7 @@ class ForumRepository {
       'views': 0,
       'timestamp': FieldValue.serverTimestamp(),
       'likedBy': [],
+      'viewedBy': [],
     });
   }
 
@@ -54,10 +55,10 @@ class ForumRepository {
 
     if (difference.inDays > 365) {
       final years = (difference.inDays / 365).floor();
-      return '${years} year${years == 1 ? '' : 's'} ago';
+      return '$years year${years == 1 ? '' : 's'} ago';
     } else if (difference.inDays > 30) {
       final months = (difference.inDays / 30).floor();
-      return '${months} month${months == 1 ? '' : 's'} ago';
+      return '$months month${months == 1 ? '' : 's'} ago';
     } else if (difference.inDays > 0) {
       return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
     } else if (difference.inHours > 0) {
@@ -71,30 +72,28 @@ class ForumRepository {
 
   // Get replies for a specific discussion
   Stream<List<Reply>> getReplies(String discussionId) {
-    try {
-      return _firestore
-          .collection('replies')
-          .where('discussionId', isEqualTo: discussionId)
-          .orderBy('timestamp', descending: false)
-          .snapshots()
-          .map((snapshot) {
-            try {
-              return snapshot.docs
-                  .map((doc) => Reply.fromJson(doc.data(), doc.id))
-                  .toList();
-            } catch (e) {
-              print('Error parsing replies: $e');
-              return <Reply>[];
-            }
-          })
-          .handleError((error) {
-            print('Error getting replies: $error');
+    return _firestore
+        .collection('replies')
+        .where('discussionId', isEqualTo: discussionId)
+        .orderBy('timestamp', descending: false)
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.docs.isEmpty) {
             return <Reply>[];
-          });
-    } catch (e) {
-      print('Error setting up replies stream: $e');
-      return Stream.value(<Reply>[]);
-    }
+          }
+          try {
+            return snapshot.docs
+                .map((doc) => Reply.fromJson(doc.data(), doc.id))
+                .toList();
+          } catch (e) {
+            print('Error parsing replies: $e');
+            return <Reply>[];
+          }
+        })
+        .handleError((error) {
+          print('Error getting replies: $error');
+          return <Reply>[];
+        });
   }
 
   // Add a reply to a discussion
@@ -162,9 +161,26 @@ class ForumRepository {
 
   // Increment view count
   Future<void> incrementViews(String discussionId) async {
-    await _firestore.collection('discussions').doc(discussionId).update({
-      'views': FieldValue.increment(1),
-    });
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final discussionRef = _firestore
+        .collection('discussions')
+        .doc(discussionId);
+    final discussionDoc = await discussionRef.get();
+
+    if (!discussionDoc.exists) return;
+
+    final discussion = Discussion.fromJson(discussionDoc.data()!, discussionId);
+    final viewedBy = List<String>.from(discussion.viewedBy);
+
+    if (!viewedBy.contains(user.uid)) {
+      viewedBy.add(user.uid);
+      await discussionRef.update({
+        'views': FieldValue.increment(1),
+        'viewedBy': viewedBy,
+      });
+    }
   }
 
   // Get a single discussion by ID

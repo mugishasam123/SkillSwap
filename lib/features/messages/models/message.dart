@@ -14,11 +14,22 @@ class Message {
   });
 
   factory Message.fromJson(Map<String, dynamic> json, String id) {
+    final timestampRaw = json['timestamp'];
+    DateTime timestamp;
+    if (timestampRaw == null) {
+      timestamp = DateTime.now();
+    } else if (timestampRaw is Timestamp) {
+      timestamp = timestampRaw.toDate();
+    } else if (timestampRaw is DateTime) {
+      timestamp = timestampRaw;
+    } else {
+      timestamp = DateTime.now();
+    }
     return Message(
       id: id,
-      senderId: json['senderId'] as String,
-      text: json['text'] as String,
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
+      senderId: json['senderId'] as String? ?? '',
+      text: json['text'] as String? ?? '',
+      timestamp: timestamp,
     );
   }
 

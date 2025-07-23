@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SwapLibraryPage extends StatefulWidget {
-  const SwapLibraryPage({Key? key}) : super(key: key);
+  const SwapLibraryPage({super.key});
 
   @override
   State<SwapLibraryPage> createState() => _SwapLibraryPageState();
@@ -142,7 +142,7 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
                           itemBuilder: (context, i) {
                             final doc = requests[i];
                             final senderName = doc['senderName'] ?? 'Unknown';
-                            final senderAvatar = doc['senderAvatar'] ?? null;
+                            final senderAvatar = doc['senderAvatar'];
                             final learn = doc['learn'] ?? '';
                             final status = doc['status'] ?? 'pending';
                             return Row(

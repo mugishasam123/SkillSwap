@@ -7,7 +7,7 @@ import '../../data/forum_repository.dart';
 class PostDetailsPage extends StatefulWidget {
   final Discussion discussion;
 
-  const PostDetailsPage({Key? key, required this.discussion}) : super(key: key);
+  const PostDetailsPage({super.key, required this.discussion});
 
   @override
   State<PostDetailsPage> createState() => _PostDetailsPageState();
@@ -241,6 +241,31 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           ),
                         );
                       }
+                      // If the discussion has 0 replies, show the message immediately
+                      if (widget.discussion.replies == 0) {
+                        return Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No replies yet. Be the first to reply!',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
                       if (!snapshot.hasData) {
                         return Center(
                           child: Padding(
@@ -276,7 +301,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                       }
                       return ListView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const BouncingScrollPhysics(),
                         itemCount: replies.length,
                         itemBuilder: (context, index) {
                           final reply = replies[index];

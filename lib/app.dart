@@ -8,6 +8,7 @@ import 'features/home/presentation/pages/home_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/swap/presentation/pages/swap_page.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/messages/presentation/pages/message_list_page.dart';
 
 class SkillSwapApp extends StatelessWidget {
   const SkillSwapApp({super.key});
@@ -30,20 +31,13 @@ class SkillSwapApp extends StatelessWidget {
           '/signup': (context) => const SignupPage(),
           '/home': (context) => const HomePage(),
           '/swap': (context) => const SwapPage(),
-          '/messages': (context) => const MessagesPage(),
+          '/messages': (context) => MessageListPage(),
           '/profile': (context) => const ProfilePage(),
           '/settings': (context) => const SettingsPage(),
         },
       ),
     );
   }
-}
-
-class MessagesPage extends StatelessWidget {
-  const MessagesPage({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Messages Page')));
 }
 
 class SettingsPage extends StatelessWidget {

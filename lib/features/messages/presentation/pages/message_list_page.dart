@@ -5,17 +5,65 @@ import '../../data/message_repository.dart';
 import '../../models/chat.dart';
 import 'chat_page.dart';
 
-class MessageListPage extends StatelessWidget {
-  final MessageRepository repository = MessageRepository();
+class MessageListPage extends StatefulWidget {
+  const MessageListPage({super.key});
 
-  MessageListPage({super.key});
+  @override
+  State<MessageListPage> createState() => _MessageListPageState();
+}
+
+class _MessageListPageState extends State<MessageListPage> {
+  final MessageRepository repository = MessageRepository();
+  List<Chat> _chats = [];
+  String _searchQuery = '';
+  bool _isLoading = true;
+  int _unreadCount = 0;
+  Stream<List<Chat>>? _chatStream;
+
+  @override
+  void initState() {
+    super.initState();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      _chatStream = repository.getUserChats(userId);
+      _chatStream!.listen(
+        (chats) {
+          if (!mounted) return;
+          setState(() {
+            _chats = chats;
+            _isLoading = false;
+            _unreadCount = chats
+                .map((chat) => chat.unreadCount[userId] ?? 0)
+                .fold(0, (prev, count) => prev + count);
+          });
+        },
+        onError: (e) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to load chats: $e')));
+        },
+      );
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<Map<String, dynamic>?> _getUserInfo(String userId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get();
-    return doc.exists ? doc.data() : null;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      return doc.exists ? doc.data() : null;
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to load user info: $e')));
+      return null;
+    }
   }
 
   Future<void> _startNewChat(BuildContext context, String currentUserId) async {
@@ -26,43 +74,49 @@ class MessageListPage extends StatelessWidget {
           currentUserId: currentUserId,
           onUserSelected: (userId, name, avatarUrl) async {
             Navigator.of(context).pop();
-            // Check if chat exists
-            final chatQuery = await FirebaseFirestore.instance
-                .collection('chats')
-                .where('userIds', arrayContains: currentUserId)
-                .get();
-            String? chatId;
-            for (var doc in chatQuery.docs) {
-              final userIds = List<String>.from(doc['userIds']);
-              if (userIds.contains(userId) && userIds.length == 2) {
-                chatId = doc.id;
-                break;
-              }
-            }
-            if (chatId == null) {
-              // Create new chat
-              final newChat = await FirebaseFirestore.instance
+            try {
+              // Check if chat exists
+              final chatQuery = await FirebaseFirestore.instance
                   .collection('chats')
-                  .add({
-                    'userIds': [currentUserId, userId],
-                    'lastMessage': '',
-                    'lastMessageTime': FieldValue.serverTimestamp(),
-                    'unreadCount': {currentUserId: 0, userId: 0},
-                  });
-              chatId = newChat.id;
-            }
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatPage(
-                  chatId: chatId!,
-                  otherUserId: userId,
-                  otherUserName: name,
-                  otherUserAvatar: avatarUrl,
+                  .where('userIds', arrayContains: currentUserId)
+                  .get();
+              String? chatId;
+              for (var doc in chatQuery.docs) {
+                final userIds = List<String>.from(doc['userIds']);
+                if (userIds.contains(userId) && userIds.length == 2) {
+                  chatId = doc.id;
+                  break;
+                }
+              }
+              if (chatId == null) {
+                chatId = await repository.createChat(
                   userIds: [currentUserId, userId],
+                );
+                if (chatId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to create chat.')),
+                  );
+                  return;
+                }
+              }
+              if (!mounted) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(
+                    chatId: chatId!,
+                    otherUserId: userId,
+                    otherUserName: name,
+                    otherUserAvatar: avatarUrl,
+                    userIds: [currentUserId, userId],
+                  ),
                 ),
-              ),
-            );
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to start chat: $e')),
+              );
+            }
           },
         );
       },
@@ -75,9 +129,16 @@ class MessageListPage extends StatelessWidget {
     if (userId == null) {
       return const Center(child: Text('Not logged in'));
     }
+    final filteredChats = _chats
+        .where(
+          (chat) => chat.lastMessage.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ),
+        )
+        .toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
-      // Remove the AppBar
       body: Column(
         children: [
           Padding(
@@ -86,11 +147,13 @@ class MessageListPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildHeader(context, userId)),
+                _buildHeader(context, _unreadCount),
                 IconButton(
-                  icon: const Icon(
-                    Icons.notifications_none,
-                    color: Colors.black,
+                  icon: Icon(
+                    _unreadCount > 0
+                        ? Icons.notifications
+                        : Icons.notifications_none,
+                    color: _unreadCount > 0 ? Colors.orange : Colors.black,
                     size: 28,
                   ),
                   onPressed: () {},
@@ -99,18 +162,17 @@ class MessageListPage extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(
-            height: 20,
-          ), // Add extra space between header and search bar
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextField(
+              onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
                 hintText: 'Search here',
                 suffixIcon: Container(
                   margin: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Color(0xFF225B4B), // dark green
+                    color: const Color(0xFF225B4B),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   width: 36,
@@ -131,91 +193,80 @@ class MessageListPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<Chat>>(
-              stream: repository.getUserChats(userId),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final chats = snapshot.data!;
-                if (chats.isEmpty) {
-                  return const Center(child: Text('No messages yet.'));
-                }
-                return Scrollbar(
-                  thumbVisibility: true,
-                  child: ListView.builder(
-                    itemCount: chats.length,
-                    itemBuilder: (context, index) {
-                      final chat = chats[index];
-                      final otherUserId = chat.userIds.firstWhere(
-                        (id) => id != userId,
-                      );
-                      return FutureBuilder<Map<String, dynamic>?>(
-                        future: _getUserInfo(otherUserId),
-                        builder: (context, userSnapshot) {
-                          final userData = userSnapshot.data;
-                          final avatar =
-                              userData?['avatarUrl'] ??
-                              'assets/images/logo.png';
-                          final name = userData?['name'] ?? 'User';
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: avatar.startsWith('http')
-                                  ? NetworkImage(avatar)
-                                  : AssetImage(avatar) as ImageProvider,
-                            ),
-                            title: Text(name),
-                            subtitle: Text(chat.lastMessage),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(_formatTime(chat.lastMessageTime)),
-                                if ((chat.unreadCount[userId] ?? 0) > 0)
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 4),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '${chat.unreadCount[userId]}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : filteredChats.isEmpty
+                ? const Center(child: Text('No messages yet.'))
+                : Scrollbar(
+                    thumbVisibility: true,
+                    child: ListView.builder(
+                      itemCount: filteredChats.length,
+                      itemBuilder: (context, index) {
+                        final chat = filteredChats[index];
+                        final otherUserId = chat.userIds.firstWhere(
+                          (id) => id != userId,
+                        );
+                        return FutureBuilder<Map<String, dynamic>?>(
+                          future: _getUserInfo(otherUserId),
+                          builder: (context, userSnapshot) {
+                            final userData = userSnapshot.data;
+                            final avatar =
+                                userData?['avatarUrl'] ??
+                                'assets/images/logo.png';
+                            final name = userData?['name'] ?? 'User';
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: avatar.startsWith('http')
+                                    ? NetworkImage(avatar)
+                                    : AssetImage(avatar) as ImageProvider,
+                              ),
+                              title: Text(name),
+                              subtitle: Text(chat.lastMessage),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(_formatTime(chat.lastMessageTime)),
+                                  if ((chat.unreadCount[userId] ?? 0) > 0)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${chat.unreadCount[userId]}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatPage(
+                                      chatId: chat.id,
+                                      otherUserId: otherUserId,
+                                      otherUserName: name,
+                                      otherUserAvatar: avatar,
+                                      userIds: chat.userIds,
+                                    ),
                                   ),
-                              ],
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatPage(
-                                    chatId: chat.id,
-                                    otherUserId: otherUserId,
-                                    otherUserName: name,
-                                    otherUserAvatar: avatar,
-                                    userIds: chat.userIds,
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
@@ -256,68 +307,55 @@ class MessageListPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String userId) {
-    return StreamBuilder<List<Chat>>(
-      stream: repository.getUserChats(userId),
-      builder: (context, snapshot) {
-        int unreadCount = 0;
-        if (snapshot.hasData) {
-          for (final chat in snapshot.data!) {
-            unreadCount += chat.unreadCount[userId] ?? 0;
-          }
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(BuildContext context, int unreadCount) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
           children: [
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 22,
-                  backgroundImage: AssetImage(
-                    'assets/images/logo.png',
-                  ), // Replace with user's avatar if available
-                ),
-                Positioned(
-                  bottom: 2,
-                  right: 2,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-              ],
+            const CircleAvatar(
+              radius: 22,
+              backgroundImage: AssetImage('assets/images/logo.png'),
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'My Messages',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.black,
-                  ),
+            Positioned(
+              bottom: 2,
+              right: 2,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
-                if (unreadCount > 0)
-                  Text(
-                    '$unreadCount new message${unreadCount > 1 ? 's' : ''}',
-                    style: const TextStyle(
-                      color: Color(0xFFB0B0B0),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    ),
-                  ),
-              ],
+              ),
             ),
           ],
-        );
-      },
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'My Messages',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.black,
+              ),
+            ),
+            if (unreadCount > 0)
+              Text(
+                '$unreadCount new message${unreadCount > 1 ? 's' : ''}',
+                style: const TextStyle(
+                  color: Color(0xFFB0B0B0),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 

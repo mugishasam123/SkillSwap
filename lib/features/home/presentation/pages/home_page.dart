@@ -180,7 +180,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class HomeTabs extends StatelessWidget {
-  const HomeTabs({Key? key}) : super(key: key);
+  const HomeTabs({super.key});
 
   @override
   Widget build(BuildContext context) {

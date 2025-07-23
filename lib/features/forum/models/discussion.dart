@@ -12,6 +12,7 @@ class Discussion {
   final int views;
   final DateTime timestamp;
   final List<String> likedBy;
+  final List<String> viewedBy;
 
   Discussion({
     required this.id,
@@ -25,6 +26,7 @@ class Discussion {
     required this.views,
     required this.timestamp,
     required this.likedBy,
+    required this.viewedBy,
   });
 
   factory Discussion.fromJson(Map<String, dynamic> json, String id) {
@@ -40,6 +42,7 @@ class Discussion {
       views: json['views'] ?? 0,
       timestamp: (json['timestamp'] as Timestamp).toDate(),
       likedBy: List<String>.from(json['likedBy'] ?? []),
+      viewedBy: List<String>.from(json['viewedBy'] ?? []),
     );
   }
 
@@ -55,6 +58,7 @@ class Discussion {
       'views': views,
       'timestamp': Timestamp.fromDate(timestamp),
       'likedBy': likedBy,
+      'viewedBy': viewedBy,
     };
   }
 
@@ -70,6 +74,7 @@ class Discussion {
     int? views,
     DateTime? timestamp,
     List<String>? likedBy,
+    List<String>? viewedBy,
   }) {
     return Discussion(
       id: id ?? this.id,
@@ -83,6 +88,7 @@ class Discussion {
       views: views ?? this.views,
       timestamp: timestamp ?? this.timestamp,
       likedBy: likedBy ?? this.likedBy,
+      viewedBy: viewedBy ?? this.viewedBy,
     );
   }
 }

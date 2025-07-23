@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 class SwapPage extends StatefulWidget {
   final String? swapId;
-  const SwapPage({Key? key, this.swapId}) : super(key: key);
+  const SwapPage({super.key, this.swapId});
 
   @override
   State<SwapPage> createState() => _SwapPageState();

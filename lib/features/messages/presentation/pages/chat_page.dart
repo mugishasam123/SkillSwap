@@ -30,10 +30,49 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    // Mark messages as read
+    _markChatAsRead();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _markChatAsRead();
+  }
+
+  void _markChatAsRead() {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null) {
-      repository.markMessagesAsRead(widget.chatId, userId);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (mounted) {
+          try {
+            await repository.markMessagesAsRead(widget.chatId, userId);
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to mark messages as read: $e')),
+            );
+          }
+        }
+      });
+    }
+  }
+
+  Future<void> _sendMessage(String text) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (text.isEmpty || userId == null) return;
+    try {
+      await repository.sendMessage(
+        chatId: widget.chatId,
+        senderId: userId,
+        text: text,
+        userIds: widget.userIds,
+      );
+      _controller.clear();
+      // Mark as read for sender after sending
+      await repository.markMessagesAsRead(widget.chatId, userId);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to send message: $e')));
     }
   }
 
@@ -66,6 +105,9 @@ class _ChatPageState extends State<ChatPage> {
             child: StreamBuilder<List<Message>>(
               stream: repository.getMessages(widget.chatId),
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -125,7 +167,7 @@ class _ChatPageState extends State<ChatPage> {
                                   radius: 16,
                                   backgroundImage: AssetImage(
                                     'assets/images/logo.png',
-                                  ), // Placeholder for self
+                                  ),
                                 ),
                               ),
                           ],
@@ -144,6 +186,7 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    onSubmitted: _sendMessage,
                     decoration: InputDecoration(
                       hintText: 'Type message here...',
                       border: OutlineInputBorder(
@@ -164,18 +207,7 @@ class _ChatPageState extends State<ChatPage> {
                   backgroundColor: Colors.orange,
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: () async {
-                      final text = _controller.text.trim();
-                      if (text.isNotEmpty && userId != null) {
-                        await repository.sendMessage(
-                          chatId: widget.chatId,
-                          senderId: userId,
-                          text: text,
-                          userIds: widget.userIds,
-                        );
-                        _controller.clear();
-                      }
-                    },
+                    onPressed: () => _sendMessage(_controller.text.trim()),
                   ),
                 ),
               ],

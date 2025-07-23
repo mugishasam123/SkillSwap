@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/swap_repository.dart';
-import '../../data/firebase_data_helper.dart';
 import '../../models/swap.dart';
 
 class AllSwapsPage extends StatefulWidget {
-  const AllSwapsPage({Key? key}) : super(key: key);
+  const AllSwapsPage({super.key});
 
   @override
   State<AllSwapsPage> createState() => _AllSwapsPageState();
@@ -25,7 +24,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_1.png',
       skillOffered: 'cook',
       skillWanted: 'designing flyers',
-      description: 'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
+      description:
+          'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
       createdAt: DateTime.now().subtract(Duration(hours: 2)),
       location: 'Lagos, Nigeria',
       tags: ['cooking', 'graphic design', 'events'],
@@ -41,7 +41,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_2.png',
       skillOffered: 'dance',
       skillWanted: 'video editing',
-      description: 'I am good at dancing and want to learn video editing to create amazing dance videos.',
+      description:
+          'I am good at dancing and want to learn video editing to create amazing dance videos.',
       createdAt: DateTime.now().subtract(Duration(hours: 1)),
       location: 'Nairobi, Kenya',
       tags: ['dance', 'video editing', 'content creation'],
@@ -57,7 +58,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_1.png',
       skillOffered: 'cook',
       skillWanted: 'designing flyers',
-      description: 'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
+      description:
+          'I am good at cooking and want to learn graphic design to create beautiful flyers for my events.',
       createdAt: DateTime.now().subtract(Duration(minutes: 30)),
       location: 'Lagos, Nigeria',
       tags: ['cooking', 'graphic design', 'events'],
@@ -73,7 +75,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
       userAvatar: 'assets/images/onboarding_2.png',
       skillOffered: 'dance',
       skillWanted: 'video editing',
-      description: 'I am good at dancing and want to learn video editing to create amazing dance videos.',
+      description:
+          'I am good at dancing and want to learn video editing to create amazing dance videos.',
       createdAt: DateTime.now().subtract(Duration(minutes: 15)),
       location: 'Nairobi, Kenya',
       tags: ['dance', 'video editing', 'content creation'],
@@ -87,7 +90,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
   void _viewSwap(Swap swap) {
     // Increment view count
     _repository.incrementViews(swap.id);
-    
+
     // Show swap details dialog
     showDialog(
       context: context,
@@ -176,7 +179,9 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               ),
             ),
             Expanded(
-              child: _showOfflineMockData ? _buildMockSwapsList() : _buildSwapsList(),
+              child: _showOfflineMockData
+                  ? _buildMockSwapsList()
+                  : _buildSwapsList(),
             ),
           ],
         ),
@@ -212,7 +217,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
 
         final swaps = snapshot.data!;
         print('Loaded ${swaps.length} swaps from Firebase');
-        
+
         if (swaps.isEmpty) {
           return Center(
             child: Column(
@@ -293,12 +298,18 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               Expanded(
                 child: Text(
                   'Showing mock data (offline mode)',
-                  style: TextStyle(color: Colors.orange[800], fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    color: Colors.orange[800],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               TextButton(
                 onPressed: () => setState(() => _showOfflineMockData = false),
-                child: Text('Switch to Firebase', style: TextStyle(color: Colors.orange[800])),
+                child: Text(
+                  'Switch to Firebase',
+                  style: TextStyle(color: Colors.orange[800]),
+                ),
               ),
             ],
           ),
@@ -319,10 +330,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
   void _showFullScreenImage(String imageUrl, String userName) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _FullScreenImageView(
-          imageUrl: imageUrl,
-          userName: userName,
-        ),
+        builder: (context) =>
+            _FullScreenImageView(imageUrl: imageUrl, userName: userName),
       ),
     );
   }
@@ -341,10 +350,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,10 +375,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                     ),
                     Text(
                       _repository.getTimeAgo(swap.createdAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -410,9 +413,10 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                             if (loadingProgress == null) return child;
                             return Center(
                               child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
                                     ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes!
                                     : null,
                               ),
                             );
@@ -462,17 +466,15 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                   ),
                   child: const Text(
                     'View',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/swap', arguments: swap.id),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/swap', arguments: swap.id),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8A00),
                     foregroundColor: Colors.white,
@@ -483,10 +485,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                   ),
                   child: const Text(
                     'Request Swap',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
               ),
@@ -503,13 +502,15 @@ class _SwapDetailsDialog extends StatelessWidget {
 
   const _SwapDetailsDialog({required this.swap});
 
-  void _showFullScreenImage(BuildContext context, String imageUrl, String userName) {
+  void _showFullScreenImage(
+    BuildContext context,
+    String imageUrl,
+    String userName,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _FullScreenImageView(
-          imageUrl: imageUrl,
-          userName: userName,
-        ),
+        builder: (context) =>
+            _FullScreenImageView(imageUrl: imageUrl, userName: userName),
       ),
     );
   }
@@ -543,11 +544,10 @@ class _SwapDetailsDialog extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        swap.location.isNotEmpty ? swap.location : 'Location not specified',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        swap.location.isNotEmpty
+                            ? swap.location
+                            : 'Location not specified',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -581,7 +581,11 @@ class _SwapDetailsDialog extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               GestureDetector(
-                onTap: () => _showFullScreenImage(context, swap.imageUrl!, swap.userName),
+                onTap: () => _showFullScreenImage(
+                  context,
+                  swap.imageUrl!,
+                  swap.userName,
+                ),
                 child: Container(
                   height: 150,
                   width: double.infinity,
@@ -599,9 +603,10 @@ class _SwapDetailsDialog extends StatelessWidget {
                               if (loadingProgress == null) return child;
                               return Center(
                                 child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
+                                  value:
+                                      loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
+                                            loadingProgress.expectedTotalBytes!
                                       : null,
                                 ),
                               );
@@ -669,11 +674,15 @@ class _SwapDetailsDialog extends StatelessWidget {
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: swap.tags.map((tag) => Chip(
-                  label: Text(tag),
-                  backgroundColor: Colors.grey[200],
-                  labelStyle: TextStyle(fontSize: 12),
-                )).toList(),
+                children: swap.tags
+                    .map(
+                      (tag) => Chip(
+                        label: Text(tag),
+                        backgroundColor: Colors.grey[200],
+                        labelStyle: TextStyle(fontSize: 12),
+                      ),
+                    )
+                    .toList(),
               ),
               const SizedBox(height: 16),
             ],
@@ -712,10 +721,7 @@ class _SwapDetailsDialog extends StatelessWidget {
                 ),
                 child: const Text(
                   'Request Swap',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                 ),
               ),
             ),
@@ -758,10 +764,7 @@ class _DetailRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
               Text(
                 value,
@@ -782,10 +785,7 @@ class _FullScreenImageView extends StatelessWidget {
   final String imageUrl;
   final String userName;
 
-  const _FullScreenImageView({
-    required this.imageUrl,
-    required this.userName,
-  });
+  const _FullScreenImageView({required this.imageUrl, required this.userName});
 
   @override
   Widget build(BuildContext context) {
@@ -811,7 +811,7 @@ class _FullScreenImageView extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
                             ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
+                                  loadingProgress.expectedTotalBytes!
                             : null,
                         color: Colors.white,
                       ),
@@ -846,4 +846,4 @@ class _FullScreenImageView extends StatelessWidget {
       ),
     );
   }
-} 
+}
