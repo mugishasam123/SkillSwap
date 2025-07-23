@@ -105,7 +105,7 @@ class _SignupFormState extends State<_SignupForm> {
             ),
           );
         } else if (state is AuthSuccess) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/profile');
         }
       },
       builder: (context, state) {

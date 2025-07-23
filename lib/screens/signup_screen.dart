@@ -44,14 +44,15 @@ class _SignupScreenState extends State<SignupScreen> {
           'swapScore': 0,
           'location': '',
           'availability': '',
-          'skillLibrary': [],
+          'skillsOffered': [],
+          'skillsWanted': [],
           'reviews': [],
           'bio': '',
           'notificationsEnabled': true,
           'privacySettings': {},
         });
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/profile');
         }
       }
     } on FirebaseAuthException catch (e) {

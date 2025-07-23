@@ -5,10 +5,12 @@ import 'features/onboarding/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/signup_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/home/presentation/pages/settings_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/swap/presentation/pages/swap_page.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/messages/presentation/pages/message_list_page.dart';
+import 'features/home/presentation/pages/about_page.dart';
 
 class SkillSwapApp extends StatelessWidget {
   const SkillSwapApp({super.key});
@@ -34,15 +36,9 @@ class SkillSwapApp extends StatelessWidget {
           '/messages': (context) => MessageListPage(),
           '/profile': (context) => const ProfilePage(),
           '/settings': (context) => const SettingsPage(),
+          '/about': (context) => const AboutPage(),
         },
       ),
     );
   }
-}
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Settings Page')));
 }
