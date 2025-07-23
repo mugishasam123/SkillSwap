@@ -260,15 +260,23 @@ class ProfileRepository {
   }
 
   // Get user profile by ID (for viewing other users' profiles)
-  Future<UserProfile?> getUserProfileById(String userId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .get();
-    
-    if (doc.exists) {
-      return UserProfile.fromJson(doc.data()!, doc.id);
+  Future<UserProfile?> getUserProfileById(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists && doc.data() != null) {
+        return UserProfile.fromJson(doc.data()!, doc.id);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching user profile by id: $e');
+      return null;
     }
-    return null;
+  }
+
+  // Stream all users
+  Stream<List<UserProfile>> getAllUsers() {
+    return _firestore.collection('users').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => UserProfile.fromJson(doc.data(), doc.id)).toList();
+    });
   }
 } 
