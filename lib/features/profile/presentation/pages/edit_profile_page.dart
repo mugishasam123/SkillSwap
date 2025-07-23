@@ -23,7 +23,45 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _usernameController;
   late TextEditingController _bioController;
   late TextEditingController _locationController;
-  late TextEditingController _availabilityController;
+  
+  // Availability dropdown
+  String? _selectedAvailability;
+  
+  // Predefined availability options
+  static const List<String> _availabilityOptions = [
+    'Mornings (6 AM - 12 PM)',
+    'Afternoons (12 PM - 6 PM)',
+    'Evenings (6 PM - 12 AM)',
+    'Late Night (12 AM - 6 AM)',
+    'Weekends Only',
+    'Weekdays Only',
+    'Flexible',
+    'By Appointment',
+  ];
+  
+  // Popular locations for quick selection
+  static const List<String> _popularLocations = [
+    'New York, USA',
+    'London, UK',
+    'Tokyo, Japan',
+    'Paris, France',
+    'Sydney, Australia',
+    'Toronto, Canada',
+    'Berlin, Germany',
+    'Singapore',
+    'Dubai, UAE',
+    'Mumbai, India',
+    'São Paulo, Brazil',
+    'Mexico City, Mexico',
+    'Cairo, Egypt',
+    'Lagos, Nigeria',
+    'Nairobi, Kenya',
+    'Cape Town, South Africa',
+    'Kigali, Rwanda',
+    'Accra, Ghana',
+    'Addis Ababa, Ethiopia',
+    'Dar es Salaam, Tanzania',
+  ];
   
   bool _isLoading = false;
 
@@ -34,7 +72,40 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _usernameController = TextEditingController(text: widget.userProfile.username ?? '');
     _bioController = TextEditingController(text: widget.userProfile.bio ?? '');
     _locationController = TextEditingController(text: widget.userProfile.location ?? '');
-    _availabilityController = TextEditingController(text: widget.userProfile.availability ?? '');
+    
+    // Set initial availability value with mapping for old values
+    _selectedAvailability = _mapOldAvailabilityToNew(widget.userProfile.availability);
+  }
+
+  // Map old availability values to new ones for backward compatibility
+  String? _mapOldAvailabilityToNew(String? oldAvailability) {
+    if (oldAvailability == null || oldAvailability.isEmpty) {
+      return null;
+    }
+    
+    final lowerOld = oldAvailability.toLowerCase();
+    
+    // Map old values to new ones
+    if (lowerOld.contains('evening')) {
+      return 'Evenings (6 PM - 12 AM)';
+    } else if (lowerOld.contains('morning')) {
+      return 'Mornings (6 AM - 12 PM)';
+    } else if (lowerOld.contains('afternoon') || lowerOld.contains('mid day') || lowerOld.contains('midday')) {
+      return 'Afternoons (12 PM - 6 PM)';
+    } else if (lowerOld.contains('night') || lowerOld.contains('late')) {
+      return 'Late Night (12 AM - 6 AM)';
+    } else if (lowerOld.contains('weekend')) {
+      return 'Weekends Only';
+    } else if (lowerOld.contains('weekday')) {
+      return 'Weekdays Only';
+    } else if (lowerOld.contains('flexible')) {
+      return 'Flexible';
+    } else if (lowerOld.contains('appointment')) {
+      return 'By Appointment';
+    }
+    
+    // If no match found, return null (will show as unselected)
+    return null;
   }
 
   @override
@@ -43,7 +114,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _usernameController.dispose();
     _bioController.dispose();
     _locationController.dispose();
-    _availabilityController.dispose();
     super.dispose();
   }
 
@@ -149,20 +219,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               _buildSectionTitle('Location & Availability'),
               const SizedBox(height: 16),
 
-              _buildTextField(
-                controller: _locationController,
-                label: 'Location',
-                icon: Icons.location_on_outlined,
-                hint: 'e.g., Lagos, Nigeria',
-              ),
+              _buildLocationField(),
               const SizedBox(height: 16),
 
-              _buildTextField(
-                controller: _availabilityController,
-                label: 'Availability',
-                icon: Icons.calendar_today_outlined,
-                hint: 'e.g., Weekends, Evenings',
-              ),
+              _buildAvailabilityDropdown(),
               const SizedBox(height: 32),
 
               // Privacy Settings
@@ -280,6 +340,126 @@ class _EditProfilePageState extends State<EditProfilePage> {
         fillColor: Colors.grey[50],
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
+    );
+  }
+
+  Widget _buildLocationField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Location',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _locationController,
+          decoration: InputDecoration(
+            labelText: 'Enter your location',
+            hintText: 'e.g., Lagos, Nigeria',
+            prefixIcon: const Icon(Icons.location_on_outlined, color: Colors.grey),
+            suffixIcon: PopupMenuButton<String>(
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+              onSelected: (String location) {
+                setState(() {
+                  _locationController.text = location;
+                });
+              },
+              itemBuilder: (BuildContext context) {
+                return _popularLocations.map((String location) {
+                  return PopupMenuItem<String>(
+                    value: location,
+                    child: Text(location),
+                  );
+                }).toList();
+              },
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF225B4B), width: 2),
+            ),
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Or select from popular locations',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvailabilityDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Availability',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: _selectedAvailability,
+          decoration: InputDecoration(
+            labelText: 'Select your availability',
+            prefixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey),
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            enabledBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide(color: Color(0xFF225B4B), width: 2),
+            ),
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+          hint: const Text('Choose your availability'),
+          items: _availabilityOptions.map((String availability) {
+            return DropdownMenuItem<String>(
+              value: availability,
+              child: Text(availability),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedAvailability = newValue;
+            });
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select your availability';
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 
@@ -618,9 +798,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         location: _locationController.text.trim().isNotEmpty 
             ? _locationController.text.trim() 
             : null,
-        availability: _availabilityController.text.trim().isNotEmpty 
-            ? _availabilityController.text.trim() 
-            : null,
+        availability: _selectedAvailability,
       );
 
       if (mounted) {
