@@ -35,7 +35,8 @@ class ProfileRepository {
             bio: doc.data()?['bio'],
             location: doc.data()?['location'],
             availability: '',
-            skillLibrary: [],
+            skillsOffered: [],
+            skillsWanted: [],
             reviews: [],
             swapScore: doc.data()?['swapScore'] ?? 0,
             notificationsEnabled: doc.data()?['notificationsEnabled'] ?? true,
@@ -54,7 +55,8 @@ class ProfileRepository {
     String? bio,
     String? location,
     String? availability,
-    List<String>? skillLibrary,
+    List<String>? skillsOffered,
+    List<String>? skillsWanted,
     String? avatarUrl,
   }) async {
     final user = _auth.currentUser;
@@ -67,7 +69,8 @@ class ProfileRepository {
     if (bio != null) updateData['bio'] = bio;
     if (location != null) updateData['location'] = location;
     if (availability != null) updateData['availability'] = availability;
-    if (skillLibrary != null) updateData['skillLibrary'] = skillLibrary;
+    if (skillsOffered != null) updateData['skillsOffered'] = skillsOffered;
+    if (skillsWanted != null) updateData['skillsWanted'] = skillsWanted;
     if (avatarUrl != null) updateData['avatarUrl'] = avatarUrl;
 
     await _firestore
@@ -76,8 +79,10 @@ class ProfileRepository {
         .update(updateData);
   }
 
-  // Add skill to library
-  Future<void> addSkill(String skill) async {
+
+
+  // Add skill to skills offered
+  Future<void> addSkillOffered(String skill) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
@@ -85,12 +90,12 @@ class ProfileRepository {
         .collection('users')
         .doc(user.uid)
         .update({
-      'skillLibrary': FieldValue.arrayUnion([skill]),
+      'skillsOffered': FieldValue.arrayUnion([skill]),
     });
   }
 
-  // Remove skill from library
-  Future<void> removeSkill(String skill) async {
+  // Remove skill from skills offered
+  Future<void> removeSkillOffered(String skill) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
@@ -98,7 +103,33 @@ class ProfileRepository {
         .collection('users')
         .doc(user.uid)
         .update({
-      'skillLibrary': FieldValue.arrayRemove([skill]),
+      'skillsOffered': FieldValue.arrayRemove([skill]),
+    });
+  }
+
+  // Add skill to skills wanted
+  Future<void> addSkillWanted(String skill) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .update({
+      'skillsWanted': FieldValue.arrayUnion([skill]),
+    });
+  }
+
+  // Remove skill from skills wanted
+  Future<void> removeSkillWanted(String skill) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .update({
+      'skillsWanted': FieldValue.arrayRemove([skill]),
     });
   }
 

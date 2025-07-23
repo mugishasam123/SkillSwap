@@ -8,7 +8,8 @@ class UserProfile {
   final String? bio;
   final String? location;
   final String? availability;
-  final List<String> skillLibrary;
+  final List<String> skillsOffered;
+  final List<String> skillsWanted;
   final List<Map<String, dynamic>> reviews;
   final int swapScore;
   final bool notificationsEnabled;
@@ -23,7 +24,8 @@ class UserProfile {
     this.bio,
     this.location,
     this.availability,
-    required this.skillLibrary,
+    required this.skillsOffered,
+    required this.skillsWanted,
     required this.reviews,
     required this.swapScore,
     required this.notificationsEnabled,
@@ -50,7 +52,8 @@ class UserProfile {
       bio: json['bio'],
       location: json['location'],
       availability: availability,
-      skillLibrary: List<String>.from(json['skillLibrary'] ?? []),
+      skillsOffered: List<String>.from(json['skillsOffered'] ?? []),
+      skillsWanted: List<String>.from(json['skillsWanted'] ?? []),
       reviews: List<Map<String, dynamic>>.from(json['reviews'] ?? []),
       swapScore: json['swapScore'] ?? 0,
       notificationsEnabled: json['notificationsEnabled'] ?? true,
@@ -68,7 +71,8 @@ class UserProfile {
       'bio': bio,
       'location': location,
       'availability': availability,
-      'skillLibrary': skillLibrary,
+      'skillsOffered': skillsOffered,
+      'skillsWanted': skillsWanted,
       'reviews': reviews,
       'swapScore': swapScore,
       'notificationsEnabled': notificationsEnabled,
@@ -85,7 +89,8 @@ class UserProfile {
     String? bio,
     String? location,
     String? availability,
-    List<String>? skillLibrary,
+    List<String>? skillsOffered,
+    List<String>? skillsWanted,
     List<Map<String, dynamic>>? reviews,
     int? swapScore,
     bool? notificationsEnabled,
@@ -100,7 +105,8 @@ class UserProfile {
       bio: bio ?? this.bio,
       location: location ?? this.location,
       availability: availability ?? this.availability,
-      skillLibrary: skillLibrary ?? this.skillLibrary,
+      skillsOffered: skillsOffered ?? this.skillsOffered,
+      skillsWanted: skillsWanted ?? this.skillsWanted,
       reviews: reviews ?? this.reviews,
       swapScore: swapScore ?? this.swapScore,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
