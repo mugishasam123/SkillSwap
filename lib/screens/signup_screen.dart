@@ -52,7 +52,7 @@ class _SignupScreenState extends State<SignupScreen> {
           'privacySettings': {},
         });
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/profile');
         }
       }
     } on FirebaseAuthException catch (e) {
