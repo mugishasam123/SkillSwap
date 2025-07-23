@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/swap_repository.dart';
 import '../../models/swap.dart';
+import '../../../profile/data/profile_repository.dart';
+import '../../../profile/models/user_profile.dart';
+import '../../../profile/presentation/pages/user_profile_dialog.dart';
 
 class AllSwapsPage extends StatefulWidget {
   const AllSwapsPage({super.key});
@@ -87,15 +90,26 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
     ),
   ];
 
-  void _viewSwap(Swap swap) {
+  void _viewSwap(Swap swap) async {
     // Increment view count
     _repository.incrementViews(swap.id);
 
-    // Show swap details dialog
-    showDialog(
-      context: context,
-      builder: (context) => _SwapDetailsDialog(swap: swap),
-    );
+    // Fetch the full user profile for the swap's user
+    final profileRepo = ProfileRepository();
+    final UserProfile? userProfile = await profileRepo.getUserProfileById(swap.userId);
+
+    if (userProfile != null && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => UserProfileDialog(userProfile: userProfile),
+      );
+    } else {
+      // Fallback: show swap details dialog if user profile not found
+      showDialog(
+        context: context,
+        builder: (context) => _SwapDetailsDialog(swap: swap),
+      );
+    }
   }
 
   void _requestSwap(Swap swap) async {
@@ -179,20 +193,18 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               ),
             ),
             Expanded(
-              child: _showOfflineMockData
-                  ? _buildMockSwapsList()
-                  : _buildSwapsList(),
+              child: _buildUsersList(),
             ),
           ],
         ),
-        // Removed the Positioned widget with FloatingActionButtons
       ],
     );
   }
 
-  Widget _buildSwapsList() {
-    return StreamBuilder<List<Swap>>(
-      stream: _repository.getAllSwaps(),
+  Widget _buildUsersList() {
+    final profileRepo = ProfileRepository();
+    return StreamBuilder<List<UserProfile>>(
+      stream: profileRepo.getAllUsers(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -202,7 +214,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                 Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
                 SizedBox(height: 16),
                 Text(
-                  'Error loading swaps: ${snapshot.error}',
+                  'Error loading users: ${snapshot.error}',
                   style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
@@ -210,48 +222,142 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
             ),
           );
         }
-
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
-
-        final swaps = snapshot.data!;
-        print('Loaded ${swaps.length} swaps from Firebase');
-
-        if (swaps.isEmpty) {
+        final users = snapshot.data!;
+        if (users.isEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.swap_horiz, size: 64, color: Colors.grey[400]),
-                SizedBox(height: 16),
-                Text(
-                  'No swaps available yet',
-                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Tap the + button to create sample data',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _showMockData(),
-                  child: Text('Show Mock Data (Offline)'),
-                ),
-              ],
-            ),
+            child: Text('No users found.'),
           );
         }
-
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          itemCount: swaps.length,
+          itemCount: users.length,
           itemBuilder: (context, index) {
-            return _buildSwapCard(swaps[index]);
+            return _buildUserCard(users[index]);
           },
         );
       },
+    );
+  }
+
+  Widget _buildUserCard(UserProfile user) {
+    final String skillOffered = (user.skillLibrary.isNotEmpty) ? user.skillLibrary.first : 'not specified';
+    final String skillWanted = 'not specified';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Avatar
+          CircleAvatar(
+            radius: 28,
+            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+              ? (user.avatarUrl!.startsWith('http')
+                  ? NetworkImage(user.avatarUrl!)
+                  : AssetImage(user.avatarUrl!) as ImageProvider)
+              : const AssetImage('assets/images/onboarding_1.png'),
+          ),
+          const SizedBox(width: 16),
+          // Name, sentence, and buttons
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${user.name} is good at $skillOffered and wants to learn $skillWanted.',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 38,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            showDialog(
+                              context: context,
+                              builder: (context) => UserProfileDialog(userProfile: user),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1DA1F2),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: const Text(
+                            'View',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 38,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/swap', arguments: user.uid);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF8A00),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: const Text(
+                            'Request Swap',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
