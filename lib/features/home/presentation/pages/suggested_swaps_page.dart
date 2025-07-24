@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/swap_repository.dart';
 import '../../models/swap.dart';
+import '../../../profile/data/profile_repository.dart';
+import '../../../profile/models/user_profile.dart';
+import '../../../profile/presentation/pages/user_profile_dialog.dart';
 
 class SuggestedSwapsPage extends StatefulWidget {
   const SuggestedSwapsPage({super.key});
@@ -14,15 +17,45 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
   final SwapRepository _repository = SwapRepository();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _viewSwap(Swap swap) {
+  void _viewSwap(Swap swap) async {
     // Increment view count
     _repository.incrementViews(swap.id);
-    
-    // Show swap details dialog
-    showDialog(
-      context: context,
-      builder: (context) => _SwapDetailsDialog(swap: swap),
-    );
+
+    // Fetch the full user profile for the swap's user
+    final profileRepo = ProfileRepository();
+    final UserProfile? userProfile = await profileRepo.getUserProfileById(swap.userId);
+
+    if (userProfile != null && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => UserProfileDialog(userProfile: userProfile),
+      );
+    } else {
+      // Create a basic user profile from swap data as fallback
+      final fallbackProfile = UserProfile(
+        uid: swap.userId,
+        name: swap.userName,
+        email: '',
+        username: swap.userName.toLowerCase().replaceAll(' ', ''),
+        bio: swap.description,
+        location: swap.location,
+        availability: 'Available',
+        skillsOffered: [swap.skillOffered],
+        skillsWanted: [swap.skillWanted],
+        reviews: [],
+        swapScore: 0,
+        notificationsEnabled: true,
+        privacySettings: {},
+        avatarUrl: swap.userAvatar,
+      );
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => UserProfileDialog(userProfile: fallbackProfile),
+        );
+      }
+    }
   }
 
   void _requestSwap(Swap swap) async {

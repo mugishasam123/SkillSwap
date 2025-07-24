@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import '../models/swap.dart';
 import '../../profile/data/image_upload_service.dart';
+import '../../profile/models/user_profile.dart';
 import 'package:flutter/material.dart';
 
 class SwapRepository {
@@ -32,17 +33,99 @@ class SwapRepository {
     }
 
     return _firestore
-        .collection('swaps')
-        .orderBy('createdAt', descending: true)
-        .limit(20) // Get more to filter in memory
+        .collection('users')
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Swap.fromJson(doc.data(), doc.id))
-              .where((swap) => swap.isActive && swap.userId != user.uid) // Filter in memory
-              .take(10) // Limit to 10
-              .toList(),
-        );
+        .asyncMap((snapshot) async {
+          try {
+            // Get current user's skills
+            final userDoc = await _firestore.collection('users').doc(user.uid).get();
+            final userData = userDoc.data();
+            
+            // Check what fields actually exist in the user document
+            print('DEBUG: User data keys: ${userData?.keys.toList()}');
+            
+            // Try different possible field names
+            final userSkillsOffered = List<String>.from(userData?['skillsOffered'] ?? userData?['skillLibrary'] ?? userData?['skills'] ?? []);
+            final userSkillsWanted = List<String>.from(userData?['skillsWanted'] ?? userData?['wantedSkills'] ?? []);
+            
+            print('DEBUG: User skills offered: $userSkillsOffered');
+            print('DEBUG: User skills wanted: $userSkillsWanted');
+
+            final allUsers = snapshot.docs
+                .map((doc) => UserProfile.fromJson(doc.data(), doc.id))
+                .where((userProfile) => userProfile.uid != user.uid) // Exclude current user
+                .toList();
+                
+            print('DEBUG: Total users found: ${snapshot.docs.length}');
+            print('DEBUG: Users (excluding current user): ${allUsers.length}');
+            print('DEBUG: All users: ${allUsers.map((u) => u.name).toList()}');
+
+            // Ranking based on matching skills and swap score
+            final rankedUsers = allUsers.map((userProfile) {
+              double score = 0.0;
+              
+              final userSkillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
+              final userSkillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : 'not specified';
+              
+              print('DEBUG: Checking user - ${userProfile.name} offers "$userSkillOffered" wants "$userSkillWanted"');
+              
+              // Check if user has matching skills (same skill offered and wanted)
+              bool hasMatchingSkills = userSkillOffered.toLowerCase() == userSkillWanted.toLowerCase() && 
+                                      userSkillOffered != 'not specified' && 
+                                      userSkillWanted != 'not specified';
+              
+              if (hasMatchingSkills) {
+                score += 1000.0; // Very high base score for matching skills
+                print('DEBUG: MATCHING SKILLS! ${userProfile.name} has matching skills: $userSkillOffered');
+              } else {
+                score += 0.0; // No score for non-matching skills
+                print('DEBUG: NO MATCHING SKILLS! ${userProfile.name} has different skills');
+              }
+              
+              // Add swap score as secondary ranking
+              score += userProfile.swapScore;
+              
+              print('DEBUG: Final score for ${userProfile.name}: $score (matching: $hasMatchingSkills, swapScore: ${userProfile.swapScore})');
+              
+              return {'user': userProfile, 'score': score, 'hasMatchingSkills': hasMatchingSkills};
+            }).toList();
+
+            // Sort by score (highest first) and take top 2
+            rankedUsers.sort((a, b) => (b['score'] as double).compareTo(a['score'] as double));
+            
+            // Convert to Swap objects for compatibility
+            final suggestedSwaps = rankedUsers
+                .take(2)
+                .map((item) {
+                  final userProfile = item['user'] as UserProfile;
+                  final skillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
+                  final skillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : 'not specified';
+                  
+                  return Swap(
+                    id: userProfile.uid,
+                    userId: userProfile.uid,
+                    userName: userProfile.name,
+                    userAvatar: userProfile.avatarUrl ?? 'assets/images/onboarding_1.png',
+                    skillOffered: skillOffered,
+                    skillWanted: skillWanted,
+                    description: '${userProfile.name} is good at $skillOffered and wants to learn $skillWanted.',
+                    createdAt: DateTime.now(),
+                    location: userProfile.location ?? '',
+                    tags: [],
+                    isActive: true,
+                    views: 0,
+                    requests: userProfile.swapScore,
+                    imageUrl: null,
+                  );
+                })
+                .toList();
+            
+            return suggestedSwaps;
+          } catch (e) {
+            print('Error in suggested swaps: $e');
+            return [];
+          }
+        });
   }
 
   // Create a new swap with optional image
