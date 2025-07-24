@@ -13,11 +13,6 @@ class SuggestedSwapsPage extends StatefulWidget {
 class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
   final SwapRepository _repository = SwapRepository();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final TextEditingController _searchController = TextEditingController();
-  
-  String _selectedLanguage = 'Language';
-  String _selectedCountry = 'Country';
-  String _selectedAvailability = 'Availability';
 
   void _viewSwap(Swap swap) {
     // Increment view count
@@ -125,64 +120,6 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           
           // New Swaps Cards
           _buildNewSwapsSection(),
-          
-          const SizedBox(height: 24),
-          
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.search, color: Colors.grey[600], size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'What do you want to learn?',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Filter Dropdowns
-          Row(
-            children: [
-              Expanded(
-                child: _buildFilterDropdown(
-                  value: _selectedLanguage,
-                  items: ['Language', 'English', 'French', 'Spanish', 'German'],
-                  onChanged: (value) => setState(() => _selectedLanguage = value!),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildFilterDropdown(
-                  value: _selectedCountry,
-                  items: ['Country', 'Nigeria', 'Kenya', 'Ghana', 'South Africa'],
-                  onChanged: (value) => setState(() => _selectedCountry = value!),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildFilterDropdown(
-                  value: _selectedAvailability,
-                  items: ['Availability', 'Weekdays', 'Weekends', 'Evenings'],
-                  onChanged: (value) => setState(() => _selectedAvailability = value!),
-                ),
-              ),
-            ],
-          ),
           
           const SizedBox(height: 24),
           
@@ -421,37 +358,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
     );
   }
 
-  Widget _buildFilterDropdown({
-    required String value,
-    required List<String> items,
-    required Function(String?) onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: DropdownButton<String>(
-        value: value,
-        onChanged: onChanged,
-        underline: Container(),
-        isExpanded: true,
-        icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[600]),
-        style: TextStyle(
-          color: Colors.grey[800],
-          fontSize: 14,
-        ),
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
-      ),
-    );
-  }
+
 
   Widget _buildSkillGrid() {
     final skills = [
