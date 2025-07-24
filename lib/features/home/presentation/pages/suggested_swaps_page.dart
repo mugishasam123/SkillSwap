@@ -395,10 +395,10 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
 
   Widget _buildSkillGrid() {
     final skills = [
-      {'title': 'CV & Resume Writing', 'image': 'assets/images/onboarding_1.png'},
-      {'title': 'Intro to Digital Freelancing', 'image': 'assets/images/onboarding_2.png'},
-      {'title': 'Video Editing with CapCut', 'image': 'assets/images/onboarding_3.png'},
-      {'title': 'UI/UX Basics using Figma', 'image': 'assets/images/onboarding_1.png'},
+      {'title': 'CV & Resume Writing', 'image': 'assets/images/onboarding_1.png', 'skill': 'resume writing'},
+      {'title': 'Intro to Digital Freelancing', 'image': 'assets/images/onboarding_2.png', 'skill': 'freelancing'},
+      {'title': 'Video Editing with CapCut', 'image': 'assets/images/onboarding_3.png', 'skill': 'video editing'},
+      {'title': 'UI/UX Basics using Figma', 'image': 'assets/images/onboarding_1.png', 'skill': 'ui/ux'},
     ];
 
     return GridView.builder(
@@ -413,71 +413,86 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
       itemCount: skills.length,
       itemBuilder: (context, index) {
         final skill = skills[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
+        return GestureDetector(
+          onTap: () {
+            // Navigate to home page with All tab selected and skill filter
+            print('DEBUG: Clicking skill: ${skill['skill']}');
+            Navigator.pushNamed(
+              context, 
+              '/home', 
+              arguments: {
+                'selectedTab': 0, // Home tab
+                'homeTabIndex': 1, // All tab within home
+                'filterSkill': skill['skill']
+              }
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                      color: Colors.grey[100],
                     ),
-                    color: Colors.grey[100],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                    ),
-                    child: Image.asset(
-                      skill['image']!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Icon(
-                            Icons.image_not_supported,
-                            size: 30,
-                            color: Colors.grey[600],
-                          ),
-                        );
-                      },
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                      child: Image.asset(
+                        skill['image']!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: Icon(
+                              Icons.image_not_supported,
+                              size: 30,
+                              color: Colors.grey[600],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    skill['title']!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      skill['title']!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

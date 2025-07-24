@@ -25,6 +25,72 @@ class SwapRepository {
         );
   }
 
+  // Get users filtered by skill
+  Stream<List<Swap>> getUsersBySkill(String skill) {
+    return _firestore
+        .collection('users')
+        .snapshots()
+        .map((snapshot) {
+          final allUsers = snapshot.docs
+              .map((doc) => UserProfile.fromJson(doc.data(), doc.id))
+              .toList();
+
+          // Filter users who have the specified skill (more flexible matching)
+          final filteredUsers = allUsers.where((userProfile) {
+            final userSkillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : '';
+            final userSkillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : '';
+            
+            // Create skill mappings for flexible matching
+            final skillMappings = {
+              'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing'],
+              'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work'],
+              'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit'],
+              'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience'],
+            };
+            
+            final searchSkill = skill.toLowerCase();
+            final mappedSkills = skillMappings[searchSkill] ?? [searchSkill];
+            
+            // Check if user has any of the mapped skills
+            for (String mappedSkill in mappedSkills) {
+              if (userSkillOffered.toLowerCase().contains(mappedSkill) ||
+                  userSkillWanted.toLowerCase().contains(mappedSkill)) {
+                return true;
+              }
+            }
+            
+            return false;
+          }).toList();
+
+          print('DEBUG: Filtering for skill: $skill');
+          print('DEBUG: Found ${filteredUsers.length} users with matching skills');
+          print('DEBUG: Matching users: ${filteredUsers.map((u) => '${u.name} (offers: ${u.skillsOffered.isNotEmpty ? u.skillsOffered.first : "none"}, wants: ${u.skillsWanted.isNotEmpty ? u.skillsWanted.first : "none"})').toList()}');
+          
+          // Convert to Swap objects for compatibility
+          return filteredUsers.map((userProfile) {
+            final skillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
+            final skillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : 'not specified';
+            
+            return Swap(
+              id: userProfile.uid,
+              userId: userProfile.uid,
+              userName: userProfile.name,
+              userAvatar: userProfile.avatarUrl ?? 'assets/images/onboarding_1.png',
+              skillOffered: skillOffered,
+              skillWanted: skillWanted,
+              description: '${userProfile.name} is good at $skillOffered and wants to learn $skillWanted.',
+              createdAt: DateTime.now(),
+              location: userProfile.location ?? '',
+              tags: [],
+              isActive: true,
+              views: 0,
+              requests: userProfile.swapScore,
+              imageUrl: null,
+            );
+          }).toList();
+        });
+  }
+
   // Get suggested swaps based on user preferences
   Stream<List<Swap>> getSuggestedSwaps() {
     final user = _auth.currentUser;
