@@ -7,7 +7,9 @@ import '../../../profile/models/user_profile.dart';
 import '../../../profile/presentation/pages/user_profile_dialog.dart';
 
 class AllSwapsPage extends StatefulWidget {
-  const AllSwapsPage({super.key});
+  final String? filterSkill;
+  
+  const AllSwapsPage({super.key, this.filterSkill});
 
   @override
   State<AllSwapsPage> createState() => _AllSwapsPageState();
@@ -17,6 +19,12 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
   final SwapRepository _repository = SwapRepository();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _showOfflineMockData = false;
+
+  @override
+  void initState() {
+    super.initState();
+    print('DEBUG: AllSwapsPage initState with filterSkill: ${widget.filterSkill}');
+  }
 
   // Mock data for offline testing
   List<Swap> get _mockSwaps => [
@@ -183,7 +191,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Text(
-                'All Swaps',
+                widget.filterSkill != null ? 'Filtered Skills' : 'All Swaps',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 26,
@@ -203,8 +211,37 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
 
   Widget _buildUsersList() {
     final profileRepo = ProfileRepository();
-    return StreamBuilder<List<UserProfile>>(
-      stream: profileRepo.getAllUsers(),
+    
+    // Use filtered stream if filterSkill is provided
+    final stream = widget.filterSkill != null 
+        ? _repository.getUsersBySkill(widget.filterSkill!)
+        : Stream.value(<Swap>[]).asyncMap((_) async {
+            final users = await profileRepo.getAllUsers().first;
+            return users.map((userProfile) {
+              final skillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
+              final skillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : 'not specified';
+              
+              return Swap(
+                id: userProfile.uid,
+                userId: userProfile.uid,
+                userName: userProfile.name,
+                userAvatar: userProfile.avatarUrl ?? 'assets/images/onboarding_1.png',
+                skillOffered: skillOffered,
+                skillWanted: skillWanted,
+                description: '${userProfile.name} is good at $skillOffered and wants to learn $skillWanted.',
+                createdAt: DateTime.now(),
+                location: userProfile.location ?? '',
+                tags: [],
+                isActive: true,
+                views: 0,
+                requests: userProfile.swapScore,
+                imageUrl: null,
+              );
+            }).toList();
+          });
+    
+    return StreamBuilder<List<Swap>>(
+      stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -225,26 +262,28 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
-        final users = snapshot.data!;
-        if (users.isEmpty) {
+        final swaps = snapshot.data!;
+        if (swaps.isEmpty) {
           return Center(
-            child: Text('No users found.'),
+            child: Text(widget.filterSkill != null 
+                ? 'No users found with ${widget.filterSkill} skills.'
+                : 'No users found.'),
           );
         }
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          itemCount: users.length,
+          itemCount: swaps.length,
           itemBuilder: (context, index) {
-            return _buildUserCard(users[index]);
+            return _buildUserCard(swaps[index]);
           },
         );
       },
     );
   }
 
-  Widget _buildUserCard(UserProfile user) {
-    final String skillOffered = (user.skillsOffered.isNotEmpty) ? user.skillsOffered.first : 'not specified';
-    final String skillWanted = (user.skillsWanted.isNotEmpty) ? user.skillsWanted.first : 'not specified';
+  Widget _buildUserCard(Swap swap) {
+    final String skillOffered = swap.skillOffered;
+    final String skillWanted = swap.skillWanted;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -266,11 +305,9 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
           // Avatar
           CircleAvatar(
             radius: 28,
-            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-              ? (user.avatarUrl!.startsWith('http')
-                  ? NetworkImage(user.avatarUrl!)
-                  : AssetImage(user.avatarUrl!) as ImageProvider)
-              : const AssetImage('assets/images/onboarding_1.png'),
+            backgroundImage: swap.userAvatar.startsWith('http')
+                ? NetworkImage(swap.userAvatar)
+                : AssetImage(swap.userAvatar),
           ),
           const SizedBox(width: 16),
           // Name, sentence, and buttons
@@ -279,7 +316,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.name,
+                  swap.userName,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -287,7 +324,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${user.name} is good at $skillOffered and wants to learn $skillWanted.',
+                  '${swap.userName} is good at $skillOffered and wants to learn $skillWanted.',
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black87,
@@ -302,9 +339,26 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                         height: 38,
                         child: ElevatedButton(
                           onPressed: () async {
+                            // Create a UserProfile from the swap data
+                            final userProfile = UserProfile(
+                              uid: swap.userId,
+                              name: swap.userName,
+                              email: '',
+                              username: swap.userName.toLowerCase().replaceAll(' ', ''),
+                              bio: swap.description,
+                              location: swap.location,
+                              availability: 'Available',
+                              skillsOffered: [swap.skillOffered],
+                              skillsWanted: [swap.skillWanted],
+                              reviews: [],
+                              swapScore: swap.requests,
+                              notificationsEnabled: true,
+                              privacySettings: {},
+                              avatarUrl: swap.userAvatar,
+                            );
                             showDialog(
                               context: context,
-                              builder: (context) => UserProfileDialog(userProfile: user),
+                              builder: (context) => UserProfileDialog(userProfile: userProfile),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -331,7 +385,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                         height: 38,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/swap', arguments: user.uid);
+                            Navigator.pushNamed(context, '/swap', arguments: swap.userId);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFF8A00),
