@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../features/home/data/email_service.dart';
 
 class SwapLibraryPage extends StatefulWidget {
   const SwapLibraryPage({super.key});
@@ -118,7 +119,7 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
                   : StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection('swapRequests')
-                          .where('recipientId', isEqualTo: currentUser.uid)
+                          .where('receiverId', isEqualTo: currentUser.uid)
                           .orderBy('createdAt', descending: true)
                           .snapshots(),
                       builder: (context, snapshot) {
@@ -167,12 +168,25 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 2),
-                                      Text(
-                                        '$senderName wants to learn $learn',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                        ),
+                                      FutureBuilder<DocumentSnapshot>(
+                                        future: FirebaseFirestore.instance.collection('users').doc(doc['requesterId']).get(),
+                                        builder: (context, userSnapshot) {
+                                          String skillsText = 'various skills';
+                                          if (userSnapshot.hasData && userSnapshot.data!.data() != null) {
+                                            final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                                            final skills = userData['skillLibrary'] as List<dynamic>? ?? [];
+                                            if (skills.isNotEmpty) {
+                                              skillsText = skills.join(', ');
+                                            }
+                                          }
+                                          return Text(
+                                            '$senderName wants to learn $learn and is good at $skillsText',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontFamily: 'Poppins',
+                                            ),
+                                          );
+                                        },
                                       ),
                                       const SizedBox(height: 8),
                                       Row(
@@ -185,6 +199,15 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
                                                 borderRadius: BorderRadius.circular(20),
                                               ),
                                               child: const Text('Declined', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                                            )
+                                          else if (status == 'accepted')
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF4CAF50),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
                                             )
                                           else ...[
                                             ElevatedButton(
@@ -212,9 +235,84 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
                                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                                               ),
                                               onPressed: () async {
-                                                // Placeholder: send email logic here
-                                                await sendSwapEmail(doc);
-                                                await FirebaseFirestore.instance.collection('swapRequests').doc(doc.id).update({'status': 'accepted'});
+                                                try {
+                                                  // Update status to accepted
+                                                  await FirebaseFirestore.instance.collection('swapRequests').doc(doc.id).update({'status': 'accepted'});
+                                                  
+                                                  // Increment swapScore for the current user
+                                                  final currentUser = FirebaseAuth.instance.currentUser;
+                                                  if (currentUser != null) {
+                                                    final userRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+                                                    await userRef.update({
+                                                      'swapScore': FieldValue.increment(1),
+                                                    });
+                                                  }
+                                                  
+                                                  // Send confirmation emails using SendGrid
+                                                  final docData = doc.data() as Map<String, dynamic>;
+                                                  final requesterDoc = await FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(docData['requesterId'])
+                                                      .get();
+                                                  final receiverDoc = await FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(docData['receiverId'])
+                                                      .get();
+                                                  
+                                                  final requesterData = requesterDoc.data();
+                                                  final receiverData = receiverDoc.data();
+                                                  
+                                                  if (requesterData != null && receiverData != null) {
+                                                    // Format meeting details
+                                                    final meetingDate = docData['date'] != null
+                                                        ? DateTime.fromMillisecondsSinceEpoch(
+                                                            (docData['date'] as Timestamp).millisecondsSinceEpoch)
+                                                            .toLocal()
+                                                            .toString()
+                                                            .split(' ')[0]
+                                                        : 'To be confirmed';
+                                                    
+                                                    final meetingTime = docData['time'] ?? 'To be confirmed';
+                                                    final platform = docData['platform'] == 'google_meet' ? 'Google Meet' : 'Zoom';
+                                                    final skillToLearn = docData['learn'] ?? 'skills';
+                                                    
+                                                    await EmailService.sendSwapConfirmationEmail(
+                                                      requesterEmail: requesterData['email'] ?? '',
+                                                      receiverEmail: receiverData['email'] ?? '',
+                                                      requesterName: requesterData['name'] ?? 'User',
+                                                      receiverName: receiverData['name'] ?? 'User',
+                                                      requesterLocation: requesterData['location'] ?? 'Not specified',
+                                                      receiverLocation: receiverData['location'] ?? 'Not specified',
+                                                      meetingDate: meetingDate,
+                                                      meetingTime: meetingTime,
+                                                      platform: platform,
+                                                      skillToLearn: skillToLearn,
+                                                    );
+                                                  }
+                                                  
+                                                  // Show confirmation dialog
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) => AlertDialog(
+                                                      title: const Text('Swap Accepted!'),
+                                                      content: const Text('Confirmation emails sent to both parties.'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () => Navigator.of(context).pop(),
+                                                          child: const Text('OK'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                } catch (error) {
+                                                  print('Error accepting swap: $error');
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('Error accepting swap: $error'),
+                                                      backgroundColor: Colors.red,
+                                                    ),
+                                                  );
+                                                }
                                               },
                                               child: const Text('Accept', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
                                             ),
@@ -282,18 +380,6 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Future<void> sendSwapEmail(QueryDocumentSnapshot doc) async {
-    // TODO: Integrate actual email sending logic here
-    // You can use a backend function, or an email package
-    // For now, just show a snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Email with meeting details sent to both parties!'),
-        backgroundColor: Colors.green,
       ),
     );
   }

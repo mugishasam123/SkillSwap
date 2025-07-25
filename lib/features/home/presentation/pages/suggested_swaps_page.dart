@@ -47,7 +47,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
     }
 
     try {
-      await _repository.requestSwap(swap.id);
+      await _repository.requestSwap(receiverId: swap.userId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -393,7 +393,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () => Navigator.pushNamed(context, '/swap', arguments: swap.id),
+                        onPressed: () => Navigator.pushNamed(context, '/swap', arguments: swap.userId),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF8A00),
                           foregroundColor: Colors.white,
@@ -762,7 +762,7 @@ class _SwapDetailsDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.pushNamed(context, '/swap', arguments: swap.id);
+                  Navigator.pushNamed(context, '/swap', arguments: swap.userId);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF8A00),
