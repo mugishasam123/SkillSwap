@@ -25,7 +25,54 @@ class SwapRepository {
         );
   }
 
-  // Get users filtered by skill
+  // Get swaps filtered by skill
+  Stream<List<Swap>> getSwapsBySkill(String skill) {
+    return _firestore
+        .collection('swaps')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          final allSwaps = snapshot.docs
+              .map((doc) => Swap.fromJson(doc.data(), doc.id))
+              .where((swap) => swap.isActive)
+              .toList();
+
+          // Create skill mappings for flexible matching - now includes single words
+          final skillMappings = {
+            'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing', 'resume writing'],
+            'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work', 'freelance'],
+            'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit', 'video', 'editing'],
+            'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience', 'ui', 'ux'],
+          };
+          
+          final searchSkill = skill.toLowerCase();
+          final mappedSkills = skillMappings[searchSkill] ?? [searchSkill];
+          
+          // Filter swaps that match the skill
+          final filteredSwaps = allSwaps.where((swap) {
+            final swapSkillOffered = swap.skillOffered.toLowerCase();
+            final swapSkillWanted = swap.skillWanted.toLowerCase();
+            
+            // Check if swap has any of the mapped skills
+            for (String mappedSkill in mappedSkills) {
+              if (swapSkillOffered.contains(mappedSkill) ||
+                  swapSkillWanted.contains(mappedSkill)) {
+                return true;
+              }
+            }
+            
+            return false;
+          }).toList();
+
+          print('DEBUG: Filtering swaps for skill: $skill');
+          print('DEBUG: Found ${filteredSwaps.length} swaps with matching skills');
+          print('DEBUG: Matching swaps: ${filteredSwaps.map((s) => '${s.userName} (offers: ${s.skillOffered}, wants: ${s.skillWanted})').toList()}');
+          
+          return filteredSwaps;
+        });
+  }
+
+  // Get users filtered by skill (keeping for backward compatibility)
   Stream<List<Swap>> getUsersBySkill(String skill) {
     return _firestore
         .collection('users')
@@ -37,25 +84,37 @@ class SwapRepository {
 
           // Filter users who have the specified skill (more flexible matching)
           final filteredUsers = allUsers.where((userProfile) {
-            final userSkillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : '';
-            final userSkillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : '';
+            // Check ALL skills in both arrays, not just the first one
+            final userSkillsOffered = userProfile.skillsOffered.map((s) => s.toLowerCase()).toList();
+            final userSkillsWanted = userProfile.skillsWanted.map((s) => s.toLowerCase()).toList();
             
-            // Create skill mappings for flexible matching
+            // Create skill mappings for flexible matching - now includes single words
             final skillMappings = {
-              'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing'],
-              'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work'],
-              'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit'],
-              'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience'],
+              'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing', 'resume writing', 'resume'],
+              'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work', 'freelance'],
+              'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit', 'video', 'editing'],
+              'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience', 'ui', 'ux'],
             };
             
             final searchSkill = skill.toLowerCase();
             final mappedSkills = skillMappings[searchSkill] ?? [searchSkill];
             
-            // Check if user has any of the mapped skills
+            print('DEBUG: Search skill: $searchSkill');
+            print('DEBUG: Mapped skills: $mappedSkills');
+            
+            // Check if user has any of the mapped skills in ANY of their skills
             for (String mappedSkill in mappedSkills) {
-              if (userSkillOffered.toLowerCase().contains(mappedSkill) ||
-                  userSkillWanted.toLowerCase().contains(mappedSkill)) {
-                return true;
+              for (String offeredSkill in userSkillsOffered) {
+                if (offeredSkill.contains(mappedSkill)) {
+                  print('DEBUG: MATCH FOUND! User ${userProfile.name} has "$offeredSkill" which contains "$mappedSkill"');
+                  return true;
+                }
+              }
+              for (String wantedSkill in userSkillsWanted) {
+                if (wantedSkill.contains(mappedSkill)) {
+                  print('DEBUG: MATCH FOUND! User ${userProfile.name} has "$wantedSkill" which contains "$mappedSkill"');
+                  return true;
+                }
               }
             }
             

@@ -190,14 +190,74 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text(
-                widget.filterSkill != null ? 'Filtered Skills' : 'All Swaps',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 26,
-                  color: Color(0xFF121717),
-                  fontFamily: 'Poppins',
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.filterSkill != null ? 'Filtered Skills' : 'All Swaps',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                      color: Color(0xFF121717),
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  if (widget.filterSkill != null) ...[
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF225B4B).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Color(0xFF225B4B).withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.filter_list,
+                                size: 16,
+                                color: Color(0xFF225B4B),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Filtered by: ${widget.filterSkill}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF225B4B),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            // Navigate back to home without filter
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/home',
+                              arguments: {
+                                'selectedTab': 0,
+                                'homeTabIndex': 1,
+                              },
+                            );
+                          },
+                          child: Text(
+                            'Clear Filter',
+                            style: TextStyle(
+                              color: Color(0xFF225B4B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
             Expanded(
@@ -211,11 +271,13 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
 
   Widget _buildUsersList() {
     final profileRepo = ProfileRepository();
+    print('DEBUG: AllSwapsPage - Building users list with filterSkill: ${widget.filterSkill}');
     
-    // Use filtered stream if filterSkill is provided
+    // Use filtered stream if filterSkill is provided, otherwise show all users as swaps
     final stream = widget.filterSkill != null 
         ? _repository.getUsersBySkill(widget.filterSkill!)
         : Stream.value(<Swap>[]).asyncMap((_) async {
+            final profileRepo = ProfileRepository();
             final users = await profileRepo.getAllUsers().first;
             return users.map((userProfile) {
               final skillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
