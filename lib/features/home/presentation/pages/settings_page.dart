@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Added for FirebaseFirestore
 import '../../../profile/data/profile_repository.dart';
 import '../../../profile/models/user_profile.dart';
 import 'about_page.dart';

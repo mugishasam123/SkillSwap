@@ -1,1 +1,47 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"skillswap-b3f3a","appId":"1:1080492400567:android:5d2194bfbcb4f9e8779232","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"skillswap-b3f3a","appId":"1:1080492400567:ios:17bad1886da9b5ba779232","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"skillswap-b3f3a","configurations":{"android":"1:1080492400567:android:5d2194bfbcb4f9e8779232","ios":"1:1080492400567:ios:17bad1886da9b5ba779232"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "skillswap-b3f3a",
+          "appId": "1:1080492400567:android:5d2194bfbcb4f9e8779232",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "skillswap-b3f3a",
+          "appId": "1:1080492400567:ios:17bad1886da9b5ba779232",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "skillswap-b3f3a",
+          "configurations": {
+            "android": "1:1080492400567:android:5d2194bfbcb4f9e8779232",
+            "ios": "1:1080492400567:ios:17bad1886da9b5ba779232"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ]
+}

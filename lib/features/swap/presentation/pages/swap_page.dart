@@ -4,8 +4,8 @@ import '../../../home/data/swap_repository.dart';
 import 'package:intl/intl.dart';
 
 class SwapPage extends StatefulWidget {
-  final String? swapId;
-  const SwapPage({super.key, this.swapId});
+  final String? receiverId;
+  const SwapPage({super.key, this.receiverId});
 
   @override
   State<SwapPage> createState() => _SwapPageState();
@@ -53,7 +53,7 @@ class _SwapPageState extends State<SwapPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String? swapIdFromArgs = widget.swapId ?? ModalRoute.of(context)?.settings.arguments as String?;
+    final String? receiverIdFromArgs = widget.receiverId ?? ModalRoute.of(context)?.settings.arguments as String?;
 
     // Colors from screenshot
     const Color primaryBlue = Color(0xFF19A7CE);
@@ -363,7 +363,7 @@ class _SwapPageState extends State<SwapPage> {
                     ),
                     onPressed: _canSendRequest
                         ? () async {
-                            await _sendSwapRequest(context, swapIdFromArgs);
+                            await _sendSwapRequest(context, receiverIdFromArgs);
                           }
                         : null,
                     child: const Text('Send Request'),
@@ -427,7 +427,7 @@ class _SwapPageState extends State<SwapPage> {
     );
   }
 
-  Future<void> _sendSwapRequest(BuildContext context, String? swapId) async {
+  Future<void> _sendSwapRequest(BuildContext context, String? receiverId) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -439,10 +439,10 @@ class _SwapPageState extends State<SwapPage> {
       return;
     }
 
-    if (swapId == null) {
+    if (receiverId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Error: No swap selected'),
+          content: Text('Error: No user selected'),
           backgroundColor: Colors.red,
         ),
       );
@@ -463,7 +463,7 @@ class _SwapPageState extends State<SwapPage> {
       final repository = SwapRepository();
       // Save the swap request with all info
       await repository.requestSwap(
-        swapId,
+        receiverId: receiverId,
         platform: _selectedPlatform,
         date: _selectedDate,
         time: _selectedTime,

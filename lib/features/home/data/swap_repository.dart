@@ -240,8 +240,8 @@ class SwapRepository {
   }
 
   // Request a swap
-  Future<void> requestSwap(
-    String swapId, {
+  Future<void> requestSwap({
+    required String receiverId,
     String? platform,
     DateTime? date,
     TimeOfDay? time,
@@ -250,19 +250,25 @@ class SwapRepository {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    await _firestore.collection('swaps').doc(swapId).update({
-      'requests': FieldValue.increment(1),
-    });
+    // Fetch sender's name and avatar
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final userData = userDoc.data();
+    final senderName = userData?['name'] ?? 'Unknown';
+    final senderAvatar = userData?['avatarUrl'];
 
-    // Create a swap request
+    print('Debug: receiverId = $receiverId');
+    print('Debug: requesterId (current user) = ${user.uid}');
+
     await _firestore.collection('swapRequests').add({
-      'swapId': swapId,
+      'receiverId': receiverId,
       'requesterId': user.uid,
+      'senderName': senderName,
+      'senderAvatar': senderAvatar,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
       if (platform != null) 'platform': platform,
       if (date != null) 'date': Timestamp.fromDate(date),
-      if (time != null) 'time': '${time.hour}:${time.minute}',
+      if (time != null) 'time': '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
       if (learn != null) 'learn': learn,
     });
   }
