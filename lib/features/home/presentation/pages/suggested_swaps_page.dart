@@ -21,16 +21,32 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
     // Increment view count
     _repository.incrementViews(swap.id);
 
+    print('=== SUGGESTED SWAPS DEBUG ===');
+    print('DEBUG: swap.userId = ${swap.userId}');
+    print('DEBUG: swap.userName = ${swap.userName}');
+    print('DEBUG: swap.skillOffered = ${swap.skillOffered}');
+    print('DEBUG: swap.skillWanted = ${swap.skillWanted}');
+
     // Fetch the full user profile for the swap's user
     final profileRepo = ProfileRepository();
+    print('DEBUG: About to fetch profile for userId: ${swap.userId}');
     final UserProfile? userProfile = await profileRepo.getUserProfileById(swap.userId);
 
+    print('DEBUG: Profile fetch result: ${userProfile != null ? "SUCCESS" : "FAILED"}');
+    if (userProfile != null) {
+      print('DEBUG: Fetched profile name: ${userProfile.name}');
+      print('DEBUG: Fetched profile skills offered: ${userProfile.skillsOffered}');
+      print('DEBUG: Fetched profile skills wanted: ${userProfile.skillsWanted}');
+    }
+
     if (userProfile != null && mounted) {
+      print('DEBUG: Showing UserProfileDialog with full profile');
       showDialog(
         context: context,
         builder: (context) => UserProfileDialog(userProfile: userProfile),
       );
     } else {
+      print('DEBUG: Using fallback profile with limited skills');
       // Create a basic user profile from swap data as fallback
       final fallbackProfile = UserProfile(
         uid: swap.userId,

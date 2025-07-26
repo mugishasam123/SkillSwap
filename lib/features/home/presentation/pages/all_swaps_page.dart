@@ -102,21 +102,56 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
     // Increment view count
     _repository.incrementViews(swap.id);
 
+    print('=== ALL SWAPS DEBUG ===');
+    print('DEBUG: swap.userId = ${swap.userId}');
+    print('DEBUG: swap.userName = ${swap.userName}');
+    print('DEBUG: swap.skillOffered = ${swap.skillOffered}');
+    print('DEBUG: swap.skillWanted = ${swap.skillWanted}');
+
     // Fetch the full user profile for the swap's user
     final profileRepo = ProfileRepository();
+    print('DEBUG: About to fetch profile for userId: ${swap.userId}');
     final UserProfile? userProfile = await profileRepo.getUserProfileById(swap.userId);
 
+    print('DEBUG: Profile fetch result: ${userProfile != null ? "SUCCESS" : "FAILED"}');
+    if (userProfile != null) {
+      print('DEBUG: Fetched profile name: ${userProfile.name}');
+      print('DEBUG: Fetched profile skills offered: ${userProfile.skillsOffered}');
+      print('DEBUG: Fetched profile skills wanted: ${userProfile.skillsWanted}');
+    }
+
     if (userProfile != null && mounted) {
+      print('DEBUG: Showing UserProfileDialog with full profile');
       showDialog(
         context: context,
         builder: (context) => UserProfileDialog(userProfile: userProfile),
       );
     } else {
-      // Fallback: show swap details dialog if user profile not found
-      showDialog(
-        context: context,
-        builder: (context) => _SwapDetailsDialog(swap: swap),
+      print('DEBUG: Using fallback profile with limited skills');
+      // Create a basic user profile from swap data as fallback
+      final fallbackProfile = UserProfile(
+        uid: swap.userId,
+        name: swap.userName,
+        email: '',
+        username: swap.userName.toLowerCase().replaceAll(' ', ''),
+        bio: swap.description,
+        location: swap.location,
+        availability: 'Available',
+        skillsOffered: [swap.skillOffered],
+        skillsWanted: [swap.skillWanted],
+        reviews: [],
+        swapScore: 0,
+        notificationsEnabled: true,
+        privacySettings: {},
+        avatarUrl: swap.userAvatar,
       );
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => UserProfileDialog(userProfile: fallbackProfile),
+        );
+      }
     }
   }
 
@@ -283,6 +318,14 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
               final skillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
               final skillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : 'not specified';
               
+              // Create description showing ALL skills
+              final allSkillsOffered = userProfile.skillsOffered.isNotEmpty 
+                  ? userProfile.skillsOffered.join(', ') 
+                  : 'not specified';
+              final allSkillsWanted = userProfile.skillsWanted.isNotEmpty 
+                  ? userProfile.skillsWanted.join(', ') 
+                  : 'not specified';
+              
               return Swap(
                 id: userProfile.uid,
                 userId: userProfile.uid,
@@ -290,7 +333,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                 userAvatar: userProfile.avatarUrl ?? 'assets/images/onboarding_1.png',
                 skillOffered: skillOffered,
                 skillWanted: skillWanted,
-                description: '${userProfile.name} is good at $skillOffered and wants to learn $skillWanted.',
+                description: '${userProfile.name} is good at $allSkillsOffered and wants to learn $allSkillsWanted.',
                 createdAt: DateTime.now(),
                 location: userProfile.location ?? '',
                 tags: [],
