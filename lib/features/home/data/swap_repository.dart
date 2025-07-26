@@ -37,12 +37,19 @@ class SwapRepository {
               .where((swap) => swap.isActive)
               .toList();
 
-          // Create skill mappings for flexible matching - now includes single words
+          // Create skill mappings for the 4 mocked skills only
           final skillMappings = {
-            'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing', 'resume writing'],
-            'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work', 'freelance'],
-            'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit', 'video', 'editing'],
-            'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience', 'ui', 'ux'],
+            // CV & Resume Writing
+            'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing', 'cover letter', 'job application', 'professional writing'],
+            
+            // Digital Freelancing
+            'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work', 'remote work', 'gig work', 'contract work', 'self-employed'],
+            
+            // Video Editing
+            'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit', 'premiere', 'after effects', 'final cut', 'film editing', 'post production'],
+            
+            // UI/UX Design
+            'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience', 'web design', 'app design', 'prototyping', 'wireframing', 'adobe xd', 'sketch'],
           };
           
           final searchSkill = skill.toLowerCase();
@@ -82,25 +89,32 @@ class SwapRepository {
               .map((doc) => UserProfile.fromJson(doc.data(), doc.id))
               .toList();
 
+          // Create skill mappings for the 4 mocked skills only
+          final skillMappings = {
+            // CV & Resume Writing
+            'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing', 'cover letter', 'job application', 'professional writing'],
+            
+            // Digital Freelancing
+            'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work', 'remote work', 'gig work', 'contract work', 'self-employed'],
+            
+            // Video Editing
+            'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit', 'premiere', 'after effects', 'final cut', 'film editing', 'post production'],
+            
+            // UI/UX Design
+            'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience', 'web design', 'app design', 'prototyping', 'wireframing', 'adobe xd', 'sketch'],
+          };
+          
+          final searchSkill = skill.toLowerCase();
+          final mappedSkills = skillMappings[searchSkill] ?? [searchSkill];
+          
+          print('DEBUG: Search skill: $searchSkill');
+          print('DEBUG: Mapped skills: $mappedSkills');
+
           // Filter users who have the specified skill (more flexible matching)
           final filteredUsers = allUsers.where((userProfile) {
             // Check ALL skills in both arrays, not just the first one
             final userSkillsOffered = userProfile.skillsOffered.map((s) => s.toLowerCase()).toList();
             final userSkillsWanted = userProfile.skillsWanted.map((s) => s.toLowerCase()).toList();
-            
-            // Create skill mappings for flexible matching - now includes single words
-            final skillMappings = {
-              'resume writing': ['resume', 'cv', 'writing', 'resume writing', 'cv writing', 'resume writing', 'resume'],
-              'freelancing': ['freelance', 'freelancing', 'digital freelancing', 'online work', 'freelance'],
-              'video editing': ['video', 'editing', 'video editing', 'capcut', 'video edit', 'video', 'editing'],
-              'ui/ux': ['ui', 'ux', 'ui/ux', 'design', 'figma', 'user interface', 'user experience', 'ui', 'ux'],
-            };
-            
-            final searchSkill = skill.toLowerCase();
-            final mappedSkills = skillMappings[searchSkill] ?? [searchSkill];
-            
-            print('DEBUG: Search skill: $searchSkill');
-            print('DEBUG: Mapped skills: $mappedSkills');
             
             // Check if user has any of the mapped skills in ANY of their skills
             for (String mappedSkill in mappedSkills) {
@@ -125,10 +139,62 @@ class SwapRepository {
           print('DEBUG: Found ${filteredUsers.length} users with matching skills');
           print('DEBUG: Matching users: ${filteredUsers.map((u) => '${u.name} (offers: ${u.skillsOffered.isNotEmpty ? u.skillsOffered.first : "none"}, wants: ${u.skillsWanted.isNotEmpty ? u.skillsWanted.first : "none"})').toList()}');
           
+          // Rank users: Priority 1 = matching skills, Priority 2 = relevant skills by swap score
+          final rankedUsers = filteredUsers.map((userProfile) {
+            double score = 0.0;
+            bool hasMatchingSkills = false;
+            
+            // Check if user has matching skills (same offered AND wanted)
+            if (userProfile.skillsOffered.isNotEmpty && userProfile.skillsWanted.isNotEmpty) {
+              final offeredSkill = userProfile.skillsOffered.first.toLowerCase();
+              final wantedSkill = userProfile.skillsWanted.first.toLowerCase();
+              
+              // Check if any of the mapped skills match both offered and wanted
+              for (String mappedSkill in mappedSkills) {
+                if (offeredSkill.contains(mappedSkill) && wantedSkill.contains(mappedSkill)) {
+                  hasMatchingSkills = true;
+                  score += 10000.0; // Very high priority for matching skills
+                  print('DEBUG: MATCHING SKILLS! ${userProfile.name} has "$offeredSkill" offered AND wanted');
+                  break;
+                }
+              }
+            }
+            
+            // Add swap score as secondary ranking
+            score += userProfile.swapScore;
+            
+            print('DEBUG: User ${userProfile.name} - Score: $score, Matching: $hasMatchingSkills, SwapScore: ${userProfile.swapScore}');
+            
+            return {
+              'userProfile': userProfile,
+              'score': score,
+              'hasMatchingSkills': hasMatchingSkills,
+            };
+          }).toList();
+          
+          // Sort by score (matching skills first, then by swap score)
+          rankedUsers.sort((a, b) => (b['score'] as double).compareTo(a['score'] as double));
+          
+          // Take top 2 matching skills users first, then add other relevant users
+          final topMatchingUsers = rankedUsers.where((r) => r['hasMatchingSkills'] as bool).take(2).toList();
+          final otherRelevantUsers = rankedUsers.where((r) => !(r['hasMatchingSkills'] as bool)).toList();
+          
+          final finalUsers = [...topMatchingUsers, ...otherRelevantUsers];
+          
+          print('DEBUG: Top matching users: ${topMatchingUsers.map((r) => '${(r['userProfile'] as UserProfile).name}').toList()}');
+          print('DEBUG: Other relevant users: ${otherRelevantUsers.map((r) => '${(r['userProfile'] as UserProfile).name}').toList()}');
+          
           // Convert to Swap objects for compatibility
-          return filteredUsers.map((userProfile) {
-            final skillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
-            final skillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : 'not specified';
+          return finalUsers.map((rankedUser) {
+            final userProfile = rankedUser['userProfile'] as UserProfile;
+            
+            // Use ALL skills instead of just the first one
+            final skillOffered = userProfile.skillsOffered.isNotEmpty 
+                ? userProfile.skillsOffered.join(', ') 
+                : 'not specified';
+            final skillWanted = userProfile.skillsWanted.isNotEmpty 
+                ? userProfile.skillsWanted.join(', ') 
+                : 'not specified';
             
             return Swap(
               id: userProfile.uid,
@@ -223,8 +289,14 @@ class SwapRepository {
                 .take(2)
                 .map((item) {
                   final userProfile = item['user'] as UserProfile;
-                  final skillOffered = userProfile.skillsOffered.isNotEmpty ? userProfile.skillsOffered.first : 'not specified';
-                  final skillWanted = userProfile.skillsWanted.isNotEmpty ? userProfile.skillsWanted.first : 'not specified';
+                  
+                  // Use ALL skills instead of just the first one
+                  final skillOffered = userProfile.skillsOffered.isNotEmpty 
+                      ? userProfile.skillsOffered.join(', ') 
+                      : 'not specified';
+                  final skillWanted = userProfile.skillsWanted.isNotEmpty 
+                      ? userProfile.skillsWanted.join(', ') 
+                      : 'not specified';
                   
                   return Swap(
                     id: userProfile.uid,
@@ -334,9 +406,14 @@ class SwapRepository {
 
   // Increment view count
   Future<void> incrementViews(String swapId) async {
-    await _firestore.collection('swaps').doc(swapId).update({
-      'views': FieldValue.increment(1),
-    });
+    try {
+      await _firestore.collection('swaps').doc(swapId).update({
+        'views': FieldValue.increment(1),
+      });
+    } catch (e) {
+      // If the document doesn't exist or update fails, just log it and continue
+      print('DEBUG: Failed to increment views for swapId: $swapId - $e');
+    }
   }
 
   // Get time ago from timestamp
