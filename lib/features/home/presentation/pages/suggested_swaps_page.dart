@@ -140,14 +140,40 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           const SizedBox(height: 20),
           
           // New Swaps Section
-          Text(
-            'Suggested Swaps',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24,
-              color: Color(0xFF121717),
-              fontFamily: 'Poppins',
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Suggested Swaps',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: Color(0xFF121717),
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Navigate to All tab without filter
+                  Navigator.pushReplacementNamed(
+                    context,
+                    '/home',
+                    arguments: {
+                      'selectedTab': 0, // Home tab
+                      'homeTabIndex': 1, // All tab within home
+                    },
+                  );
+                },
+                child: Text(
+                  'View All Swaps',
+                  style: TextStyle(
+                    color: Color(0xFF225B4B),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           
@@ -157,14 +183,40 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           const SizedBox(height: 24),
           
           // Skill/Course Grid
-          Text(
-            'Suggested Skills',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Color(0xFF121717),
-              fontFamily: 'Poppins',
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Suggested Skills',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Color(0xFF121717),
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Navigate to All tab without filter
+                  Navigator.pushReplacementNamed(
+                    context,
+                    '/home',
+                    arguments: {
+                      'selectedTab': 0, // Home tab
+                      'homeTabIndex': 1, // All tab within home
+                    },
+                  );
+                },
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    color: Color(0xFF225B4B),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           
@@ -417,7 +469,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           onTap: () {
             // Navigate to home page with All tab selected and skill filter
             print('DEBUG: Clicking skill: ${skill['skill']}');
-            Navigator.pushNamed(
+            Navigator.pushReplacementNamed(
               context, 
               '/home', 
               arguments: {

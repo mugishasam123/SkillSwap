@@ -34,6 +34,9 @@ class _HomePageState extends State<HomePage> {
     }
     if (widget.arguments != null && widget.arguments!['filterSkill'] != null) {
       print('DEBUG: Home page - Filter skill: ${widget.arguments!['filterSkill']}');
+    } else {
+      print('DEBUG: Home page - No filter skill provided or arguments is null');
+      print('DEBUG: Home page - Arguments: ${widget.arguments}');
     }
   }
 
@@ -113,9 +116,14 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        Expanded(child: HomeTabs(
-          filterSkill: widget.arguments?['filterSkill'],
-          initialTabIndex: _homeTabIndex,
+        Expanded(child: Builder(
+          builder: (context) {
+            print('DEBUG: Home page - Passing filterSkill to HomeTabs: ${widget.arguments?['filterSkill']}');
+            return HomeTabs(
+              filterSkill: widget.arguments?['filterSkill'],
+              initialTabIndex: _homeTabIndex,
+            );
+          },
         )),
       ],
     ),
@@ -239,6 +247,7 @@ class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin
     });
     
     print('DEBUG: HomeTabs - Setting initial tab index to: ${widget.initialTabIndex}');
+    print('DEBUG: HomeTabs - Filter skill: $_currentFilterSkill');
   }
 
   @override
@@ -278,6 +287,18 @@ class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
+            onTap: (index) {
+              // Handle manual tab clicks
+              if (index == 1) { // All tab
+                if (_currentFilterSkill != null) {
+                  // If there's a filter active, clear it
+                  setState(() {
+                    _currentFilterSkill = null;
+                  });
+                  print('DEBUG: HomeTabs - Manually clicked All tab, clearing filter');
+                }
+              }
+            },
             tabs: const [
               Tab(text: 'Suggested'),
               Tab(text: 'All'),

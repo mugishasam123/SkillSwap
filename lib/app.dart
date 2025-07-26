@@ -31,7 +31,7 @@ class SkillSwapApp extends StatelessWidget {
           '/onboarding': (context) => const OnboardingPage(),
           '/login': (context) => const LoginPage(),
           '/signup': (context) => const SignupPage(),
-          '/home': (context) => const HomePage(),
+          '/home': (context) => HomePage(arguments: ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?),
           '/swap': (context) => const SwapPage(),
           '/messages': (context) => MessageListPage(),
           '/profile': (context) => const ProfilePage(),

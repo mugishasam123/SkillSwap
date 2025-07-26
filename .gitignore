@@ -13,6 +13,8 @@
 migrate_working_dir/
 android/build/reports/problems/problems-report.html
 
+.env
+
 # IntelliJ related
 *.iml
 *.ipr
