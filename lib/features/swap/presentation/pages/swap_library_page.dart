@@ -257,8 +257,10 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           return const Center(child: Text('No swaps received yet.'));
         }
         final requests = snapshot.data!.docs.where((doc) {
-          final senderName = (doc['senderName'] ?? '').toString().toLowerCase();
-          final learn = (doc['learn'] ?? '').toString().toLowerCase();
+          final data = doc.data() as Map<String, dynamic>?;
+          if (data == null) return false;
+          final senderName = (data['senderName'] ?? '').toString().toLowerCase();
+          final learn = (data['learn'] ?? '').toString().toLowerCase();
           return senderName.contains(_search) || learn.contains(_search);
         }).toList();
         if (requests.isEmpty) {
@@ -269,10 +271,14 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           separatorBuilder: (_, __) => const SizedBox(height: 18),
           itemBuilder: (context, i) {
             final doc = requests[i];
-            final senderName = doc['senderName'] ?? 'Unknown';
-            final senderAvatar = doc['senderAvatar'];
-            final learn = doc['learn'] ?? '';
-            final status = doc['status'] ?? 'pending';
+            final data = doc.data() as Map<String, dynamic>?;
+            if (data == null) {
+              return const SizedBox(height: 100, child: Center(child: Text('Invalid data')));
+            }
+            final senderName = data['senderName'] ?? 'Unknown';
+            final senderAvatar = data['senderAvatar'];
+            final learn = data['learn'] ?? '';
+            final status = data['status'] ?? 'pending';
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -298,13 +304,13 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                       Builder(
                         builder: (context) {
                           // Use the skills stored in the swap request document
-                          final skillsOffered = doc['senderSkillsOffered'] ?? 'various skills';
-                          final skillsWanted = doc['senderSkillsWanted'] ?? 'various skills';
+                          final skillsOffered = data['senderSkillsOffered'] ?? 'various skills';
+                          final skillsWanted = data['senderSkillsWanted'] ?? 'various skills';
                           
                           // Get date and time information
                           String dateTimeInfo = '';
-                          final date = doc['date'];
-                          final time = doc['time'];
+                          final date = data['date'];
+                          final time = data['time'];
                           
                           if (date != null && time != null) {
                             if (date is Timestamp) {
@@ -390,10 +396,10 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                               onPressed: () async {
                                 try {
                                   // Get the swap request data
-                                  final date = doc['date'];
-                                  final time = doc['time'];
-                                  final platform = doc['platform'];
-                                  final skillToLearn = doc['learn'];
+                                  final date = data['date'];
+                                  final time = data['time'];
+                                  final platform = data['platform'];
+                                  final skillToLearn = data['learn'];
                                   
                                   if (date != null && time != null && platform != null && skillToLearn != null) {
                                     // Format the date and time
@@ -410,11 +416,11 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                     // Get user data for email
                                     final requesterDoc = await FirebaseFirestore.instance
                                         .collection('users')
-                                        .doc(doc['requesterId'])
+                                        .doc(data['requesterId'])
                                         .get();
                                     final receiverDoc = await FirebaseFirestore.instance
                                         .collection('users')
-                                        .doc(doc['receiverId'])
+                                        .doc(data['receiverId'])
                                         .get();
                                     
                                     final requesterData = requesterDoc.data();
@@ -492,7 +498,9 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
         }
         
         final requests = snapshot.data!.docs.where((doc) {
-          final learn = (doc['learn'] ?? '').toString().toLowerCase();
+          final data = doc.data() as Map<String, dynamic>?;
+          if (data == null) return false;
+          final learn = (data['learn'] ?? '').toString().toLowerCase();
           return learn.contains(_search);
         }).toList();
         
@@ -504,9 +512,13 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           separatorBuilder: (_, __) => const SizedBox(height: 18),
           itemBuilder: (context, i) {
             final doc = requests[i];
-            final receiverId = doc['receiverId'] ?? '';
-            final learn = doc['learn'] ?? '';
-            final status = doc['status'] ?? 'pending';
+            final data = doc.data() as Map<String, dynamic>?;
+            if (data == null) {
+              return const SizedBox(height: 100, child: Center(child: Text('Invalid data')));
+            }
+            final receiverId = data['receiverId'] ?? '';
+            final learn = data['learn'] ?? '';
+            final status = data['status'] ?? 'pending';
             return FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance.collection('users').doc(receiverId).get(),
               builder: (context, userSnapshot) {
@@ -548,8 +560,8 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                         builder: (context) {
                           // Get date and time information
                           String dateTimeInfo = '';
-                          final date = doc['date'];
-                          final time = doc['time'];
+                          final date = data['date'];
+                          final time = data['time'];
                           
                           if (date != null && time != null) {
                             if (date is Timestamp) {
