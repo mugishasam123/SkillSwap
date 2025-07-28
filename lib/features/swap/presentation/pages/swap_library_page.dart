@@ -10,9 +10,27 @@ class SwapLibraryPage extends StatefulWidget {
   State<SwapLibraryPage> createState() => _SwapLibraryPageState();
 }
 
-class _SwapLibraryPageState extends State<SwapLibraryPage> {
+class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProviderStateMixin {
   String _search = '';
   int _selectedIndex = 2;
+  late TabController _tabController;
+  int _currentTabIndex = 0; // 0 for Swap Received, 1 for Swap Sent
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: _currentTabIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -46,6 +64,12 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
+          // Temporary button to update existing swap requests with skills
+          IconButton(
+            icon: const Icon(Icons.update, color: Colors.orange),
+            onPressed: () => _updateExistingSwapRequests(),
+            tooltip: 'Update existing swap requests with skills',
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: Stack(
@@ -98,6 +122,48 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
               ),
             ),
             const SizedBox(height: 12),
+            // Toggle button for Swap Received/Swap Sent
+            Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.7, // Reduced width to 70%
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: const Color(0xFF617D8A),
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                  ),
+                  indicator: BoxDecoration(
+                    color: const Color(0xFF225B4B),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  onTap: (index) {
+                    setState(() {
+                      _currentTabIndex = index;
+                    });
+                  },
+                  tabs: const [
+                    Tab(text: 'Swap Received'),
+                    Tab(text: 'Swap Sent'),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             TextField(
               decoration: InputDecoration(
                 hintText: 'Search here',
@@ -116,217 +182,14 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
             Expanded(
               child: currentUser == null
                   ? const Center(child: Text('Please log in'))
-                  : StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('swapRequests')
-                          .where('receiverId', isEqualTo: currentUser.uid)
-                          .orderBy('createdAt', descending: true)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const Center(child: Text('No swaps yet.'));
-                        }
-                        final requests = snapshot.data!.docs.where((doc) {
-                          final senderName = (doc['senderName'] ?? '').toString().toLowerCase();
-                          final learn = (doc['learn'] ?? '').toString().toLowerCase();
-                          return senderName.contains(_search) || learn.contains(_search);
-                        }).toList();
-                        if (requests.isEmpty) {
-                          return const Center(child: Text('No swaps match your search.'));
-                        }
-                        return ListView.separated(
-                          itemCount: requests.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 18),
-                          itemBuilder: (context, i) {
-                            final doc = requests[i];
-                            final senderName = doc['senderName'] ?? 'Unknown';
-                            final senderAvatar = doc['senderAvatar'];
-                            final learn = doc['learn'] ?? '';
-                            final status = doc['status'] ?? 'pending';
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CircleAvatar(
-                                  radius: 28,
-                                  backgroundImage: senderAvatar != null ? NetworkImage(senderAvatar) : null,
-                                  child: senderAvatar == null ? Text(senderName[0], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)) : null,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        senderName,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      FutureBuilder<DocumentSnapshot>(
-                                        future: FirebaseFirestore.instance.collection('users').doc(doc['requesterId']).get(),
-                                        builder: (context, userSnapshot) {
-                                          String skillsText = 'various skills';
-                                          if (userSnapshot.hasData && userSnapshot.data!.data() != null) {
-                                            final userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                                            final skills = userData['skillLibrary'] as List<dynamic>? ?? [];
-                                            if (skills.isNotEmpty) {
-                                              skillsText = skills.join(', ');
-                                            }
-                                          }
-                                          return Text(
-                                            '$senderName wants to learn $learn and is good at $skillsText',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontFamily: 'Poppins',
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          if (status == 'declined')
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFBDBDBD),
-                                                borderRadius: BorderRadius.circular(20),
-                                              ),
-                                              child: const Text('Declined', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                                            )
-                                          else if (status == 'accepted')
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF4CAF50),
-                                                borderRadius: BorderRadius.circular(20),
-                                              ),
-                                              child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                                            )
-                                          else ...[
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: const Color(0xFF19A7CE),
-                                                foregroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(20),
-                                                ),
-                                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                              ),
-                                              onPressed: () async {
-                                                await FirebaseFirestore.instance.collection('swapRequests').doc(doc.id).update({'status': 'declined'});
-                                              },
-                                              child: const Text('Decline', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: const Color(0xFFF7931A),
-                                                foregroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(20),
-                                                ),
-                                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                              ),
-                                              onPressed: () async {
-                                                try {
-                                                  // Update status to accepted
-                                                  await FirebaseFirestore.instance.collection('swapRequests').doc(doc.id).update({'status': 'accepted'});
-                                                  
-                                                  // Increment swapScore for the current user
-                                                  final currentUser = FirebaseAuth.instance.currentUser;
-                                                  if (currentUser != null) {
-                                                    final userRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
-                                                    await userRef.update({
-                                                      'swapScore': FieldValue.increment(1),
-                                                    });
-                                                  }
-                                                  
-                                                  // Send confirmation emails using SendGrid
-                                                  final docData = doc.data() as Map<String, dynamic>;
-                                                  final requesterDoc = await FirebaseFirestore.instance
-                                                      .collection('users')
-                                                      .doc(docData['requesterId'])
-                                                      .get();
-                                                  final receiverDoc = await FirebaseFirestore.instance
-                                                      .collection('users')
-                                                      .doc(docData['receiverId'])
-                                                      .get();
-                                                  
-                                                  final requesterData = requesterDoc.data();
-                                                  final receiverData = receiverDoc.data();
-                                                  
-                                                  if (requesterData != null && receiverData != null) {
-                                                    // Format meeting details
-                                                    final meetingDate = docData['date'] != null
-                                                        ? DateTime.fromMillisecondsSinceEpoch(
-                                                            (docData['date'] as Timestamp).millisecondsSinceEpoch)
-                                                            .toLocal()
-                                                            .toString()
-                                                            .split(' ')[0]
-                                                        : 'To be confirmed';
-                                                    
-                                                    final meetingTime = docData['time'] ?? 'To be confirmed';
-                                                    final platform = docData['platform'] == 'google_meet' ? 'Google Meet' : 'Zoom';
-                                                    final skillToLearn = docData['learn'] ?? 'skills';
-                                                    
-                                                    await EmailService.sendSwapConfirmationEmail(
-                                                      requesterEmail: requesterData['email'] ?? '',
-                                                      receiverEmail: receiverData['email'] ?? '',
-                                                      requesterName: requesterData['name'] ?? 'User',
-                                                      receiverName: receiverData['name'] ?? 'User',
-                                                      requesterLocation: requesterData['location'] ?? 'Not specified',
-                                                      receiverLocation: receiverData['location'] ?? 'Not specified',
-                                                      meetingDate: meetingDate,
-                                                      meetingTime: meetingTime,
-                                                      platform: platform,
-                                                      skillToLearn: skillToLearn,
-                                                    );
-                                                  }
-                                                  
-                                                  // Show confirmation dialog
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) => AlertDialog(
-                                                      title: const Text('Swap Accepted!'),
-                                                      content: const Text('Confirmation emails sent to both parties.'),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () => Navigator.of(context).pop(),
-                                                          child: const Text('OK'),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  );
-                                                } catch (error) {
-                                                  print('Error accepting swap: $error');
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text('Error accepting swap: $error'),
-                                                      backgroundColor: Colors.red,
-                                                    ),
-                                                  );
-                                                }
-                                              },
-                                              child: const Text('Accept', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Swap Received Tab
+                        _buildSwapReceivedTab(currentUser.uid),
+                        // Swap Sent Tab
+                        _buildSwapSentTab(currentUser.uid),
+                      ],
                     ),
             ),
           ],
@@ -382,5 +245,502 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> {
         ),
       ),
     );
+  }
+
+  // Build Swap Received Tab
+  Widget _buildSwapReceivedTab(String currentUserId) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('swapRequests')
+          .where('receiverId', isEqualTo: currentUserId)
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No swaps received yet.'));
+        }
+        final requests = snapshot.data!.docs.where((doc) {
+          final senderName = (doc['senderName'] ?? '').toString().toLowerCase();
+          final learn = (doc['learn'] ?? '').toString().toLowerCase();
+          return senderName.contains(_search) || learn.contains(_search);
+        }).toList();
+        if (requests.isEmpty) {
+          return const Center(child: Text('No swaps match your search.'));
+        }
+        return ListView.separated(
+          itemCount: requests.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 18),
+          itemBuilder: (context, i) {
+            final doc = requests[i];
+            final senderName = doc['senderName'] ?? 'Unknown';
+            final senderAvatar = doc['senderAvatar'];
+            final learn = doc['learn'] ?? '';
+            final status = doc['status'] ?? 'pending';
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundImage: senderAvatar != null ? NetworkImage(senderAvatar) : null,
+                  child: senderAvatar == null ? Text(senderName[0], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)) : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        senderName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Builder(
+                        builder: (context) {
+                          // Use the skills stored in the swap request document
+                          final skillsOffered = doc['senderSkillsOffered'] ?? 'various skills';
+                          final skillsWanted = doc['senderSkillsWanted'] ?? 'various skills';
+                          
+                          // Get date and time information
+                          String dateTimeInfo = '';
+                          final date = doc['date'];
+                          final time = doc['time'];
+                          
+                          if (date != null && time != null) {
+                            if (date is Timestamp) {
+                              final dateTime = date.toDate();
+                              final formattedDate = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+                              dateTimeInfo = ' • $formattedDate at $time';
+                            }
+                          }
+                          
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '$senderName wants to learn $learn and is good at $skillsOffered',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              if (dateTimeInfo.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    dateTimeInfo.replaceFirst(' • ', ''),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'Poppins',
+                                      color: Color(0xFFF7931A),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          if (status == 'declined')
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBDBDBD),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text('Declined', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                            )
+                          else if (status == 'accepted')
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CAF50),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                            )
+                          else ...[
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF19A7CE),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                              ),
+                              onPressed: () async {
+                                await FirebaseFirestore.instance.collection('swapRequests').doc(doc.id).update({'status': 'declined'});
+                              },
+                              child: const Text('Decline', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                            ),
+                            const SizedBox(width: 12),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFF7931A),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                              ),
+                              onPressed: () async {
+                                try {
+                                  // Get the swap request data
+                                  final date = doc['date'];
+                                  final time = doc['time'];
+                                  final platform = doc['platform'];
+                                  final skillToLearn = doc['learn'];
+                                  
+                                  if (date != null && time != null && platform != null && skillToLearn != null) {
+                                    // Format the date and time
+                                    String meetingDate = '';
+                                    String meetingTime = '';
+                                    
+                                    if (date is Timestamp) {
+                                      final dateTime = date.toDate();
+                                      meetingDate = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+                                    }
+                                    meetingTime = time.toString();
+                                    
+                                    // Send confirmation emails
+                                    // Get user data for email
+                                    final requesterDoc = await FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(doc['requesterId'])
+                                        .get();
+                                    final receiverDoc = await FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(doc['receiverId'])
+                                        .get();
+                                    
+                                    final requesterData = requesterDoc.data();
+                                    final receiverData = receiverDoc.data();
+                                    
+                                    if (requesterData != null && receiverData != null) {
+                                      await EmailService.sendSwapConfirmationEmail(
+                                        requesterEmail: requesterData['email'] ?? '',
+                                        receiverEmail: receiverData['email'] ?? '',
+                                        requesterName: requesterData['name'] ?? 'User',
+                                        receiverName: receiverData['name'] ?? 'User',
+                                        requesterLocation: requesterData['location'] ?? 'Not specified',
+                                        receiverLocation: receiverData['location'] ?? 'Not specified',
+                                        meetingDate: meetingDate,
+                                        meetingTime: meetingTime,
+                                        platform: platform == 'google_meet' ? 'Google Meet' : 'Zoom',
+                                        skillToLearn: skillToLearn,
+                                      );
+                                    }
+                                  }
+                                  
+                                  // Show confirmation dialog
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Swap Accepted!'),
+                                      content: const Text('Confirmation emails sent to both parties.'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } catch (error) {
+                                  print('Error accepting swap: $error');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error accepting swap: $error'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text('Accept', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Build Swap Sent Tab
+  Widget _buildSwapSentTab(String currentUserId) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('swapRequests')
+          .where('requesterId', isEqualTo: currentUserId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No swaps sent yet.'));
+        }
+        
+        final requests = snapshot.data!.docs.where((doc) {
+          final learn = (doc['learn'] ?? '').toString().toLowerCase();
+          return learn.contains(_search);
+        }).toList();
+        
+        if (requests.isEmpty) {
+          return const Center(child: Text('No swaps match your search.'));
+        }
+        return ListView.separated(
+          itemCount: requests.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 18),
+          itemBuilder: (context, i) {
+            final doc = requests[i];
+            final receiverId = doc['receiverId'] ?? '';
+            final learn = doc['learn'] ?? '';
+            final status = doc['status'] ?? 'pending';
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance.collection('users').doc(receiverId).get(),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
+                }
+                
+                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                  return const SizedBox(height: 100, child: Center(child: Text('User not found')));
+                }
+                
+                final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+                final receiverName = userData?['name'] ?? 'Unknown';
+                final receiverAvatar = userData?['avatarUrl'];
+                
+                return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundImage: receiverAvatar != null ? NetworkImage(receiverAvatar) : null,
+                  child: receiverAvatar == null ? Text(receiverName[0], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)) : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        receiverName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Builder(
+                        builder: (context) {
+                          // Get date and time information
+                          String dateTimeInfo = '';
+                          final date = doc['date'];
+                          final time = doc['time'];
+                          
+                          if (date != null && time != null) {
+                            if (date is Timestamp) {
+                              final dateTime = date.toDate();
+                              final formattedDate = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+                              dateTimeInfo = ' • $formattedDate at $time';
+                            }
+                          }
+                          
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'You want to learn $learn from $receiverName',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              if (dateTimeInfo.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    dateTimeInfo.replaceFirst(' • ', ''),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'Poppins',
+                                      color: Color(0xFFF7931A),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          if (status == 'declined')
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFBDBDBD),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text('Rejected', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                            )
+                          else if (status == 'accepted')
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CAF50),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF7931A),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text('Pending', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Temporary method to update existing swap requests with sender skills
+  Future<void> _updateExistingSwapRequests() async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Updating existing swap requests...'),
+            ],
+          ),
+        ),
+      );
+
+      // Get all swap requests
+      final swapRequestsSnapshot = await FirebaseFirestore.instance
+          .collection('swapRequests')
+          .get();
+
+      int updatedCount = 0;
+      int totalCount = swapRequestsSnapshot.docs.length;
+
+      for (final doc in swapRequestsSnapshot.docs) {
+        final data = doc.data();
+        final requesterId = data['requesterId'] as String?;
+        
+        if (requesterId != null) {
+          bool needsUpdate = false;
+          Map<String, dynamic> updateData = {};
+
+          // Check if the document needs skills update
+          if (!data.containsKey('senderSkillsOffered') || !data.containsKey('senderSkillsWanted')) {
+            // Fetch the requester's user data
+            final userDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(requesterId)
+                .get();
+
+            if (userDoc.exists) {
+              final userData = userDoc.data()!;
+              final skillsOffered = List<String>.from(userData['skillsOffered'] ?? []);
+              final skillsWanted = List<String>.from(userData['skillsWanted'] ?? []);
+              
+              // Convert skills to readable format
+              final skillsOfferedText = skillsOffered.isNotEmpty ? skillsOffered.join(', ') : 'various skills';
+              final skillsWantedText = skillsWanted.isNotEmpty ? skillsWanted.join(', ') : 'various skills';
+
+              updateData['senderSkillsOffered'] = skillsOfferedText;
+              updateData['senderSkillsWanted'] = skillsWantedText;
+              needsUpdate = true;
+            }
+          }
+
+          // Check if the document needs date/time update
+          if (!data.containsKey('date') || !data.containsKey('time')) {
+            // Add sample date and time (tomorrow at 2 PM)
+            final tomorrow = DateTime.now().add(const Duration(days: 1));
+            final sampleTime = '14:00'; // 2 PM
+            
+            updateData['date'] = Timestamp.fromDate(tomorrow);
+            updateData['time'] = sampleTime;
+            needsUpdate = true;
+          }
+
+          // Update the swap request document if needed
+          if (needsUpdate) {
+            await FirebaseFirestore.instance
+                .collection('swapRequests')
+                .doc(doc.id)
+                .update(updateData);
+
+            updatedCount++;
+          }
+        }
+      }
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Updated $updatedCount out of $totalCount swap requests with sender skills and date/time!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+    } catch (error) {
+      // Close loading dialog if it's still open
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating swap requests: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 } 
