@@ -64,12 +64,6 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          // Temporary button to update existing swap requests with skills
-          IconButton(
-            icon: const Icon(Icons.update, color: Colors.orange),
-            onPressed: () => _updateExistingSwapRequests(),
-            tooltip: 'Update existing swap requests with skills',
-          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: Stack(
@@ -637,110 +631,5 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
     );
   }
 
-  // Temporary method to update existing swap requests with sender skills
-  Future<void> _updateExistingSwapRequests() async {
-    try {
-      // Show loading dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Updating existing swap requests...'),
-            ],
-          ),
-        ),
-      );
 
-      // Get all swap requests
-      final swapRequestsSnapshot = await FirebaseFirestore.instance
-          .collection('swapRequests')
-          .get();
-
-      int updatedCount = 0;
-      int totalCount = swapRequestsSnapshot.docs.length;
-
-      for (final doc in swapRequestsSnapshot.docs) {
-        final data = doc.data();
-        final requesterId = data['requesterId'] as String?;
-        
-        if (requesterId != null) {
-          bool needsUpdate = false;
-          Map<String, dynamic> updateData = {};
-
-          // Check if the document needs skills update
-          if (!data.containsKey('senderSkillsOffered') || !data.containsKey('senderSkillsWanted')) {
-            // Fetch the requester's user data
-            final userDoc = await FirebaseFirestore.instance
-                .collection('users')
-                .doc(requesterId)
-                .get();
-
-            if (userDoc.exists) {
-              final userData = userDoc.data()!;
-              final skillsOffered = List<String>.from(userData['skillsOffered'] ?? []);
-              final skillsWanted = List<String>.from(userData['skillsWanted'] ?? []);
-              
-              // Convert skills to readable format
-              final skillsOfferedText = skillsOffered.isNotEmpty ? skillsOffered.join(', ') : 'various skills';
-              final skillsWantedText = skillsWanted.isNotEmpty ? skillsWanted.join(', ') : 'various skills';
-
-              updateData['senderSkillsOffered'] = skillsOfferedText;
-              updateData['senderSkillsWanted'] = skillsWantedText;
-              needsUpdate = true;
-            }
-          }
-
-          // Check if the document needs date/time update
-          if (!data.containsKey('date') || !data.containsKey('time')) {
-            // Add sample date and time (tomorrow at 2 PM)
-            final tomorrow = DateTime.now().add(const Duration(days: 1));
-            final sampleTime = '14:00'; // 2 PM
-            
-            updateData['date'] = Timestamp.fromDate(tomorrow);
-            updateData['time'] = sampleTime;
-            needsUpdate = true;
-          }
-
-          // Update the swap request document if needed
-          if (needsUpdate) {
-            await FirebaseFirestore.instance
-                .collection('swapRequests')
-                .doc(doc.id)
-                .update(updateData);
-
-            updatedCount++;
-          }
-        }
-      }
-
-      // Close loading dialog
-      Navigator.of(context).pop();
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Updated $updatedCount out of $totalCount swap requests with sender skills and date/time!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-    } catch (error) {
-      // Close loading dialog if it's still open
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating swap requests: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
 } 
