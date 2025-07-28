@@ -381,20 +381,32 @@ class SwapRepository {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // Fetch sender's name and avatar
+    // Fetch sender's name, avatar, and skills
     final userDoc = await _firestore.collection('users').doc(user.uid).get();
     final userData = userDoc.data();
     final senderName = userData?['name'] ?? 'Unknown';
     final senderAvatar = userData?['avatarUrl'];
+    
+    // Get sender's skills
+    final skillsOffered = List<String>.from(userData?['skillsOffered'] ?? []);
+    final skillsWanted = List<String>.from(userData?['skillsWanted'] ?? []);
+    
+    // Convert skills to readable format
+    final skillsOfferedText = skillsOffered.isNotEmpty ? skillsOffered.join(', ') : 'various skills';
+    final skillsWantedText = skillsWanted.isNotEmpty ? skillsWanted.join(', ') : 'various skills';
 
     print('Debug: receiverId = $receiverId');
     print('Debug: requesterId (current user) = ${user.uid}');
+    print('Debug: sender skills offered = $skillsOfferedText');
+    print('Debug: sender skills wanted = $skillsWantedText');
 
     await _firestore.collection('swapRequests').add({
       'receiverId': receiverId,
       'requesterId': user.uid,
       'senderName': senderName,
       'senderAvatar': senderAvatar,
+      'senderSkillsOffered': skillsOfferedText,
+      'senderSkillsWanted': skillsWantedText,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
       if (platform != null) 'platform': platform,
