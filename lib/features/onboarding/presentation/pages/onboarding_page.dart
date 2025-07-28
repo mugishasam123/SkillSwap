@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/theme_switch.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -49,7 +50,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     final page = _pages[_currentPage];
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: Container(
@@ -57,8 +57,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
             padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
             child: Column(
               children: [
-                const SizedBox(height: 32),
-                Image.asset('assets/images/logo.png', height: 250),
+                const SizedBox(height: 16),
+                Image.asset('assets/images/logo.png', height: 200),
                 const SizedBox(height: 4),
                 // const Text(
                 //   'Learn. Teach. Thrive.',
@@ -80,23 +80,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     itemBuilder: (context, index) {
                       final page = _pages[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
+                        padding: const EdgeInsets.all(24),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const SizedBox(height: 16),
-                            Image.asset(
-                              page.imageAsset,
-                              height: 260,
-                              fit: BoxFit.contain,
-                            ),
+                            Image.asset(page.imageAsset, height: 200),
                             const SizedBox(height: 32),
                             Text(
                               page.title,
                               style: const TextStyle(
-                                fontSize: 26,
+                                fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF333333),
+                                color: Color(0xFF225B4B),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -105,8 +100,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               page.description,
                               style: const TextStyle(
                                 fontSize: 16,
-                                color: Color(0xFF444444),
-                                fontWeight: FontWeight.w400,
+                                color: Colors.grey,
+                                height: 1.5,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -116,47 +111,46 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 0, bottom: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(_pages.length, (index) => GestureDetector(
-                      onTap: () {
-                        _pageController.animateToPage(
-                          index,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: _buildDot(index),
-                    )),
+                const SizedBox(height: 24),
+                // Dot indicators
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _pages.length,
+                    (index) => _buildDot(index),
                   ),
                 ),
+                const SizedBox(height: 24),
+                // Navigation buttons
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
                     children: [
-                      TextButton(
-                        onPressed: _skip,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.grey,
-                          textStyle: const TextStyle(fontSize: 18),
+                      if (_currentPage != _pages.length - 1)
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: _skip,
+                              child: const Text('Skip', style: TextStyle(color: Colors.grey)),
+                            ),
+                            const Spacer(),
+                            ElevatedButton(
+                              onPressed: _nextPage,
+                              child: const Icon(Icons.arrow_forward, color: Colors.white),
+                            ),
+                          ],
                         ),
-                        child: const Text('Skip'),
-                      ),
-                      ElevatedButton(
-                        onPressed: _nextPage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF225B4B),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
+                      if (_currentPage == _pages.length - 1)
+                        ElevatedButton(
+                          onPressed: _goToAuth,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF225B4B),
+                            padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+                          child: const Text('Get started',
+                            style: TextStyle(fontSize: 18, color: Colors.white)),
                         ),
-                        child: Text(_currentPage == _pages.length - 1 ? 'Get started' : 'Next',
-                          style: const TextStyle(fontSize: 18, color: Colors.white)),
-                      ),
                     ],
                   ),
                 ),

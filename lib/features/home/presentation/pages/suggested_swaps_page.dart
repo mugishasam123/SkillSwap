@@ -164,7 +164,9 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
-                  color: Color(0xFF121717),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Color(0xFF121717),
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -207,7 +209,9 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
-                  color: Color(0xFF121717),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Color(0xFF121717),
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -257,7 +261,12 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                 SizedBox(height: 16),
                 Text(
                   'Error loading new swaps',
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 16, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400]
+                        : Colors.grey[600]
+                  ),
                 ),
               ],
             ),
@@ -278,7 +287,12 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                 SizedBox(height: 16),
                 Text(
                   'No new swaps available',
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 16, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400]
+                        : Colors.grey[600]
+                  ),
                 ),
               ],
             ),
@@ -300,11 +314,15 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF2A2A2A)
+            : Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -322,9 +340,12 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
               const SizedBox(height: 8),
               Text(
                 swap.userName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Colors.black,
                 ),
               ),
             ],
@@ -338,9 +359,11 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
               children: [
                 Text(
                   '${swap.userName} is good at ${_formatSkill(swap.skillOffered)}, and ${swap.userName} wants to learn ${_formatSkill(swap.skillWanted)}.',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white 
+                        : Colors.black87,
                     height: 1.4,
                   ),
                 ),
@@ -355,7 +378,9 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey[100],
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[800]
+                            : Colors.grey[100],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -376,11 +401,15 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                                 },
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
-                                    color: Colors.grey[300],
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey[700]
+                                        : Colors.grey[300],
                                     child: Icon(
                                       Icons.image_not_supported,
                                       size: 30,
-                                      color: Colors.grey[600],
+                                      color: Theme.of(context).brightness == Brightness.dark 
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
                                     ),
                                   );
                                 },
@@ -390,11 +419,15 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
-                                    color: Colors.grey[300],
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey[700]
+                                        : Colors.grey[300],
                                     child: Icon(
                                       Icons.image_not_supported,
                                       size: 30,
-                                      color: Colors.grey[600],
+                                      color: Theme.of(context).brightness == Brightness.dark 
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
                                     ),
                                   );
                                 },
@@ -497,11 +530,15 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? const Color(0xFF2A2A2A)
+                  : Colors.white,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.black.withOpacity(0.08),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -519,7 +556,9 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                         topLeft: Radius.circular(12),
                         topRight: Radius.circular(12),
                       ),
-                      color: Colors.grey[100],
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.grey[800]
+                          : Colors.grey[100],
                     ),
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
@@ -531,11 +570,15 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: Colors.grey[300],
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey[700]
+                                : Colors.grey[300],
                             child: Icon(
                               Icons.image_not_supported,
                               size: 30,
-                              color: Colors.grey[600],
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                             ),
                           );
                         },
@@ -549,10 +592,12 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       skill['title']!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white 
+                            : Colors.black87,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -607,16 +652,21 @@ class _SwapDetailsDialog extends StatelessWidget {
                     children: [
                       Text(
                         swap.userName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white 
+                              : Colors.black,
                         ),
                       ),
                       Text(
                         swap.location.isNotEmpty ? swap.location : 'Location not specified',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.grey[400]
+                              : Colors.grey[600],
                         ),
                       ),
                     ],
@@ -661,7 +711,9 @@ class _SwapDetailsDialog extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white
+                      : Colors.grey[800],
                 ),
               ),
               const SizedBox(height: 8),
@@ -672,7 +724,9 @@ class _SwapDetailsDialog extends StatelessWidget {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[100],
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[800]
+                        : Colors.grey[100],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -693,11 +747,15 @@ class _SwapDetailsDialog extends StatelessWidget {
                             },
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                color: Colors.grey[300],
+                                color: Theme.of(context).brightness == Brightness.dark 
+                                    ? Colors.grey[700]
+                                    : Colors.grey[300],
                                 child: Icon(
                                   Icons.image_not_supported,
                                   size: 50,
-                                  color: Colors.grey[600],
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
                                 ),
                               );
                             },
@@ -707,11 +765,15 @@ class _SwapDetailsDialog extends StatelessWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                color: Colors.grey[300],
+                                color: Theme.of(context).brightness == Brightness.dark 
+                                    ? Colors.grey[700]
+                                    : Colors.grey[300],
                                 child: Icon(
                                   Icons.image_not_supported,
                                   size: 50,
-                                  color: Colors.grey[600],
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
                                 ),
                               );
                             },
@@ -727,7 +789,9 @@ class _SwapDetailsDialog extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white
+                      : Colors.grey[800],
                 ),
               ),
               const SizedBox(height: 8),
@@ -735,7 +799,9 @@ class _SwapDetailsDialog extends StatelessWidget {
                 swap.description,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[700],
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[300]
+                      : Colors.grey[700],
                   height: 1.4,
                 ),
               ),
@@ -747,7 +813,9 @@ class _SwapDetailsDialog extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white
+                      : Colors.grey[800],
                 ),
               ),
               const SizedBox(height: 8),
@@ -756,26 +824,55 @@ class _SwapDetailsDialog extends StatelessWidget {
                 runSpacing: 8,
                 children: swap.tags.map((tag) => Chip(
                   label: Text(tag),
-                  backgroundColor: Colors.grey[200],
-                  labelStyle: TextStyle(fontSize: 12),
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[700]
+                      : Colors.grey[200],
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white
+                        : Colors.black,
+                  ),
                 )).toList(),
               ),
               const SizedBox(height: 16),
             ],
             Row(
               children: [
-                Icon(Icons.remove_red_eye, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.remove_red_eye, 
+                  size: 16, 
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : Colors.grey[600]
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${swap.views} views',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400]
+                        : Colors.grey[600]
+                  ),
                 ),
                 const SizedBox(width: 16),
-                Icon(Icons.handshake, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.handshake, 
+                  size: 16, 
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : Colors.grey[600]
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${swap.requests} requests',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400]
+                        : Colors.grey[600]
+                  ),
                 ),
               ],
             ),
@@ -915,14 +1012,19 @@ class _DetailRow extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : Colors.grey[600],
                 ),
               ),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white
+                      : Colors.black,
                 ),
               ),
             ],

@@ -7,6 +7,7 @@ import '../../data/profile_repository.dart';
 import '../../models/user_profile.dart';
 import 'edit_profile_page.dart';
 import '../../../swap/presentation/pages/swap_library_page.dart';
+import '../../../../core/widgets/theme_switch.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -23,153 +24,157 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: StreamBuilder<UserProfile?>(
-          stream: _repository.getCurrentUserProfile(),
-          builder: (context, snapshot) {
-            try {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+                stream: _repository.getCurrentUserProfile(),
+                builder: (context, snapshot) {
+                  try {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error loading profile',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Error loading profile',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${snapshot.error}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () => setState(() {}),
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    final userProfile = snapshot.data;
+                    if (userProfile == null) {
+                      return const Center(
+                        child: Text('Profile not found'),
+                      );
+                    }
+
+                    return Container(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                          // Header with back button
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back, size: 28),
+                                onPressed: () {
+                                  if (widget.onBackToHome != null) {
+                                    widget.onBackToHome!();
+                                  } else {
+                                    // Fallback to home navigation
+                                    Navigator.of(context).pushReplacementNamed('/home');
+                                  }
+                                },
+                              ),
+                              const Spacer(),
+                              Text(
+                                'Your Profile',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 24),
+                                onPressed: () => _navigateToEditProfile(userProfile),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Profile Picture and Basic Info
+                          _buildProfileSection(userProfile),
+                          const SizedBox(height: 24),
+
+                          // Key Information Block
+                          _buildKeyInfoSection(userProfile),
+                          const SizedBox(height: 24),
+
+                          // Skill Library Section
+                          _buildSkillLibrarySection(userProfile),
+                          const SizedBox(height: 24),
+
+                          // Reviews Section
+                          _buildReviewsSection(userProfile),
+                          const SizedBox(height: 32),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${snapshot.error}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => setState(() {}),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            final userProfile = snapshot.data;
-            if (userProfile == null) {
-              return const Center(
-                child: Text('Profile not found'),
-              );
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header with back button
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, size: 28),
-                        onPressed: () {
-                          if (widget.onBackToHome != null) {
-                            widget.onBackToHome!();
-                          } else {
-                            // Fallback to home navigation
-                            Navigator.of(context).pushReplacementNamed('/home');
-                          }
-                        },
-                      ),
-                      const Spacer(),
-                      const Text(
-                        'Your Profile',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                    );
+                  } catch (e) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Something went wrong',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Error: $e',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => setState(() {}),
+                              child: const Text('Retry'),
+                            ),
+                          ],
                         ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 24),
-                        onPressed: () => _navigateToEditProfile(userProfile),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Profile Picture and Basic Info
-                  _buildProfileSection(userProfile),
-                  const SizedBox(height: 24),
-
-                  // Key Information Block
-                  _buildKeyInfoSection(userProfile),
-                  const SizedBox(height: 24),
-
-                  // Skill Library Section
-                  _buildSkillLibrarySection(userProfile),
-                  const SizedBox(height: 24),
-
-                  // Reviews Section
-                  _buildReviewsSection(userProfile),
-                  const SizedBox(height: 32),
-                ],
+                    );
+                  }
+                },
               ),
-            );
-          } catch (e) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Something went wrong',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Error: $e',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => setState(() {}),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-          },
-        ),
       ),
     );
   }
@@ -211,10 +216,12 @@ class _ProfilePageState extends State<ProfilePage> {
         // Name
         Text(
           userProfile.name,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF225B4B),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF3E8E7E)
+                : const Color(0xFF225B4B),
           ),
         ),
         const SizedBox(height: 4),
@@ -222,9 +229,11 @@ class _ProfilePageState extends State<ProfilePage> {
         // Username
         Text(
           userProfile.username != null ? '@${userProfile.username}' : '@${userProfile.name.toLowerCase().replaceAll(' ', '')}',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
-            color: Colors.grey,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white70
+                : Colors.grey,
           ),
         ),
         const SizedBox(height: 16),
@@ -233,27 +242,33 @@ class _ProfilePageState extends State<ProfilePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.swap_horiz,
-              color: Colors.black,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
               size: 24,
             ),
             const SizedBox(width: 8),
             Text(
               '${userProfile.swapScore}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
               ),
             ),
           ],
         ),
-        const Text(
+        Text(
           'Swap Score',
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white70
+                : Colors.grey,
           ),
         ),
       ],
@@ -265,7 +280,9 @@ class _ProfilePageState extends State<ProfilePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF225B4B),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF3E8E7E)
+            : const Color(0xFF225B4B),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -350,12 +367,14 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Your Skill Library',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
           ),
         ),
         const SizedBox(height: 20),
@@ -421,14 +440,24 @@ class _ProfilePageState extends State<ProfilePage> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? color.withValues(alpha: 0.2)
+                  : color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? color.withValues(alpha: 0.5)
+                    : color.withValues(alpha: 0.3),
+              ),
             ),
             child: Text(
               'No ${title.toLowerCase()} yet. Tap the + button to add!',
               textAlign: TextAlign.center,
-              style: TextStyle(color: color.withValues(alpha: 0.7)),
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? color.withValues(alpha: 0.9)
+                    : color.withValues(alpha: 0.7),
+              ),
             ),
           )
         else
@@ -474,12 +503,14 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Reviews',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
           ),
         ),
         const SizedBox(height: 16),
@@ -488,13 +519,19 @@ class _ProfilePageState extends State<ProfilePage> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1E1E1E)
+                  : Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
+            child: Text(
               'No reviews yet. Start swapping to get reviews!',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white70
+                    : Colors.grey,
+              ),
             ),
           )
         else
@@ -505,26 +542,36 @@ class _ProfilePageState extends State<ProfilePage> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF1E1E1E)
+                      : Colors.grey[50],
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[700]!
+                        : Colors.grey[200]!,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       review['reviewText'] ?? '',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white70
+                            : Colors.grey,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       '- ${review['reviewerName'] ?? 'Anonymous'}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white60
+                            : Colors.grey,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

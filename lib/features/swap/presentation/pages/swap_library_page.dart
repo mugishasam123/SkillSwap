@@ -56,11 +56,21 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF121212)
+            : Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back, 
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
@@ -69,7 +79,12 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
             child: Stack(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.notifications_none, color: Colors.black),
+                  icon: Icon(
+                    Icons.notifications_none, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white 
+                        : Colors.black
+                  ),
                   onPressed: () {},
                 ),
                 Positioned(
@@ -89,29 +104,32 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           ),
         ],
       ),
-      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Swap Library',
               style: TextStyle(
-                color: Colors.black,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
                 fontFamily: 'Poppins',
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Who has sent you a Swap?',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF222222),
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : const Color(0xFF222222),
                 fontFamily: 'Poppins',
               ),
             ),
@@ -122,13 +140,17 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                 width: MediaQuery.of(context).size.width * 0.7, // Reduced width to 70%
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? const Color(0xFF2A2A2A)
+                      : Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   labelColor: Colors.white,
-                  unselectedLabelColor: const Color(0xFF617D8A),
+                  unselectedLabelColor: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : const Color(0xFF617D8A),
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Poppins',
@@ -140,7 +162,9 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                     fontSize: 14,
                   ),
                   indicator: BoxDecoration(
-                    color: const Color(0xFF225B4B),
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF3E8E7E)
+                        : const Color(0xFF225B4B),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
@@ -159,11 +183,23 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
             ),
             const SizedBox(height: 16),
             TextField(
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
+              ),
               decoration: InputDecoration(
                 hintText: 'Search here',
-                hintStyle: const TextStyle(color: Color(0xFFBDBDBD), fontFamily: 'Poppins'),
+                hintStyle: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : const Color(0xFFBDBDBD), 
+                  fontFamily: 'Poppins'
+                ),
                 filled: true,
-                fillColor: const Color(0xFFF5F5F5),
+                fillColor: Theme.of(context).brightness == Brightness.dark 
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF5F5F5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -190,17 +226,21 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF1E1E1E)
+              : Colors.white,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
           boxShadow: [
             BoxShadow(
-              color: Color(0x11000000),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF000000)
+                  : const Color(0x11000000),
               blurRadius: 8,
-              offset: Offset(0, -2),
+              offset: const Offset(0, -2),
             ),
           ],
         ),
@@ -210,8 +250,12 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           elevation: 0,
           currentIndex: _selectedIndex,
           onTap: _onTabTapped,
-          selectedItemColor: const Color(0xFF225B4B),
-          unselectedItemColor: Colors.black,
+          selectedItemColor: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF3E8E7E)
+              : const Color(0xFF225B4B),
+          unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white70
+              : Colors.black,
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
           items: const [
@@ -254,7 +298,16 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No swaps received yet.'));
+          return Center(
+            child: Text(
+              'No swaps received yet.',
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey[600],
+              ),
+            ),
+          );
         }
         final requests = snapshot.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>?;
@@ -264,7 +317,16 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           return senderName.contains(_search) || learn.contains(_search);
         }).toList();
         if (requests.isEmpty) {
-          return const Center(child: Text('No swaps match your search.'));
+          return Center(
+            child: Text(
+              'No swaps match your search.',
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey[600],
+              ),
+            ),
+          );
         }
         return ListView.separated(
           itemCount: requests.length,
@@ -285,7 +347,14 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                 CircleAvatar(
                   radius: 28,
                   backgroundImage: senderAvatar != null ? NetworkImage(senderAvatar) : null,
-                  child: senderAvatar == null ? Text(senderName[0], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)) : null,
+                  child: senderAvatar == null ? Text(
+                    senderName[0], 
+                    style: TextStyle(
+                      fontSize: 24, 
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    )
+                  ) : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -294,10 +363,13 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                     children: [
                       Text(
                         senderName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                           fontFamily: 'Poppins',
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white 
+                              : Colors.black,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -325,9 +397,12 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                             children: [
                               Text(
                                 '$senderName wants to learn $learn and is good at $skillsOffered',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontFamily: 'Poppins',
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey[300]
+                                      : Colors.grey[600],
                                 ),
                               ),
                               if (dateTimeInfo.isNotEmpty)
@@ -335,10 +410,12 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                   padding: const EdgeInsets.only(top: 4),
                                   child: Text(
                                     dateTimeInfo.replaceFirst(' • ', ''),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontFamily: 'Poppins',
-                                      color: Color(0xFFF7931A),
+                                      color: Theme.of(context).brightness == Brightness.dark 
+                                          ? const Color(0xFFFFB74D)
+                                          : const Color(0xFFF7931A),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -494,7 +571,16 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No swaps sent yet.'));
+          return Center(
+            child: Text(
+              'No swaps sent yet.',
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey[600],
+              ),
+            ),
+          );
         }
         
         final requests = snapshot.data!.docs.where((doc) {
@@ -505,8 +591,18 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
         }).toList();
         
         if (requests.isEmpty) {
-          return const Center(child: Text('No swaps match your search.'));
+          return Center(
+            child: Text(
+              'No swaps match your search.',
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey[600],
+              ),
+            ),
+          );
         }
+        
         return ListView.separated(
           itemCount: requests.length,
           separatorBuilder: (_, __) => const SizedBox(height: 18),
@@ -527,7 +623,7 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                 }
                 
                 if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                  return const SizedBox(height: 100, child: Center(child: Text('User not found')));
+                  return const SizedBox.shrink(); // Hide this item instead of showing "User not found"
                 }
                 
                 final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
@@ -535,106 +631,121 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                 final receiverAvatar = userData?['avatarUrl'];
                 
                 return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundImage: receiverAvatar != null ? NetworkImage(receiverAvatar) : null,
-                  child: receiverAvatar == null ? Text(receiverName[0], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)) : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        receiverName,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundImage: receiverAvatar != null ? NetworkImage(receiverAvatar) : null,
+                      child: receiverAvatar == null ? Text(
+                        receiverName[0], 
                         style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Builder(
-                        builder: (context) {
-                          // Get date and time information
-                          String dateTimeInfo = '';
-                          final date = data['date'];
-                          final time = data['time'];
-                          
-                          if (date != null && time != null) {
-                            if (date is Timestamp) {
-                              final dateTime = date.toDate();
-                              final formattedDate = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-                              dateTimeInfo = ' • $formattedDate at $time';
-                            }
-                          }
-                          
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'You want to learn $learn from $receiverName',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                              if (dateTimeInfo.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    dateTimeInfo.replaceFirst(' • ', ''),
-                                    style: const TextStyle(
-                                      fontSize: 12,
+                          fontSize: 24, 
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        )
+                      ) : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            receiverName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.white 
+                                  : Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Builder(
+                            builder: (context) {
+                              // Get date and time information
+                              String dateTimeInfo = '';
+                              final date = data['date'];
+                              final time = data['time'];
+                              
+                              if (date != null && time != null) {
+                                if (date is Timestamp) {
+                                  final dateTime = date.toDate();
+                                  final formattedDate = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+                                  dateTimeInfo = ' • $formattedDate at $time';
+                                }
+                              }
+                              
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'You want to learn $learn from $receiverName',
+                                    style: TextStyle(
+                                      fontSize: 14,
                                       fontFamily: 'Poppins',
-                                      color: Color(0xFFF7931A),
-                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).brightness == Brightness.dark 
+                                          ? Colors.grey[300]
+                                          : Colors.grey[600],
                                     ),
                                   ),
+                                  if (dateTimeInfo.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        dateTimeInfo.replaceFirst(' • ', ''),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontFamily: 'Poppins',
+                                          color: Theme.of(context).brightness == Brightness.dark 
+                                              ? const Color(0xFFFFB74D)
+                                              : const Color(0xFFF7931A),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              if (status == 'declined')
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFBDBDBD),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Text('Rejected', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                                )
+                              else if (status == 'accepted')
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF4CAF50),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF7931A),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Text('Pending', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
                                 ),
                             ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (status == 'declined')
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBDBDBD),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text('Rejected', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                            )
-                          else if (status == 'accepted')
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF4CAF50),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                            )
-                          else
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF7931A),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text('Pending', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                            ),
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            );
+                    ),
+                  ],
+                );
               },
             );
           },
@@ -642,6 +753,4 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
       },
     );
   }
-
-
-} 
+}

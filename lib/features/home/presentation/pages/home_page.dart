@@ -5,6 +5,7 @@ import '../../../forum/presentation/pages/forum_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import 'all_swaps_page.dart';
 import 'suggested_swaps_page.dart';
+import '../../../../core/widgets/theme_switch.dart';
 
 class HomePage extends StatefulWidget {
   final Map<String, dynamic>? arguments;
@@ -43,79 +44,7 @@ class _HomePageState extends State<HomePage> {
   List<Widget> _pagesBuilder(Function(int) onTabChange) => [
     Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            top: 24,
-            left: 20,
-            right: 20,
-            bottom: 8,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              // Search icon in white circle with shadow
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.search, color: Colors.black, size: 24),
-                  onPressed: () {},
-                  tooltip: 'Search',
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Notification icon with badge
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.notifications_none,
-                        color: Colors.black,
-                        size: 24,
-                      ),
-                      onPressed: () {},
-                      tooltip: 'Notifications',
-                    ),
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        const SizedBox(height: 24),
         Expanded(child: Builder(
           builder: (context) {
             print('DEBUG: Home page - Passing filterSkill to HomeTabs: ${widget.arguments?['filterSkill']}');
@@ -136,9 +65,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final pages = _pagesBuilder((i) => setState(() => _selectedIndex = i));
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),
         ),
@@ -149,7 +78,8 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
+              const ThemeSwitch(),
+              const SizedBox(height: 8),
               if (_selectedIndex != 1 && _selectedIndex != 3)
                 const SizedBox(height: 16),
               Expanded(child: pages[_selectedIndex]),
@@ -158,17 +88,21 @@ class _HomePageState extends State<HomePage> {
         ),
         floatingActionButton: null,
         bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF1E1E1E)
+                : Colors.white,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
             boxShadow: [
               BoxShadow(
-                color: Color(0x11000000),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF000000)
+                    : const Color(0x11000000),
                 blurRadius: 8,
-                offset: Offset(0, -2),
+                offset: const Offset(0, -2),
               ),
             ],
           ),
@@ -178,8 +112,12 @@ class _HomePageState extends State<HomePage> {
             elevation: 0,
             currentIndex: _selectedIndex,
             onTap: (i) => setState(() => _selectedIndex = i),
-            selectedItemColor: const Color(0xFF225B4B),
-            unselectedItemColor: Colors.black,
+            selectedItemColor: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF3E8E7E)
+                : const Color(0xFF225B4B),
+            unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white70
+                : Colors.black,
             showUnselectedLabels: true,
             selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
             items: const [
@@ -264,7 +202,9 @@ class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey[800]
+                : Colors.grey[100],
             borderRadius: BorderRadius.circular(12),
           ),
           child: TabBar(

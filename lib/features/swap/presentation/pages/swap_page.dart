@@ -65,12 +65,22 @@ class _SwapPageState extends State<SwapPage> {
     const Color meetTextGrey = Color(0xFF5F6368);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF121212)
+            : Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black, size: 22),
+          icon: Icon(
+            Icons.arrow_back, 
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black, 
+            size: 22
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: null,
@@ -81,7 +91,13 @@ class _SwapPageState extends State<SwapPage> {
             child: Stack(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.notifications_none, color: Colors.black, size: 22),
+                  icon: Icon(
+                    Icons.notifications_none, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white 
+                        : Colors.black, 
+                    size: 22
+                  ),
                   onPressed: () {},
                 ),
                 Positioned(
@@ -107,41 +123,55 @@ class _SwapPageState extends State<SwapPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.only(left: 0, bottom: 10),
+            Padding(
+              padding: const EdgeInsets.only(left: 0, bottom: 10),
               child: Text(
                 'Send a Swap',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Colors.black,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
                 ),
               ),
             ),
-            const Text(
+            Text(
               'What would you like to learn?',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: textBlack,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : textBlack,
                 fontFamily: 'Poppins',
               ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _learnController,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
                 fontFamily: 'Poppins',
-                color: textBlack,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : textBlack,
               ),
               decoration: InputDecoration(
                 hintText: 'Type here',
-                hintStyle: const TextStyle(color: textGrey, fontSize: 15, fontFamily: 'Poppins'),
+                hintStyle: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : textGrey, 
+                  fontSize: 15, 
+                  fontFamily: 'Poppins'
+                ),
                 filled: true,
-                fillColor: lightGrey,
+                fillColor: Theme.of(context).brightness == Brightness.dark 
+                    ? const Color(0xFF2A2A2A)
+                    : lightGrey,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -164,24 +194,42 @@ class _SwapPageState extends State<SwapPage> {
               spacing: 8,
               runSpacing: 4,
               children: _learnSkills.map((skill) => Chip(
-                label: Text(skill, style: const TextStyle(fontFamily: 'Poppins')),
-                deleteIcon: const Icon(Icons.close, size: 18),
+                label: Text(
+                  skill, 
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white 
+                        : Colors.black,
+                  )
+                ),
+                deleteIcon: Icon(
+                  Icons.close, 
+                  size: 18,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Colors.black,
+                ),
                 onDeleted: () {
                   setState(() {
                     _learnSkills.remove(skill);
                   });
                 },
-                backgroundColor: lightGrey,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                    ? const Color(0xFF2A2A2A)
+                    : lightGrey,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               )).toList(),
             ),
             const SizedBox(height: 28),
-            const Text(
+            Text(
               'When do you want to learn?',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: textBlack,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : textBlack,
                 fontFamily: 'Poppins',
               ),
             ),
@@ -204,21 +252,35 @@ class _SwapPageState extends State<SwapPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? const Color(0xFF2A2A2A)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: borderGrey),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey[700]!
+                              : borderGrey
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today, color: textGrey, size: 20),
+                          Icon(
+                            Icons.calendar_today, 
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey[400]
+                                : textGrey, 
+                            size: 20
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             _selectedDate != null
                                 ? DateFormat('MMM d, yyyy').format(_selectedDate!)
                                 : 'Select date',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
-                              color: textBlack,
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.white 
+                                  : textBlack,
                               fontFamily: 'Poppins',
                             ),
                           ),
@@ -242,21 +304,35 @@ class _SwapPageState extends State<SwapPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? const Color(0xFF2A2A2A)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: borderGrey),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey[700]!
+                              : borderGrey
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.access_time, color: textGrey, size: 20),
+                          Icon(
+                            Icons.access_time, 
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey[400]
+                                : textGrey, 
+                            size: 20
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             _selectedTime != null
                                 ? _selectedTime!.format(context)
                                 : 'Select time',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
-                              color: textBlack,
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.white 
+                                  : textBlack,
                               fontFamily: 'Poppins',
                             ),
                           ),
@@ -283,8 +359,16 @@ class _SwapPageState extends State<SwapPage> {
                   height: 40,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedPlatform == 'google_meet' ? primaryBlue : lightGrey,
-                      foregroundColor: _selectedPlatform == 'google_meet' ? Colors.white : textBlack,
+                      backgroundColor: _selectedPlatform == 'google_meet' 
+                          ? primaryBlue 
+                          : (Theme.of(context).brightness == Brightness.dark 
+                              ? const Color(0xFF2A2A2A)
+                              : lightGrey),
+                      foregroundColor: _selectedPlatform == 'google_meet' 
+                          ? Colors.white 
+                          : (Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white 
+                              : textBlack),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20)),
                       ),
@@ -319,8 +403,16 @@ class _SwapPageState extends State<SwapPage> {
                   height: 40,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedPlatform == 'zoom' ? primaryBlue : lightGrey,
-                      foregroundColor: _selectedPlatform == 'zoom' ? Colors.white : textBlack,
+                      backgroundColor: _selectedPlatform == 'zoom' 
+                          ? primaryBlue 
+                          : (Theme.of(context).brightness == Brightness.dark 
+                              ? const Color(0xFF2A2A2A)
+                              : lightGrey),
+                      foregroundColor: _selectedPlatform == 'zoom' 
+                          ? Colors.white 
+                          : (Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white 
+                              : textBlack),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20)),
                       ),
@@ -376,30 +468,38 @@ class _SwapPageState extends State<SwapPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF1E1E1E)
+              : Colors.white,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
           boxShadow: [
             BoxShadow(
-              color: Color(0x11000000),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF000000)
+                  : const Color(0x11000000),
               blurRadius: 8,
-              offset: Offset(0, -2),
+              offset: const Offset(0, -2),
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          currentIndex: _selectedIndex,
-          onTap: _onTabTapped,
-          selectedItemColor: const Color(0xFF225B4B),
-          unselectedItemColor: Colors.black,
-          showUnselectedLabels: true,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            currentIndex: _selectedIndex,
+            onTap: _onTabTapped,
+            selectedItemColor: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF3E8E7E)
+                : const Color(0xFF225B4B),
+            unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white70
+                : Colors.black,
+            showUnselectedLabels: true,
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),

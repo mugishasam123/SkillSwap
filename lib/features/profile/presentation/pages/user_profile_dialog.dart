@@ -9,6 +9,9 @@ class UserProfileDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF2A2A2A)
+          : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -17,22 +20,29 @@ class UserProfileDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Profile Picture and Basic Info
-            Center(child: _buildProfileSection()),
+            Center(child: _buildProfileSection(context)),
             const SizedBox(height: 24),
             // Key Information Block
             _buildKeyInfoSection(),
             const SizedBox(height: 24),
             // Skill Library Section
-            _buildSkillLibrarySection(),
+            _buildSkillLibrarySection(context),
             const SizedBox(height: 24),
             // Reviews Section
-            _buildReviewsSection(),
+            _buildReviewsSection(context),
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.center,
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                child: Text(
+                  'Close',
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white 
+                        : Colors.black,
+                  ),
+                ),
               ),
             ),
           ],
@@ -41,7 +51,7 @@ class UserProfileDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileSection() {
+  Widget _buildProfileSection(BuildContext context) {
     return Column(
       children: [
         CircleAvatar(
@@ -51,10 +61,12 @@ class UserProfileDialog extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           userProfile.name,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF225B4B),
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Color(0xFF225B4B),
           ),
         ),
         const SizedBox(height: 4),
@@ -62,24 +74,45 @@ class UserProfileDialog extends StatelessWidget {
           userProfile.username != null && userProfile.username!.isNotEmpty
               ? '@${userProfile.username}'
               : '@${userProfile.name.toLowerCase().replaceAll(' ', '')}',
-          style: const TextStyle(fontSize: 15, color: Colors.grey),
+          style: TextStyle(
+            fontSize: 15, 
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey[400]
+                : Colors.grey
+          ),
         ),
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.swap_horiz, color: Colors.black, size: 20),
+            Icon(
+              Icons.swap_horiz, 
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black, 
+              size: 20
+            ),
             const SizedBox(width: 6),
             Text(
               '${userProfile.swapScore}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
               ),
             ),
             const SizedBox(width: 4),
-            const Text('Swap Score', style: TextStyle(fontSize: 13, color: Colors.grey)),
+            Text(
+              'Swap Score', 
+              style: TextStyle(
+                fontSize: 13, 
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey
+              )
+            ),
           ],
         ),
       ],
@@ -139,18 +172,40 @@ class UserProfileDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildSkillLibrarySection() {
+  Widget _buildSkillLibrarySection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Skills Offered', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black)),
+        Text(
+          'Skills Offered', 
+          style: TextStyle(
+            fontSize: 17, 
+            fontWeight: FontWeight.bold, 
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black
+          )
+        ),
         const SizedBox(height: 10),
         if (userProfile.skillsOffered.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(10)),
-            child: const Text('No skills offered yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[800]
+                  : Colors.grey[100], 
+              borderRadius: BorderRadius.circular(10)
+            ),
+            child: Text(
+              'No skills offered yet.', 
+              textAlign: TextAlign.center, 
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey
+              )
+            ),
           )
         else
           Wrap(
@@ -165,14 +220,36 @@ class UserProfileDialog extends StatelessWidget {
             }).toList(),
           ),
         const SizedBox(height: 16),
-        const Text('Skills Wanted', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black)),
+        Text(
+          'Skills Wanted', 
+          style: TextStyle(
+            fontSize: 17, 
+            fontWeight: FontWeight.bold, 
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black
+          )
+        ),
         const SizedBox(height: 10),
         if (userProfile.skillsWanted.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(10)),
-            child: const Text('No skills wanted yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[800]
+                  : Colors.grey[100], 
+              borderRadius: BorderRadius.circular(10)
+            ),
+            child: Text(
+              'No skills wanted yet.', 
+              textAlign: TextAlign.center, 
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey
+              )
+            ),
           )
         else
           Wrap(
@@ -190,18 +267,40 @@ class UserProfileDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildReviewsSection() {
+  Widget _buildReviewsSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Reviews', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black)),
+        Text(
+          'Reviews', 
+          style: TextStyle(
+            fontSize: 17, 
+            fontWeight: FontWeight.bold, 
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black
+          )
+        ),
         const SizedBox(height: 10),
         if (userProfile.reviews.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(10)),
-            child: const Text('No reviews yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[800]
+                  : Colors.grey[100], 
+              borderRadius: BorderRadius.circular(10)
+            ),
+            child: Text(
+              'No reviews yet.', 
+              textAlign: TextAlign.center, 
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey
+              )
+            ),
           )
         else
           Column(
@@ -210,13 +309,40 @@ class UserProfileDialog extends StatelessWidget {
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.grey[50], borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.grey[200]!)),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[800]
+                      : Colors.grey[50], 
+                  borderRadius: BorderRadius.circular(10), 
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[700]!
+                        : Colors.grey[200]!
+                  )
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(review['reviewText'] ?? '', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                    Text(
+                      review['reviewText'] ?? '', 
+                      style: TextStyle(
+                        fontSize: 13, 
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[300]
+                            : Colors.grey
+                      )
+                    ),
                     const SizedBox(height: 6),
-                    Text('- ${review['reviewerName'] ?? 'Anonymous'}', style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
+                    Text(
+                      '- ${review['reviewerName'] ?? 'Anonymous'}', 
+                      style: TextStyle(
+                        fontSize: 11, 
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[400]
+                            : Colors.grey, 
+                        fontWeight: FontWeight.w500
+                      )
+                    ),
                   ],
                 ),
               );

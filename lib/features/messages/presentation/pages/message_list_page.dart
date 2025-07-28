@@ -138,7 +138,9 @@ class _MessageListPageState extends State<MessageListPage> {
         .toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
       body: Column(
         children: [
           Padding(
@@ -153,7 +155,11 @@ class _MessageListPageState extends State<MessageListPage> {
                     _unreadCount > 0
                         ? Icons.notifications
                         : Icons.notifications_none,
-                    color: _unreadCount > 0 ? Colors.orange : Colors.black,
+                    color: _unreadCount > 0 
+                        ? Colors.orange 
+                        : (Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white 
+                            : Colors.black),
                     size: 28,
                   ),
                   onPressed: () {},
@@ -166,13 +172,25 @@ class _MessageListPageState extends State<MessageListPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextField(
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
+              ),
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
                 hintText: 'Search here',
+                hintStyle: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : Colors.grey[600],
+                ),
                 suffixIcon: Container(
                   margin: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF225B4B),
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF3E8E7E)
+                        : const Color(0xFF225B4B),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   width: 36,
@@ -188,7 +206,9 @@ class _MessageListPageState extends State<MessageListPage> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Theme.of(context).brightness == Brightness.dark 
+                    ? const Color(0xFF2A2A2A)
+                    : Colors.grey[200],
               ),
             ),
           ),
@@ -196,7 +216,16 @@ class _MessageListPageState extends State<MessageListPage> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : filteredChats.isEmpty
-                ? const Center(child: Text('No messages yet.'))
+                ? Center(
+                    child: Text(
+                      'No messages yet.',
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[400]
+                            : Colors.grey[600],
+                      ),
+                    ),
+                  )
                 : Scrollbar(
                     thumbVisibility: true,
                     child: ListView.builder(
@@ -220,12 +249,33 @@ class _MessageListPageState extends State<MessageListPage> {
                                     ? NetworkImage(avatar)
                                     : AssetImage(avatar) as ImageProvider,
                               ),
-                              title: Text(name),
-                              subtitle: Text(chat.lastMessage),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(_formatTime(chat.lastMessageTime)),
+                              title: Text(
+                                name,
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.white 
+                                      : Colors.black,
+                                ),
+                              ),
+                              subtitle: Text(
+                                chat.lastMessage,
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey[300]
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                                                              trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _formatTime(chat.lastMessageTime),
+                                      style: TextStyle(
+                                        color: Theme.of(context).brightness == Brightness.dark 
+                                            ? Colors.grey[400]
+                                            : Colors.grey[600],
+                                      ),
+                                    ),
                                   if ((chat.unreadCount[userId] ?? 0) > 0)
                                     Container(
                                       margin: const EdgeInsets.only(top: 4),
@@ -270,75 +320,10 @@ class _MessageListPageState extends State<MessageListPage> {
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _startNewChat(context, userId),
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x11000000),
-              blurRadius: 8,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          currentIndex: 1,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.pushReplacementNamed(context, '/home');
-                break;
-              case 1:
-                // Already on messages
-                break;
-              case 2:
-                Navigator.pushReplacementNamed(context, '/profile');
-                break;
-              case 3:
-                Navigator.pushReplacementNamed(context, '/settings');
-                break;
-            }
-          },
-          selectedItemColor: const Color(0xFF225B4B),
-          unselectedItemColor: Colors.black,
-          showUnselectedLabels: true,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              activeIcon: Icon(Icons.chat_bubble),
-              label: 'Messages',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -372,19 +357,23 @@ class _MessageListPageState extends State<MessageListPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'My Messages',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Colors.black,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
               ),
             ),
             if (unreadCount > 0)
               Text(
                 '$unreadCount new message${unreadCount > 1 ? 's' : ''}',
-                style: const TextStyle(
-                  color: Color(0xFFB0B0B0),
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : const Color(0xFFB0B0B0),
                   fontWeight: FontWeight.w500,
                   fontSize: 15,
                 ),
