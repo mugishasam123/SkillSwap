@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../../core/widgets/theme_switch.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
@@ -10,7 +11,6 @@ class SignupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Stack(
         children: [
           // Green corner background
@@ -25,29 +25,29 @@ class SignupPage extends StatelessWidget {
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Center(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/images/logo.png', height: 250),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Create Account',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/images/logo.png', height: 250),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Create Account',
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                             ),
+                            const SizedBox(height: 32),
+                            _SignupForm(),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 32),
-                      _SignupForm(),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
           ),
         ],
       ),

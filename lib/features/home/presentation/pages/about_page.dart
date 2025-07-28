@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/theme_switch.dart';
 
 class AboutPage extends StatelessWidget {
   final VoidCallback? onBackToSettings;
@@ -8,14 +9,14 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                 Row(
                   children: [
                     IconButton(
@@ -32,16 +33,20 @@ class AboutPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'About',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
                     shadows: [
                       Shadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 4),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black54
+                            : Colors.black26,
+                        offset: const Offset(0, 4),
                         blurRadius: 8,
                       ),
                     ],
@@ -72,19 +77,23 @@ class AboutPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'SkillSwap',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF225B4B),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF3E8E7E)
+                        : const Color(0xFF225B4B),
                   ),
                 ),
-                const Text(
+                Text(
                   'Version 1.0.0',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black54,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white70
+                        : Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -114,34 +123,46 @@ class AboutPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8F9FA),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF1E1E1E)
+                        : const Color(0xFFF8F9FA),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade200,
+                    ),
                   ),
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         'Contact Us',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF225B4B),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF3E8E7E)
+                              : const Color(0xFF225B4B),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         'Have questions or feedback?',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.black54,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white70
+                              : Colors.black54,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'support@skillswap.com',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Color(0xFF225B4B),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF3E8E7E)
+                              : const Color(0xFF225B4B),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -150,11 +171,13 @@ class AboutPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 // Copyright
-                const Text(
-                  '© 2024 SkillSwap. All rights reserved.',
+                Text(
+                  '© 2025 SkillSwap. All rights reserved.',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black38,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white38
+                        : Colors.black38,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -184,10 +207,14 @@ class _AboutCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Material(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1E1E1E)
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         elevation: 2,
-        shadowColor: Colors.black12,
+        shadowColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black26
+            : Colors.black12,
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -202,12 +229,14 @@ class _AboutCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
+                    child:                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF225B4B),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF3E8E7E)
+                            : const Color(0xFF225B4B),
                       ),
                     ),
                   ),
@@ -216,9 +245,11 @@ class _AboutCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 content,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
-                  color: Colors.black87,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.87)
+                      : Colors.black87,
                   height: 1.5,
                 ),
               ),

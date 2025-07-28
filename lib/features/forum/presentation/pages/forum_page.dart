@@ -55,12 +55,14 @@ class _ForumPageState extends State<ForumPage> {
           children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text(
+              child:               Text(
                 "Community Discussions",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 26,
-                  color: Color(0xFF121717),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Color(0xFF121717),
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -84,7 +86,16 @@ class _ForumPageState extends State<ForumPage> {
       stream: _repository.getDiscussions(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey[600],
+              ),
+            ),
+          );
         }
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
@@ -96,7 +107,12 @@ class _ForumPageState extends State<ForumPage> {
               padding: EdgeInsets.all(32),
               child: Text(
                 'No discussions yet. Start the conversation!',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 16, 
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400]
+                      : Colors.grey[600]
+                ),
               ),
             ),
           );
@@ -125,17 +141,23 @@ class _ForumPageState extends State<ForumPage> {
         margin: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF2A2A2A)
+              : Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.black.withOpacity(0.08),
               blurRadius: 12,
               offset: Offset(0, 4),
             ),
           ],
           border: Border.all(
-            color: Colors.grey.withOpacity(0.1),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey.withOpacity(0.2)
+                : Colors.grey.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -159,6 +181,9 @@ class _ForumPageState extends State<ForumPage> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white 
+                              : Colors.black,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -171,6 +196,9 @@ class _ForumPageState extends State<ForumPage> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.grey[300]
+                                  : Colors.black,
                             ),
                           ),
                           SizedBox(width: 12),
@@ -178,7 +206,9 @@ class _ForumPageState extends State<ForumPage> {
                             _repository.getTimeAgo(discussion.timestamp),
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                             ),
                           ),
                         ],
@@ -194,7 +224,9 @@ class _ForumPageState extends State<ForumPage> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Colors.black87,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black87,
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -220,6 +252,9 @@ class _ForumPageState extends State<ForumPage> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.white 
+                                  : Colors.black,
                             ),
                           ),
                         ],
@@ -239,6 +274,9 @@ class _ForumPageState extends State<ForumPage> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.white 
+                                : Colors.black,
                           ),
                         ),
                       ],
@@ -257,6 +295,9 @@ class _ForumPageState extends State<ForumPage> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.white 
+                                : Colors.black,
                           ),
                         ),
                       ],
@@ -276,9 +317,18 @@ class _ForumPageState extends State<ForumPage> {
       padding: const EdgeInsets.all(20.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF2A2A2A)
+              : Colors.white,
           borderRadius: BorderRadius.circular(28),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12)],
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.black12, 
+              blurRadius: 12
+            )
+          ],
         ),
         child: Row(
           children: [
@@ -293,12 +343,19 @@ class _ForumPageState extends State<ForumPage> {
             Expanded(
               child: TextField(
                 controller: _messageController,
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Colors.black,
+                ),
                 decoration: InputDecoration(
                   hintText: "Type message here...",
                   border: InputBorder.none,
                   hintStyle: TextStyle(
-                    color: Color(0xFFBDBDBD),
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400]
+                        : Color(0xFFBDBDBD),
                     fontFamily: 'Poppins',
                     fontSize: 18,
                   ),

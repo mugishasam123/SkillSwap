@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Added for FirebaseFire
 import '../../../profile/data/profile_repository.dart';
 import '../../../profile/models/user_profile.dart';
 import 'about_page.dart';
+import '../../../../core/widgets/theme_switch.dart';
 
 class SettingsPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -24,157 +25,167 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: StreamBuilder<UserProfile?>(
-          stream: _repository.getCurrentUserProfile(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+                stream: _repository.getCurrentUserProfile(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Error loading profile',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Error loading profile',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${snapshot.error}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => setState(() {}),
+                              child: const Text('Retry'),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${snapshot.error}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => setState(() {}),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
+                    );
+                  }
 
-            final userProfile = snapshot.data;
-            if (userProfile == null) {
-              return const Center(
-                child: Text('Profile not found'),
-              );
-            }
+                  final userProfile = snapshot.data;
+                  if (userProfile == null) {
+                    return const Center(
+                      child: Text('Profile not found'),
+                    );
+                  }
 
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back, size: 28),
-                          onPressed: () {
-                            if (widget.onBackToHome != null) {
-                              widget.onBackToHome!();
-                            } else {
-                              Navigator.of(
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back, size: 28),
+                                onPressed: () {
+                                  if (widget.onBackToHome != null) {
+                                    widget.onBackToHome!();
+                                  } else {
+                                    Navigator.of(
+                                      context,
+                                    ).popUntil((route) => route.isFirst);
+                                  }
+                                },
+                              ),
+                              const Spacer(),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Settings',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                              shadows: [
+                                Shadow(
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.black54
+                                      : Colors.black26,
+                                  offset: const Offset(0, 4),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          CircleAvatar(
+                            radius: 48,
+                            backgroundImage: userProfile.avatarUrl != null
+                                ? NetworkImage(userProfile.avatarUrl!)
+                                : const AssetImage('assets/images/onboarding_1.png') as ImageProvider,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            userProfile.name,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF3E8E7E)
+                                  : const Color(0xFF225B4B),
+                            ),
+                          ),
+                          Text(
+                            userProfile.username != null ? '@${userProfile.username}' : userProfile.email,
+                            style: TextStyle(
+                              fontSize: 16, 
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white70
+                                  : Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          _SettingsCard(
+                            icon: Icons.person,
+                            title: 'General',
+                            subtitle: 'View and edit your profile',
+                            onTap: () {
+                              Navigator.pushNamed(context, '/profile');
+                            },
+                          ),
+                          _SettingsCard(
+                            icon: Icons.info_outline,
+                            title: 'About',
+                            subtitle: 'Know about the app',
+                            onTap: () {
+                              Navigator.push(
                                 context,
-                              ).popUntil((route) => route.isFirst);
-                            }
-                          },
-                        ),
-                        const Spacer(),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Settings',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 4),
-                            blurRadius: 8,
+                                MaterialPageRoute(
+                                  builder: (context) => AboutPage(
+                                    onBackToSettings: () => Navigator.pop(context),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          _SettingsCard(
+                            icon: Icons.logout,
+                            title: 'Log out',
+                            subtitle: 'Log out from the app',
+                            onTap: () => _logout(context),
+                            iconColor: Colors.red,
+                            textColor: Colors.red,
                           ),
                         ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
-                    CircleAvatar(
-                      radius: 48,
-                      backgroundImage: userProfile.avatarUrl != null
-                          ? NetworkImage(userProfile.avatarUrl!)
-                          : const AssetImage('assets/images/onboarding_1.png') as ImageProvider,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      userProfile.name,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF225B4B),
-                      ),
-                    ),
-                    Text(
-                      userProfile.username != null ? '@${userProfile.username}' : userProfile.email,
-                      style: const TextStyle(fontSize: 16, color: Colors.black54),
-                    ),
-                    const SizedBox(height: 24),
-                    _SettingsCard(
-                      icon: Icons.person,
-                      title: 'General',
-                      subtitle: 'View and edit your profile',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/profile');
-                      },
-                    ),
-                    _SettingsCard(
-                      icon: Icons.info_outline,
-                      title: 'About',
-                      subtitle: 'Know about the app',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AboutPage(
-                              onBackToSettings: () => Navigator.pop(context),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _SettingsCard(
-                      icon: Icons.logout,
-                      title: 'Log out',
-                      subtitle: 'Log out from the app',
-                      onTap: () => _logout(context),
-                      iconColor: Colors.red,
-                      textColor: Colors.red,
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ),
     );
   }
@@ -202,10 +213,14 @@ class _SettingsCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Material(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF1E1E1E)
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         elevation: 2,
-        shadowColor: Colors.black12,
+        shadowColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black26
+            : Colors.black12,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
@@ -228,21 +243,30 @@ class _SettingsCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: textColor ?? const Color(0xFF225B4B),
+                          color: textColor ?? (Theme.of(context).brightness == Brightness.dark 
+                              ? const Color(0xFF3E8E7E)
+                              : const Color(0xFF225B4B)),
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: Colors.black54,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white70
+                              : Colors.black54,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.black38),
+                Icon(
+                  Icons.chevron_right, 
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white38
+                      : Colors.black38,
+                ),
               ],
             ),
           ),

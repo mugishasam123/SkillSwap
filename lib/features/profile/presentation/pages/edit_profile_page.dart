@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../data/profile_repository.dart';
 import '../../models/user_profile.dart';
+import '../../../../core/widgets/theme_switch.dart';
 
 class EditProfilePage extends StatefulWidget {
   final UserProfile userProfile;
@@ -120,38 +121,49 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF121212)
+            : Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black,
           ),
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
           if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400]!
+                        : Colors.grey
+                  ),
+                ),
               ),
             )
           else
             TextButton(
               onPressed: _saveProfile,
-              child: const Text(
+              child: Text(
                 'Save',
                 style: TextStyle(
-                  color: Color(0xFF225B4B),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? const Color(0xFF3E8E7E)
+                      : const Color(0xFF225B4B),
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -159,87 +171,50 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Profile Picture Section
-              _buildProfilePictureSection(),
-              const SizedBox(height: 32),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const ThemeSwitch(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Profile Picture Section
+                      _buildProfilePictureSection(),
+                      const SizedBox(height: 32),
 
-              // Basic Information
-              _buildSectionTitle('Basic Information'),
-              const SizedBox(height: 16),
-              
-              _buildTextField(
-                controller: _nameController,
-                label: 'Full Name',
-                icon: Icons.person_outline,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Name is required';
-                  }
-                  return null;
-                },
+                      // Basic Information
+                      _buildSectionTitle('BASIC INFORMATION'),
+                      const SizedBox(height: 16),
+
+                      _buildNameField(),
+                      const SizedBox(height: 16),
+
+                      _buildUsernameField(),
+                      const SizedBox(height: 16),
+
+                      _buildBioField(),
+                      const SizedBox(height: 32),
+
+                      // Location & Availability
+                      _buildSectionTitle('LOCATION & AVAILABILITY'),
+                      const SizedBox(height: 16),
+
+                      _buildLocationField(),
+                      const SizedBox(height: 16),
+
+                      _buildAvailabilityDropdown(),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
-
-              _buildTextField(
-                controller: _usernameController,
-                label: 'Username',
-                icon: Icons.alternate_email,
-                hint: 'e.g., johnkinggraphics',
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    if (value.contains(' ')) {
-                      return 'Username cannot contain spaces';
-                    }
-                    if (value.length < 3) {
-                      return 'Username must be at least 3 characters';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              _buildTextField(
-                controller: _bioController,
-                label: 'Bio',
-                icon: Icons.description_outlined,
-                hint: 'Tell others about yourself...',
-                maxLines: 3,
-              ),
-              const SizedBox(height: 32),
-
-              // Location & Availability
-              _buildSectionTitle('Location & Availability'),
-              const SizedBox(height: 16),
-
-              _buildLocationField(),
-              const SizedBox(height: 16),
-
-              _buildAvailabilityDropdown(),
-              const SizedBox(height: 32),
-
-              // Privacy Settings
-              _buildSectionTitle('Privacy Settings'),
-              const SizedBox(height: 16),
-              
-              _buildPrivacySettings(),
-              const SizedBox(height: 32),
-
-              // Notification Settings
-              _buildSectionTitle('Notification Settings'),
-              const SizedBox(height: 16),
-              
-              _buildNotificationSettings(),
-              const SizedBox(height: 32),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -280,13 +255,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
           const SizedBox(height: 12),
           TextButton(
             onPressed: _changeProfilePicture,
-            child: const Text(
-              'Change Profile Picture',
-              style: TextStyle(
-                color: Color(0xFF225B4B),
-                fontWeight: FontWeight.w500,
-              ),
+            child:           Text(
+            'Change Profile Picture',
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF3E8E7E)
+                  : const Color(0xFF225B4B),
+              fontWeight: FontWeight.w500,
             ),
+          ),
           ),
         ],
       ),
@@ -296,10 +273,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Colors.black,
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.white 
+            : Colors.black,
       ),
     );
   }
@@ -316,30 +295,109 @@ class _EditProfilePageState extends State<EditProfilePage> {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
+      style: TextStyle(
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.white 
+            : Colors.black,
+      ),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey[400]
+              : Colors.grey[600],
+        ),
         hintText: hint,
-        prefixIcon: Icon(icon, color: Colors.grey[600]),
+        hintStyle: TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey[500]
+              : Colors.grey[600],
+        ),
+        prefixIcon: Icon(
+          icon, 
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.grey[400]
+              : Colors.grey[600]
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey[700]!
+                : Colors.grey[300]!
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey[700]!
+                : Colors.grey[300]!
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF225B4B), width: 2),
+          borderSide: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF3E8E7E)
+                : const Color(0xFF225B4B), 
+            width: 2
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.red[300]!),
         ),
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF2A2A2A)
+            : Colors.grey[50],
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
+    );
+  }
+
+  Widget _buildNameField() {
+    return _buildTextField(
+      controller: _nameController,
+      label: 'Full Name',
+      icon: Icons.person_outline,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Name is required';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildUsernameField() {
+    return _buildTextField(
+      controller: _usernameController,
+      label: 'Username',
+      icon: Icons.alternate_email,
+      hint: 'e.g., johnkinggraphics',
+      validator: (value) {
+        if (value != null && value.trim().isNotEmpty) {
+          if (value.contains(' ')) {
+            return 'Username cannot contain spaces';
+          }
+          if (value.length < 3) {
+            return 'Username must be at least 3 characters';
+          }
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildBioField() {
+    return _buildTextField(
+      controller: _bioController,
+      label: 'Bio',
+      icon: Icons.description_outlined,
+      hint: 'Tell others about yourself...',
+      maxLines: 3,
     );
   }
 
@@ -347,23 +405,50 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Location',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black87,
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: _locationController,
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black,
+          ),
           decoration: InputDecoration(
             labelText: 'Enter your location',
+            labelStyle: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[400]
+                  : Colors.grey[600],
+            ),
             hintText: 'e.g., Lagos, Nigeria',
-            prefixIcon: const Icon(Icons.location_on_outlined, color: Colors.grey),
+            hintStyle: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[500]
+                  : Colors.grey[600],
+            ),
+            prefixIcon: Icon(
+              Icons.location_on_outlined, 
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[400]
+                  : Colors.grey
+            ),
             suffixIcon: PopupMenuButton<String>(
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+              icon: Icon(
+                Icons.arrow_drop_down, 
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[400]
+                    : Colors.grey
+              ),
               onSelected: (String location) {
                 setState(() {
                   _locationController.text = location;
@@ -373,34 +458,58 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 return _popularLocations.map((String location) {
                   return PopupMenuItem<String>(
                     value: location,
-                    child: Text(location),
+                    child: Text(
+                      location,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white 
+                            : Colors.black,
+                      ),
+                    ),
                   );
                 }).toList();
               },
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[700]!
+                    : Colors.grey[300]!
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[700]!
+                    : Colors.grey[300]!
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF225B4B), width: 2),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? const Color(0xFF3E8E7E)
+                    : const Color(0xFF225B4B), 
+                width: 2
+              ),
             ),
             filled: true,
-            fillColor: Colors.grey[50],
+            fillColor: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF2A2A2A)
+                : Colors.grey[50],
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Or select from popular locations',
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey,
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey[400]
+                : Colors.grey,
           ),
         ),
       ],
@@ -422,29 +531,69 @@ class _EditProfilePageState extends State<EditProfilePage> {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedAvailability,
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black,
+          ),
           decoration: InputDecoration(
             labelText: 'Select your availability',
-            prefixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey),
+            labelStyle: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[400]
+                  : Colors.grey[600],
+            ),
+            prefixIcon: Icon(
+              Icons.calendar_today_outlined, 
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[400]
+                  : Colors.grey
+            ),
             border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
-            enabledBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-              borderSide: BorderSide(color: Colors.grey),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[700]!
+                    : Colors.grey
+              ),
             ),
-            focusedBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-              borderSide: BorderSide(color: Color(0xFF225B4B), width: 2),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? const Color(0xFF3E8E7E)
+                    : const Color(0xFF225B4B), 
+                width: 2
+              ),
             ),
             filled: true,
-            fillColor: Colors.grey[50],
+            fillColor: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF2A2A2A)
+                : Colors.grey[50],
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
-          hint: const Text('Choose your availability'),
+          hint: Text(
+            'Choose your availability',
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[500]
+                  : Colors.grey[600],
+            ),
+          ),
           items: _availabilityOptions.map((String availability) {
             return DropdownMenuItem<String>(
               value: availability,
-              child: Text(availability),
+              child: Text(
+                availability,
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Colors.black,
+                ),
+              ),
             );
           }).toList(),
           onChanged: (String? newValue) {
@@ -458,162 +607,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             }
             return null;
           },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPrivacySettings() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        children: [
-          _buildPrivacyOption(
-            'Profile Visibility',
-            'Make your profile visible to other users',
-            true,
-            (value) {
-              // TODO: Implement privacy setting
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildPrivacyOption(
-            'Show Email',
-            'Allow other users to see your email',
-            false,
-            (value) {
-              // TODO: Implement privacy setting
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildPrivacyOption(
-            'Show Location',
-            'Allow other users to see your location',
-            true,
-            (value) {
-              // TODO: Implement privacy setting
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPrivacyOption(String title, String subtitle, bool initialValue, Function(bool) onChanged) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Switch(
-          value: initialValue,
-          onChanged: onChanged,
-          activeColor: const Color(0xFF225B4B),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNotificationSettings() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        children: [
-          _buildNotificationOption(
-            'Push Notifications',
-            'Receive notifications for new messages and swap requests',
-            widget.userProfile.notificationsEnabled,
-            (value) async {
-              try {
-                await _repository.updateNotificationSettings(value);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(value ? 'Notifications enabled' : 'Notifications disabled'),
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update notification settings: $e')),
-                  );
-                }
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildNotificationOption(
-            'Email Notifications',
-            'Receive email notifications for important updates',
-            true,
-            (value) {
-              // TODO: Implement email notification setting
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotificationOption(String title, String subtitle, bool initialValue, Function(bool) onChanged) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Switch(
-          value: initialValue,
-          onChanged: onChanged,
-          activeColor: const Color(0xFF225B4B),
         ),
       ],
     );

@@ -52,10 +52,24 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     final isLiked = widget.discussion.likedBy.contains(currentUser?.uid);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
       appBar: AppBar(
-        title: Text('Discussion'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: Text(
+          'Discussion',
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.black,
+          ),
+        ),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF121212)
+            : Colors.white,
+        foregroundColor: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.white 
+            : Colors.black,
         elevation: 0,
       ),
       body: Column(
@@ -70,11 +84,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   Container(
                     padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF2A2A2A)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.black12,
                           blurRadius: 8,
                           offset: Offset(0, 2),
                         ),
@@ -110,6 +128,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
+                                          color: Theme.of(context).brightness == Brightness.dark 
+                                              ? Colors.grey[300]
+                                              : Colors.black,
                                         ),
                                       ),
                                       SizedBox(width: 12),
@@ -119,7 +140,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                         ),
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: Colors.grey[600],
+                                          color: Theme.of(context).brightness == Brightness.dark 
+                                              ? Colors.grey[400]
+                                              : Colors.grey[600],
                                         ),
                                       ),
                                     ],
@@ -132,7 +155,13 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                         SizedBox(height: 16),
                         Text(
                           widget.discussion.description,
-                          style: TextStyle(fontSize: 16, height: 1.5),
+                          style: TextStyle(
+                            fontSize: 16, 
+                            height: 1.5,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.white 
+                                : Colors.black,
+                          ),
                         ),
                         SizedBox(height: 16),
                         Row(
@@ -154,10 +183,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                         size: 20,
                                       ),
                                       SizedBox(width: 4),
-                                      Text(
-                                        '${widget.discussion.likes}',
-                                        style: TextStyle(fontSize: 14),
+                                                                          Text(
+                                      '${widget.discussion.likes}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).brightness == Brightness.dark 
+                                            ? Colors.white 
+                                            : Colors.black,
                                       ),
+                                    ),
                                     ],
                                   ),
                                 ),
@@ -172,7 +206,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                     SizedBox(width: 4),
                                     Text(
                                       '${widget.discussion.replies}',
-                                      style: TextStyle(fontSize: 14),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).brightness == Brightness.dark 
+                                            ? Colors.white 
+                                            : Colors.black,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -187,7 +226,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                     SizedBox(width: 4),
                                     Text(
                                       '${widget.discussion.views}',
-                                      style: TextStyle(fontSize: 14),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).brightness == Brightness.dark 
+                                            ? Colors.white 
+                                            : Colors.black,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -202,7 +246,13 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   // Replies section
                   Text(
                     'Replies (${widget.discussion.replies})',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18, 
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.white 
+                          : Colors.black,
+                    ),
                   ),
                   SizedBox(height: 16),
                   StreamBuilder<List<Reply>>(
@@ -225,7 +275,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                   'Error loading replies',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
                                   ),
                                 ),
                                 SizedBox(height: 8),
@@ -233,7 +285,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                   'Please try again later',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.grey[500],
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey[500]
+                                        : Colors.grey[500],
                                   ),
                                 ),
                               ],
@@ -251,14 +305,18 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 Icon(
                                   Icons.chat_bubble_outline,
                                   size: 48,
-                                  color: Colors.grey[400],
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey[500]
+                                      : Colors.grey[400],
                                 ),
                                 SizedBox(height: 16),
                                 Text(
                                   'No replies yet. Be the first to reply!',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
                                   ),
                                 ),
                               ],
@@ -284,14 +342,18 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 Icon(
                                   Icons.chat_bubble_outline,
                                   size: 48,
-                                  color: Colors.grey[400],
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey[500]
+                                      : Colors.grey[400],
                                 ),
                                 SizedBox(height: 16),
                                 Text(
                                   'No replies yet. Be the first to reply!',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
                                   ),
                                 ),
                               ],
@@ -309,9 +371,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                             margin: EdgeInsets.only(bottom: 12),
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.grey[50],
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? const Color(0xFF2A2A2A)
+                                  : Colors.grey[50],
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey[200]!),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark 
+                                    ? Colors.grey[700]!
+                                    : Colors.grey[200]!
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,6 +403,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                             style: TextStyle(
                                               fontWeight: FontWeight.w600,
                                               fontSize: 14,
+                                              color: Theme.of(context).brightness == Brightness.dark 
+                                                  ? Colors.grey[300]
+                                                  : Colors.black,
                                             ),
                                           ),
                                           Text(
@@ -343,7 +414,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                             ),
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: Colors.grey[600],
+                                              color: Theme.of(context).brightness == Brightness.dark 
+                                                  ? Colors.grey[400]
+                                                  : Colors.grey[600],
                                             ),
                                           ),
                                         ],
@@ -354,7 +427,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                                 SizedBox(height: 8),
                                 Text(
                                   reply.content,
-                                  style: TextStyle(fontSize: 14),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey[300]
+                                        : Colors.black,
+                                  ),
                                 ),
                               ],
                             ),
@@ -371,10 +449,14 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? const Color(0xFF2A2A2A)
+                  : Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.black12,
                   blurRadius: 8,
                   offset: Offset(0, -2),
                 ),
@@ -385,14 +467,26 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                 Expanded(
                   child: TextField(
                     controller: _replyController,
+                    style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.white 
+                          : Colors.black,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Write a reply...',
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[400]
+                            : Colors.grey[600],
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.grey[100],
+                      fillColor: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF1E1E1E)
+                          : Colors.grey[100],
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,

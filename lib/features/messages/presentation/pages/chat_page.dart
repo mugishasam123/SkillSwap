@@ -80,23 +80,46 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
       appBar: AppBar(
-        leading: BackButton(),
+        leading: BackButton(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.white 
+              : Colors.black,
+        ),
         title: Row(
           children: [
             CircleAvatar(backgroundImage: AssetImage(widget.otherUserAvatar)),
             const SizedBox(width: 8),
-            Text(widget.otherUserName),
+            Text(
+              widget.otherUserName,
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
+              ),
+            ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none),
+            icon: Icon(
+              Icons.notifications_none,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black,
+            ),
             onPressed: () {},
           ),
         ],
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF121212)
+            : Colors.white,
+        foregroundColor: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.white 
+            : Colors.black,
         elevation: 0,
       ),
       body: Column(
@@ -106,7 +129,16 @@ class _ChatPageState extends State<ChatPage> {
               stream: repository.getMessages(widget.chatId),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[400]
+                            : Colors.grey[600],
+                      ),
+                    ),
+                  );
                 }
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -151,7 +183,13 @@ class _ChatPageState extends State<ChatPage> {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isMe ? Colors.blue : Colors.orange,
+                                  color: isMe 
+                                      ? (Theme.of(context).brightness == Brightness.dark 
+                                          ? const Color(0xFF1976D2)
+                                          : Colors.blue)
+                                      : (Theme.of(context).brightness == Brightness.dark 
+                                          ? const Color(0xFFF57C00)
+                                          : Colors.orange),
                                   borderRadius: BorderRadius.circular(24),
                                 ),
                                 child: Text(
@@ -186,15 +224,27 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.white 
+                          : Colors.black,
+                    ),
                     onSubmitted: _sendMessage,
                     decoration: InputDecoration(
                       hintText: 'Type message here...',
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[400]
+                            : Colors.grey[600],
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.grey[200],
+                      fillColor: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF2A2A2A)
+                          : Colors.grey[200],
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 0,
@@ -215,70 +265,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x11000000),
-              blurRadius: 8,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          currentIndex: 1,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.pushReplacementNamed(context, '/home');
-                break;
-              case 1:
-                Navigator.pushReplacementNamed(context, '/messages');
-                break;
-              case 2:
-                Navigator.pushReplacementNamed(context, '/profile');
-                break;
-              case 3:
-                Navigator.pushReplacementNamed(context, '/settings');
-                break;
-            }
-          },
-          selectedItemColor: const Color(0xFF225B4B),
-          unselectedItemColor: Colors.black,
-          showUnselectedLabels: true,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              activeIcon: Icon(Icons.chat_bubble),
-              label: 'Messages',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-        ),
-      ),
+
     );
   }
 }
