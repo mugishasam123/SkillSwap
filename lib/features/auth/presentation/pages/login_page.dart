@@ -104,6 +104,8 @@ class _LoginFormState extends State<_LoginForm> {
           );
         } else if (state is AuthSuccess) {
           Navigator.pushReplacementNamed(context, '/home');
+        } else if (state is AuthNeedsProfileCompletion) {
+          Navigator.pushReplacementNamed(context, '/profile');
         }
       },
       builder: (context, state) {
@@ -161,7 +163,56 @@ class _LoginFormState extends State<_LoginForm> {
                     : const Text('Login', style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 24),
+            // Divider with "or" text
+            Row(
+              children: [
+                Expanded(child: Divider(color: Colors.grey[400])),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'OR',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Expanded(child: Divider(color: Colors.grey[400])),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Google Sign-In Button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.grey[400]!),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        context.read<AuthBloc>().add(const AuthGoogleSignInRequested());
+                      },
+                icon: Image.asset(
+                  'assets/images/google_logo.png',
+                  height: 24,
+                  width: 24,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.g_mobiledata, size: 24);
+                  },
+                ),
+                label: const Text(
+                  'Continue with Google',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
