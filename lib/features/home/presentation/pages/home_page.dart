@@ -19,6 +19,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   int _homeTabIndex = 0;
+  bool _isHeaderVisible = true;
+  double _lastScrollPosition = 0;
   
   @override
   void initState() {
@@ -41,6 +43,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _onScroll(double position) {
+    // Add a small threshold to prevent jittery behavior
+    const scrollThreshold = 10.0;
+    
+    // Show header when scrolling up, hide when scrolling down
+    if (position > _lastScrollPosition + scrollThreshold && _isHeaderVisible) {
+      // Scrolling down - hide header
+      setState(() {
+        _isHeaderVisible = false;
+      });
+    } else if (position < _lastScrollPosition - scrollThreshold && !_isHeaderVisible) {
+      // Scrolling up - show header
+      setState(() {
+        _isHeaderVisible = true;
+      });
+    }
+    
+    _lastScrollPosition = position;
+  }
+
   List<Widget> _pagesBuilder(Function(int) onTabChange) => [
     Column(
       children: [
@@ -51,6 +73,7 @@ class _HomePageState extends State<HomePage> {
             return HomeTabs(
               filterSkill: widget.arguments?['filterSkill'],
               initialTabIndex: _homeTabIndex,
+              onScroll: _onScroll,
             );
           },
         )),
@@ -64,6 +87,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final pages = _pagesBuilder((i) => setState(() => _selectedIndex = i));
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    
+    // Calculate responsive values
+    final headerHeight = isLandscape ? 80.0 : 100.0; // Increased to include theme switch and spacing
+    
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -78,10 +107,25 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const ThemeSwitch(),
-              const SizedBox(height: 8),
-              if (_selectedIndex != 1 && _selectedIndex != 3)
-                const SizedBox(height: 16),
+              // Collapsible header area with theme switch and spacing
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                height: _isHeaderVisible ? headerHeight : 0,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: _isHeaderVisible ? 1.0 : 0.0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const ThemeSwitch(),
+                      const SizedBox(height: 8),
+                      if (_selectedIndex != 1 && _selectedIndex != 3)
+                        const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
               Expanded(child: pages[_selectedIndex]),
             ],
           ),
@@ -152,8 +196,9 @@ class _HomePageState extends State<HomePage> {
 class HomeTabs extends StatefulWidget {
   final String? filterSkill;
   final int initialTabIndex;
+  final Function(double) onScroll;
   
-  const HomeTabs({super.key, this.filterSkill, this.initialTabIndex = 0});
+  const HomeTabs({super.key, this.filterSkill, this.initialTabIndex = 0, required this.onScroll});
 
   @override
   State<HomeTabs> createState() => _HomeTabsState();
@@ -214,6 +259,9 @@ class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin
     }
     
     _lastScrollPosition = position;
+    
+    // Call the parent scroll callback for header collapse functionality
+    widget.onScroll(position);
   }
 
   @override

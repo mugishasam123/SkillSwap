@@ -140,16 +140,67 @@ final dynamicPadding = _showInputArea ? 160.0 : 20.0; // Dynamic based on input 
 ### Home Page (`home_page.dart`)
 
 #### Responsive Layout Features:
-1. **Collapsible Tab Bar**: 
+1. **Collapsible Header Area**: 
+   - **Entire white area above tabs hides when scrolling down** (includes theme switch and spacing)
+   - **Reappears when scrolling up** to show navigation elements
+   - **Smooth animations** with 300ms duration
+   - **Responsive height** adjusts from 100px (portrait) to 80px (landscape)
+   - **Works across all tabs** (Suggested, All, Forum)
+2. **Collapsible Tab Bar**: 
    - **"Suggested", "All", "Forum" tabs hide when scrolling down**
    - **Reappear when scrolling up** to show navigation elements
    - **Smooth animations** with 300ms duration
    - **Responsive height** adjusts from 60px (portrait) to 50px (landscape)
    - **Works across all tabs** (Suggested, All, Forum)
-2. **Scroll Callback System**:
+3. **Scroll Callback System**:
    - **Wrapper widgets** for each tab page
    - **Synchronized scrolling** behavior across all tabs
-   - **Parent-child communication** for tab bar state
+   - **Parent-child communication** for header and tab bar state
+   - **Hierarchical scroll callbacks** - child pages communicate with HomeTabs, which communicates with HomePage
+
+#### Collapsible Header Area Implementation:
+```dart
+// Scroll listener for header area visibility
+void _onScroll(double position) {
+  // Add a small threshold to prevent jittery behavior
+  const scrollThreshold = 10.0;
+  
+  // Show header when scrolling up, hide when scrolling down
+  if (position > _lastScrollPosition + scrollThreshold && _isHeaderVisible) {
+    // Scrolling down - hide header
+    setState(() {
+      _isHeaderVisible = false;
+    });
+  } else if (position < _lastScrollPosition - scrollThreshold && !_isHeaderVisible) {
+    // Scrolling up - show header
+    setState(() {
+      _isHeaderVisible = true;
+    });
+  }
+  
+  _lastScrollPosition = position;
+}
+
+// Collapsible header area with theme switch and spacing
+AnimatedContainer(
+  duration: const Duration(milliseconds: 300),
+  curve: Curves.easeInOut,
+  height: _isHeaderVisible ? headerHeight : 0,
+  child: AnimatedOpacity(
+    duration: const Duration(milliseconds: 300),
+    opacity: _isHeaderVisible ? 1.0 : 0.0,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const ThemeSwitch(),
+        const SizedBox(height: 8),
+        if (_selectedIndex != 1 && _selectedIndex != 3)
+          const SizedBox(height: 16),
+      ],
+    ),
+  ),
+),
+```
 
 #### Collapsible Tab Bar Implementation:
 ```dart
@@ -172,11 +223,15 @@ void _onScroll(double position) {
   }
   
   _lastScrollPosition = position;
+  
+  // Call the parent scroll callback for header collapse functionality
+  widget.onScroll(position);
 }
 ```
 
 #### Key Responsive Variables:
 ```dart
+final headerHeight = isLandscape ? 80.0 : 100.0; // Includes theme switch and spacing
 final tabBarHeight = isLandscape ? 50.0 : 60.0;
 final spacingHeight = isLandscape ? 6.0 : 8.0;
 ```
@@ -225,7 +280,7 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 
 ## Benefits
 
-1. **Collapsible Headers & Tab Bar**: All headers and tab bars automatically hide when scrolling down and reappear when scrolling up
+1. **Collapsible Headers, Tab Bar & Header Area**: All headers, tab bars, and the entire white area above tabs automatically hide when scrolling down and reappear when scrolling up
 2. **No Overlapping Elements**: All UI elements now properly scale and position themselves in landscape mode
 3. **Floating Action Button Input**: Forum page now uses a floating action button instead of always-visible input area
 4. **Better Content Visibility**: More screen space available for content when headers are collapsed and input area is hidden
@@ -238,7 +293,7 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 ## User Experience Improvements
 
 ### Collapsible Header Behavior:
-- **Scroll Down**: Headers and tab bars smoothly slide up and disappear
+- **Scroll Down**: Headers, tab bars, and entire white area above tabs smoothly slide up and disappear
 - **Scroll Up**: All collapsed elements smoothly slide down and reappear
 - **Animation Duration**: 300ms with easeInOut curve for natural feel
 - **Responsive**: Works in both portrait and landscape orientations
