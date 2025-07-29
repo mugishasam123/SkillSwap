@@ -1,7 +1,7 @@
 # Responsive Improvements for Message Pages
 
 ## Overview
-The message pages and forum page have been updated to be fully responsive and landscape-friendly. These improvements ensure that the UI elements don't overlap and the headers don't block content when the device is rotated to landscape mode. Additionally, **collapsible header** features have been added for better content visibility.
+The message pages, forum page, and home page have been updated to be fully responsive and landscape-friendly. These improvements ensure that the UI elements don't overlap and the headers don't block content when the device is rotated to landscape mode. Additionally, **collapsible header** features have been added for better content visibility.
 
 ## Changes Made
 
@@ -63,13 +63,17 @@ final searchHeight = isLandscape ? 50.0 : 60.0;
    - **Responsive height** adjusts from 80px (portrait) to 60px (landscape)
    - **Font sizes** scale appropriately for landscape mode
 2. **Fixed Input Bar Positioning**:
-   - **No longer overlaps posts** - proper bottom padding added
+   - **No longer overlaps posts** - proper bottom padding added (160px)
    - **Responsive sizing** for landscape and portrait modes
    - **SafeArea integration** for proper system UI handling
+   - **Extra padding** (20px) added to input bar container
 3. **Responsive Discussion Cards**:
    - **Proper spacing** that adapts to screen orientation
-   - **Increased bottom padding** (120px) to prevent input bar overlap
+   - **Increased bottom padding** (160px) to prevent input bar overlap
    - **ScrollController integration** for header collapse behavior
+4. **Scroll Callback Integration**:
+   - **Communicates with parent** for tab bar collapsible functionality
+   - **Synchronized scrolling** across all tabs
 
 #### Collapsible Header Implementation:
 ```dart
@@ -94,6 +98,11 @@ void _onScroll() {
   }
   
   _lastScrollPosition = currentPosition;
+  
+  // Call the parent scroll callback for tab bar collapsible functionality
+  if (widget.onScrollCallback != null) {
+    widget.onScrollCallback!(currentPosition);
+  }
 }
 ```
 
@@ -101,8 +110,74 @@ void _onScroll() {
 ```dart
 final headerHeight = isLandscape ? 60.0 : 80.0;
 final inputBarHeight = isLandscape ? 70.0 : 80.0;
-final bottomPadding = 120.0; // Increased to prevent overlap
+final bottomPadding = 160.0; // Increased to prevent overlap
 ```
+
+### Home Page (`home_page.dart`)
+
+#### Responsive Layout Features:
+1. **Collapsible Tab Bar**: 
+   - **"Suggested", "All", "Forum" tabs hide when scrolling down**
+   - **Reappear when scrolling up** to show navigation elements
+   - **Smooth animations** with 300ms duration
+   - **Responsive height** adjusts from 60px (portrait) to 50px (landscape)
+   - **Works across all tabs** (Suggested, All, Forum)
+2. **Scroll Callback System**:
+   - **Wrapper widgets** for each tab page
+   - **Synchronized scrolling** behavior across all tabs
+   - **Parent-child communication** for tab bar state
+
+#### Collapsible Tab Bar Implementation:
+```dart
+// Scroll listener for tab bar visibility
+void _onScroll(double position) {
+  // Add a small threshold to prevent jittery behavior
+  const scrollThreshold = 10.0;
+  
+  // Show tab bar when scrolling up, hide when scrolling down
+  if (position > _lastScrollPosition + scrollThreshold && _isTabBarVisible) {
+    // Scrolling down - hide tab bar
+    setState(() {
+      _isTabBarVisible = false;
+    });
+  } else if (position < _lastScrollPosition - scrollThreshold && !_isTabBarVisible) {
+    // Scrolling up - show tab bar
+    setState(() {
+      _isTabBarVisible = true;
+    });
+  }
+  
+  _lastScrollPosition = position;
+}
+```
+
+#### Key Responsive Variables:
+```dart
+final tabBarHeight = isLandscape ? 50.0 : 60.0;
+final spacingHeight = isLandscape ? 6.0 : 8.0;
+```
+
+### Suggested Swaps Page (`suggested_swaps_page.dart`)
+
+#### Responsive Layout Features:
+1. **Scroll Controller Integration**:
+   - **ScrollController** added for scroll detection
+   - **Scroll callback** communication with parent
+   - **Proper disposal** of scroll controller
+2. **Tab Bar Synchronization**:
+   - **Communicates scroll position** to parent HomeTabs
+   - **Enables tab bar collapse** when scrolling
+
+### All Swaps Page (`all_swaps_page.dart`)
+
+#### Responsive Layout Features:
+1. **Scroll Controller Integration**:
+   - **ScrollController** added for ListView.builder
+   - **Scroll callback** communication with parent
+   - **Proper disposal** of scroll controller
+2. **Tab Bar Synchronization**:
+   - **Communicates scroll position** to parent HomeTabs
+   - **Enables tab bar collapse** when scrolling
 
 ### Chat Page (`chat_page.dart`)
 
@@ -126,20 +201,21 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 
 ## Benefits
 
-1. **Collapsible Headers**: Headers automatically hide when scrolling down and reappear when scrolling up
+1. **Collapsible Headers & Tab Bar**: All headers and tab bars automatically hide when scrolling down and reappear when scrolling up
 2. **No Overlapping Elements**: All UI elements now properly scale and position themselves in landscape mode
-3. **Better Content Visibility**: More screen space available for content when headers are collapsed
-4. **Fixed Input Bar**: Forum input bar no longer overlaps posts with proper bottom padding
+3. **Fixed Input Bar**: Forum input bar no longer overlaps posts with proper bottom padding (160px)
+4. **Better Content Visibility**: More screen space available for content when headers are collapsed
 5. **Smooth Animations**: 300ms smooth transitions for header show/hide
 6. **Better Space Utilization**: Landscape mode makes better use of the wider screen
 7. **Consistent Experience**: UI maintains visual consistency across orientations
 8. **Improved Readability**: Text sizes and spacing are optimized for each orientation
+9. **Synchronized Scrolling**: Tab bar collapses consistently across all tabs
 
 ## User Experience Improvements
 
 ### Collapsible Header Behavior:
-- **Scroll Down**: Headers smoothly slide up and disappear
-- **Scroll Up**: Headers smoothly slide down and reappear
+- **Scroll Down**: Headers and tab bars smoothly slide up and disappear
+- **Scroll Up**: All collapsed elements smoothly slide down and reappear
 - **Animation Duration**: 300ms with easeInOut curve for natural feel
 - **Responsive**: Works in both portrait and landscape orientations
 - **Non-intrusive**: Doesn't interfere with scrolling or content interaction
@@ -147,8 +223,13 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 ### Forum Page Specific:
 - **"Community Discussions" title** collapses with scroll
 - **Input bar stays fixed** at bottom without overlapping posts
-- **Proper spacing** between posts and input area
+- **Proper spacing** between posts and input area (160px bottom padding)
 - **Responsive sizing** for all elements
+
+### Tab Bar Specific:
+- **"Suggested", "All", "Forum" tabs** collapse when scrolling in any tab
+- **Synchronized behavior** across all tab pages
+- **Smooth animations** with proper spacing adjustments
 
 ### Visual Feedback:
 - **Smooth transitions** between header states
@@ -163,6 +244,7 @@ The improvements include basic widget tests that verify:
 - No layout errors occur during orientation changes
 - Scroll behavior works properly
 - Input bars don't overlap content
+- Tab bar collapses consistently across all tabs
 
 ## Future Enhancements
 
@@ -174,6 +256,7 @@ Consider adding:
 5. **Custom scroll physics** for more natural header behavior
 6. **Header state persistence** across app sessions
 7. **Tab bar collapsible behavior** for forum categories
+8. **Advanced scroll synchronization** between nested scrollable widgets
 
 ## Usage
 
@@ -181,4 +264,5 @@ The responsive behavior is automatic - no additional code is needed. The pages w
 - Device is rotated
 - App is resized (on desktop)
 - Different screen sizes are used
-- User scrolls up or down (header collapse/expand) 
+- User scrolls up or down (header collapse/expand)
+- User switches between tabs (tab bar state maintained) 

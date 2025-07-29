@@ -5,7 +5,9 @@ import '../../data/forum_repository.dart';
 import 'post_details_page.dart';
 
 class ForumPage extends StatefulWidget {
-  const ForumPage({super.key});
+  final Function(double)? onScrollCallback;
+  
+  const ForumPage({super.key, this.onScrollCallback});
 
   @override
   State<ForumPage> createState() => _ForumPageState();
@@ -53,6 +55,11 @@ class _ForumPageState extends State<ForumPage> {
     }
     
     _lastScrollPosition = currentPosition;
+    
+    // Call the parent scroll callback for tab bar collapsible functionality
+    if (widget.onScrollCallback != null) {
+      widget.onScrollCallback!(currentPosition);
+    }
   }
 
   void _sendMessage() {
@@ -137,7 +144,7 @@ class _ForumPageState extends State<ForumPage> {
               right: 0,
               bottom: 0,
               child: Container(
-                height: inputBarHeight + padding.bottom,
+                height: inputBarHeight + padding.bottom + 20, // Added extra padding
                 child: _buildMessageInputBar(),
               ),
             ),
@@ -188,7 +195,7 @@ class _ForumPageState extends State<ForumPage> {
           controller: _scrollController,
           child: ListView.builder(
             controller: _scrollController,
-            padding: EdgeInsets.only(bottom: 120), // Increased padding to prevent overlap
+            padding: EdgeInsets.only(bottom: 160), // Increased padding to prevent overlap
             itemCount: discussions.length,
             itemBuilder: (context, index) {
               return _buildDiscussionCard(discussions[index]);

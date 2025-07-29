@@ -162,6 +162,8 @@ class HomeTabs extends StatefulWidget {
 class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _currentFilterSkill;
+  bool _isTabBarVisible = true;
+  double _lastScrollPosition = 0;
 
   @override
   void initState() {
@@ -194,70 +196,176 @@ class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
+  void _onScroll(double position) {
+    // Add a small threshold to prevent jittery behavior
+    const scrollThreshold = 10.0;
+    
+    // Show tab bar when scrolling up, hide when scrolling down
+    if (position > _lastScrollPosition + scrollThreshold && _isTabBarVisible) {
+      // Scrolling down - hide tab bar
+      setState(() {
+        _isTabBarVisible = false;
+      });
+    } else if (position < _lastScrollPosition - scrollThreshold && !_isTabBarVisible) {
+      // Scrolling up - show tab bar
+      setState(() {
+        _isTabBarVisible = true;
+      });
+    }
+    
+    _lastScrollPosition = position;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions and orientation
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    
+    // Calculate responsive values
+    final tabBarHeight = isLandscape ? 50.0 : 60.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? Colors.grey[800]
-                : Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: TabBar(
-            controller: _tabController,
-            labelColor: Colors.white,
-            unselectedLabelColor: const Color(0xFF617D8A),
-            labelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
-              fontSize: 14,
+        // Collapsible tab bar with animation
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          height: _isTabBarVisible ? tabBarHeight : 0,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: _isTabBarVisible ? 1.0 : 0.0,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[800]
+                    : Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                labelColor: Colors.white,
+                unselectedLabelColor: const Color(0xFF617D8A),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                ),
+                indicator: BoxDecoration(
+                  color: const Color(0xFF225B4B),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                onTap: (index) {
+                  // Handle manual tab clicks
+                  if (index == 1) { // All tab
+                    if (_currentFilterSkill != null) {
+                      // If there's a filter active, clear it
+                      setState(() {
+                        _currentFilterSkill = null;
+                      });
+                      print('DEBUG: HomeTabs - Manually clicked All tab, clearing filter');
+                    }
+                  }
+                },
+                tabs: const [
+                  Tab(text: 'Suggested'),
+                  Tab(text: 'All'),
+                  Tab(text: 'Forum'),
+                ],
+              ),
             ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-              fontSize: 14,
-            ),
-            indicator: BoxDecoration(
-              color: const Color(0xFF225B4B),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: Colors.transparent,
-            onTap: (index) {
-              // Handle manual tab clicks
-              if (index == 1) { // All tab
-                if (_currentFilterSkill != null) {
-                  // If there's a filter active, clear it
-                  setState(() {
-                    _currentFilterSkill = null;
-                  });
-                  print('DEBUG: HomeTabs - Manually clicked All tab, clearing filter');
-                }
-              }
-            },
-            tabs: const [
-              Tab(text: 'Suggested'),
-              Tab(text: 'All'),
-              Tab(text: 'Forum'),
-            ],
           ),
         ),
-        const SizedBox(height: 8),
+        
+        // Responsive spacing (only when tab bar is visible)
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: _isTabBarVisible ? (isLandscape ? 6 : 8) : 0,
+        ),
+        
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
-              SuggestedSwapsPage(),
-              AllSwapsPage(filterSkill: _currentFilterSkill),
-              ForumPage(),
+              SuggestedSwapsPageWithScrollCallback(onScroll: _onScroll),
+              AllSwapsPageWithScrollCallback(
+                filterSkill: _currentFilterSkill,
+                onScroll: _onScroll,
+              ),
+              // Pass scroll callback to ForumPage
+              ForumPageWithScrollCallback(onScroll: _onScroll),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+// Wrapper widget to pass scroll callback to ForumPage
+class ForumPageWithScrollCallback extends StatefulWidget {
+  final Function(double) onScroll;
+  
+  const ForumPageWithScrollCallback({super.key, required this.onScroll});
+
+  @override
+  State<ForumPageWithScrollCallback> createState() => _ForumPageWithScrollCallbackState();
+}
+
+class _ForumPageWithScrollCallbackState extends State<ForumPageWithScrollCallback> {
+  @override
+  Widget build(BuildContext context) {
+    return ForumPage(onScrollCallback: widget.onScroll);
+  }
+}
+
+// Wrapper widget to pass scroll callback to SuggestedSwapsPage
+class SuggestedSwapsPageWithScrollCallback extends StatefulWidget {
+  final Function(double) onScroll;
+  
+  const SuggestedSwapsPageWithScrollCallback({super.key, required this.onScroll});
+
+  @override
+  State<SuggestedSwapsPageWithScrollCallback> createState() => _SuggestedSwapsPageWithScrollCallbackState();
+}
+
+class _SuggestedSwapsPageWithScrollCallbackState extends State<SuggestedSwapsPageWithScrollCallback> {
+  @override
+  Widget build(BuildContext context) {
+    return SuggestedSwapsPage(onScrollCallback: widget.onScroll);
+  }
+}
+
+// Wrapper widget to pass scroll callback to AllSwapsPage
+class AllSwapsPageWithScrollCallback extends StatefulWidget {
+  final String? filterSkill;
+  final Function(double) onScroll;
+  
+  const AllSwapsPageWithScrollCallback({
+    super.key, 
+    this.filterSkill, 
+    required this.onScroll,
+  });
+
+  @override
+  State<AllSwapsPageWithScrollCallback> createState() => _AllSwapsPageWithScrollCallbackState();
+}
+
+class _AllSwapsPageWithScrollCallbackState extends State<AllSwapsPageWithScrollCallback> {
+  @override
+  Widget build(BuildContext context) {
+    return AllSwapsPage(
+      filterSkill: widget.filterSkill,
+      onScrollCallback: widget.onScroll,
     );
   }
 }

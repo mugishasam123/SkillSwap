@@ -7,7 +7,9 @@ import '../../../profile/models/user_profile.dart';
 import '../../../profile/presentation/pages/user_profile_dialog.dart';
 
 class SuggestedSwapsPage extends StatefulWidget {
-  const SuggestedSwapsPage({super.key});
+  final Function(double)? onScrollCallback;
+  
+  const SuggestedSwapsPage({super.key, this.onScrollCallback});
 
   @override
   State<SuggestedSwapsPage> createState() => _SuggestedSwapsPageState();
@@ -16,6 +18,32 @@ class SuggestedSwapsPage extends StatefulWidget {
 class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
   final SwapRepository _repository = SwapRepository();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ScrollController _scrollController = ScrollController();
+  double _lastScrollPosition = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final currentPosition = _scrollController.position.pixels;
+    
+    // Call the parent scroll callback for tab bar collapsible functionality
+    if (widget.onScrollCallback != null) {
+      widget.onScrollCallback!(currentPosition);
+    }
+    
+    _lastScrollPosition = currentPosition;
+  }
 
   void _viewSwap(Swap swap) async {
     // Increment view count
@@ -149,6 +177,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

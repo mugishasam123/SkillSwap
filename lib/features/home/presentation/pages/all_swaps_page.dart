@@ -8,8 +8,9 @@ import '../../../profile/presentation/pages/user_profile_dialog.dart';
 
 class AllSwapsPage extends StatefulWidget {
   final String? filterSkill;
+  final Function(double)? onScrollCallback;
   
-  const AllSwapsPage({super.key, this.filterSkill});
+  const AllSwapsPage({super.key, this.filterSkill, this.onScrollCallback});
 
   @override
   State<AllSwapsPage> createState() => _AllSwapsPageState();
@@ -18,12 +19,33 @@ class AllSwapsPage extends StatefulWidget {
 class _AllSwapsPageState extends State<AllSwapsPage> {
   final SwapRepository _repository = SwapRepository();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ScrollController _scrollController = ScrollController();
+  double _lastScrollPosition = 0;
   bool _showOfflineMockData = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     print('DEBUG: AllSwapsPage initState with filterSkill: ${widget.filterSkill}');
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final currentPosition = _scrollController.position.pixels;
+    
+    // Call the parent scroll callback for tab bar collapsible functionality
+    if (widget.onScrollCallback != null) {
+      widget.onScrollCallback!(currentPosition);
+    }
+    
+    _lastScrollPosition = currentPosition;
   }
 
   // Mock data for offline testing
@@ -378,6 +400,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
           );
         }
         return ListView.builder(
+          controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           itemCount: swaps.length,
           itemBuilder: (context, index) {
