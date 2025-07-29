@@ -235,60 +235,71 @@ class _MessageListPageState extends State<MessageListPage> {
               height: _isHeaderVisible ? (isLandscape ? 12 : 20) : 0,
             ),
             
-            // Responsive search bar
-            Container(
-              height: searchHeight,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: TextField(
-                style: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.white 
-                      : Colors.black,
-                  fontSize: isLandscape ? 14 : 16,
-                ),
-                onChanged: (value) => setState(() => _searchQuery = value),
-                decoration: InputDecoration(
-                  hintText: 'Search here',
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).brightness == Brightness.dark 
-                        ? Colors.grey[400]
-                        : Colors.grey[600],
-                    fontSize: isLandscape ? 14 : 16,
-                  ),
-                  suffixIcon: Container(
-                    margin: EdgeInsets.all(isLandscape ? 4 : 6),
-                    decoration: BoxDecoration(
+            // Collapsible search bar with animation
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              height: _isHeaderVisible ? searchHeight : 0,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: _isHeaderVisible ? 1.0 : 0.0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: TextField(
+                    style: TextStyle(
                       color: Theme.of(context).brightness == Brightness.dark 
-                          ? const Color(0xFF3E8E7E)
-                          : const Color(0xFF225B4B),
-                      borderRadius: BorderRadius.circular(isLandscape ? 8 : 10),
+                          ? Colors.white 
+                          : Colors.black,
+                      fontSize: isLandscape ? 14 : 16,
                     ),
-                    width: isLandscape ? 32 : 36,
-                    height: isLandscape ? 32 : 36,
-                    child: Icon(
-                      Icons.search,
-                      color: Colors.white,
-                      size: isLandscape ? 18 : 22,
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    decoration: InputDecoration(
+                      hintText: 'Search here',
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey[400]
+                            : Colors.grey[600],
+                        fontSize: isLandscape ? 14 : 16,
+                      ),
+                      suffixIcon: Container(
+                        margin: EdgeInsets.all(isLandscape ? 4 : 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? const Color(0xFF3E8E7E)
+                              : const Color(0xFF225B4B),
+                          borderRadius: BorderRadius.circular(isLandscape ? 8 : 10),
+                        ),
+                        width: isLandscape ? 32 : 36,
+                        height: isLandscape ? 32 : 36,
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.white,
+                          size: isLandscape ? 18 : 22,
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(isLandscape ? 12 : 16),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF2A2A2A)
+                          : Colors.grey[200],
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: isLandscape ? 12 : 16,
+                        vertical: isLandscape ? 8 : 12,
+                      ),
                     ),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(isLandscape ? 12 : 16),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark 
-                      ? const Color(0xFF2A2A2A)
-                      : Colors.grey[200],
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: isLandscape ? 12 : 16,
-                    vertical: isLandscape ? 8 : 12,
                   ),
                 ),
               ),
             ),
             
-            // Responsive spacing
-            SizedBox(height: isLandscape ? 8 : 16),
+            // Responsive spacing (only when header is visible)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: _isHeaderVisible ? (isLandscape ? 8 : 16) : 0,
+            ),
             
             // Chat list with responsive sizing and scroll controller
             Expanded(

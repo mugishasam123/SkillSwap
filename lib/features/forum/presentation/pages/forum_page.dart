@@ -13,8 +13,47 @@ class ForumPage extends StatefulWidget {
 
 class _ForumPageState extends State<ForumPage> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final ForumRepository _repository = ForumRepository();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isHeaderVisible = true;
+  double _lastScrollPosition = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final currentPosition = _scrollController.position.pixels;
+    
+    // Add a small threshold to prevent jittery behavior
+    const scrollThreshold = 10.0;
+    
+    // Show header when scrolling up, hide when scrolling down
+    if (currentPosition > _lastScrollPosition + scrollThreshold && _isHeaderVisible) {
+      // Scrolling down - hide header
+      setState(() {
+        _isHeaderVisible = false;
+      });
+    } else if (currentPosition < _lastScrollPosition - scrollThreshold && !_isHeaderVisible) {
+      // Scrolling up - show header
+      setState(() {
+        _isHeaderVisible = true;
+      });
+    }
+    
+    _lastScrollPosition = currentPosition;
+  }
 
   void _sendMessage() {
     final message = _messageController.text.trim();
@@ -41,43 +80,70 @@ class _ForumPageState extends State<ForumPage> {
   }
 
   @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    // Get screen dimensions and orientation
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final padding = mediaQuery.padding;
+    
+    // Calculate responsive values
+    final headerHeight = isLandscape ? 60.0 : 80.0;
+    final inputBarHeight = isLandscape ? 70.0 : 80.0;
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
+      body: SafeArea(
+        child: Stack(
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child:               Text(
-                "Community Discussions",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 26,
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.white 
-                      : Color(0xFF121717),
-                  fontFamily: 'Poppins',
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Collapsible header with animation
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  height: _isHeaderVisible ? headerHeight : 0,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: _isHeaderVisible ? 1.0 : 0.0,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      child: Text(
+                        "Community Discussions",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: isLandscape ? 22 : 26,
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white 
+                              : Color(0xFF121717),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+                
+                // Discussion list with proper padding for input bar
+                Expanded(
+                  child: _buildDiscussionList(),
+                ),
+              ],
+            ),
+            // Input bar positioned at bottom with proper spacing
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                height: inputBarHeight + padding.bottom,
+                child: _buildMessageInputBar(),
               ),
             ),
-            Expanded(child: _buildDiscussionList()),
           ],
         ),
-        // Only keep the message input bar at the bottom
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: _buildMessageInputBar(),
-        ),
-      ],
+      ),
     );
   }
 
@@ -119,8 +185,10 @@ class _ForumPageState extends State<ForumPage> {
         }
         return Scrollbar(
           thumbVisibility: true,
+          controller: _scrollController,
           child: ListView.builder(
-            padding: EdgeInsets.only(bottom: 100),
+            controller: _scrollController,
+            padding: EdgeInsets.only(bottom: 120), // Increased padding to prevent overlap
             itemCount: discussions.length,
             itemBuilder: (context, index) {
               return _buildDiscussionCard(discussions[index]);
@@ -313,8 +381,11 @@ class _ForumPageState extends State<ForumPage> {
   }
 
   Widget _buildMessageInputBar() {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(isLandscape ? 16.0 : 20.0),
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark 
@@ -333,18 +404,18 @@ class _ForumPageState extends State<ForumPage> {
         child: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: EdgeInsets.symmetric(horizontal: isLandscape ? 12.0 : 16.0),
               child: Icon(
                 Icons.emoji_emotions_outlined,
                 color: Colors.grey,
-                size: 32,
+                size: isLandscape ? 28 : 32,
               ),
             ),
             Expanded(
               child: TextField(
                 controller: _messageController,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isLandscape ? 16 : 18,
                   color: Theme.of(context).brightness == Brightness.dark 
                       ? Colors.white 
                       : Colors.black,
@@ -357,16 +428,16 @@ class _ForumPageState extends State<ForumPage> {
                         ? Colors.grey[400]
                         : Color(0xFFBDBDBD),
                     fontFamily: 'Poppins',
-                    fontSize: 18,
+                    fontSize: isLandscape ? 16 : 18,
                   ),
                 ),
                 onSubmitted: (_) => _sendMessage(),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12.0,
-                vertical: 4.0,
+              padding: EdgeInsets.symmetric(
+                horizontal: isLandscape ? 8.0 : 12.0,
+                vertical: isLandscape ? 2.0 : 4.0,
               ),
               child: Container(
                 decoration: BoxDecoration(
@@ -374,7 +445,11 @@ class _ForumPageState extends State<ForumPage> {
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.send, color: Colors.white, size: 24),
+                  icon: Icon(
+                    Icons.send, 
+                    color: Colors.white, 
+                    size: isLandscape ? 20 : 24
+                  ),
                   onPressed: _sendMessage,
                 ),
               ),
