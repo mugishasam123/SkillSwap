@@ -62,18 +62,42 @@ final searchHeight = isLandscape ? 50.0 : 60.0;
    - **Smooth animations** with 300ms duration
    - **Responsive height** adjusts from 80px (portrait) to 60px (landscape)
    - **Font sizes** scale appropriately for landscape mode
-2. **Fixed Input Bar Positioning**:
-   - **No longer overlaps posts** - proper bottom padding added (160px)
-   - **Responsive sizing** for landscape and portrait modes
-   - **SafeArea integration** for proper system UI handling
-   - **Extra padding** (20px) added to input bar container
+2. **Floating Action Button Input System**:
+   - **Orange floating action button** (like message page) for creating posts
+   - **Collapsible input area** - only shows when button is clicked
+   - **Dynamic padding** - adjusts based on input area visibility
+   - **More space for posts** - no permanent input area taking up space
+   - **Toggle functionality** - button changes to close icon when input is open
 3. **Responsive Discussion Cards**:
    - **Proper spacing** that adapts to screen orientation
-   - **Increased bottom padding** (160px) to prevent input bar overlap
+   - **Dynamic bottom padding** (20px when closed, 160px when open)
    - **ScrollController integration** for header collapse behavior
 4. **Scroll Callback Integration**:
    - **Communicates with parent** for tab bar collapsible functionality
    - **Synchronized scrolling** across all tabs
+
+#### Floating Action Button Implementation:
+```dart
+// Toggle input area visibility
+void _toggleInputArea() {
+  setState(() {
+    _showInputArea = !_showInputArea;
+  });
+}
+
+// Floating action button
+floatingActionButton: FloatingActionButton(
+  onPressed: _toggleInputArea,
+  backgroundColor: Colors.orange,
+  child: Icon(
+    _showInputArea ? Icons.close : Icons.add,
+    color: Colors.white,
+  ),
+),
+
+// Dynamic padding based on input area visibility
+padding: EdgeInsets.only(bottom: _showInputArea ? 160 : 20),
+```
 
 #### Collapsible Header Implementation:
 ```dart
@@ -110,7 +134,7 @@ void _onScroll() {
 ```dart
 final headerHeight = isLandscape ? 60.0 : 80.0;
 final inputBarHeight = isLandscape ? 70.0 : 80.0;
-final bottomPadding = 160.0; // Increased to prevent overlap
+final dynamicPadding = _showInputArea ? 160.0 : 20.0; // Dynamic based on input visibility
 ```
 
 ### Home Page (`home_page.dart`)
@@ -203,8 +227,8 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 
 1. **Collapsible Headers & Tab Bar**: All headers and tab bars automatically hide when scrolling down and reappear when scrolling up
 2. **No Overlapping Elements**: All UI elements now properly scale and position themselves in landscape mode
-3. **Fixed Input Bar**: Forum input bar no longer overlaps posts with proper bottom padding (160px)
-4. **Better Content Visibility**: More screen space available for content when headers are collapsed
+3. **Floating Action Button Input**: Forum page now uses a floating action button instead of always-visible input area
+4. **Better Content Visibility**: More screen space available for content when headers are collapsed and input area is hidden
 5. **Smooth Animations**: 300ms smooth transitions for header show/hide
 6. **Better Space Utilization**: Landscape mode makes better use of the wider screen
 7. **Consistent Experience**: UI maintains visual consistency across orientations
@@ -222,8 +246,10 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 
 ### Forum Page Specific:
 - **"Community Discussions" title** collapses with scroll
-- **Input bar stays fixed** at bottom without overlapping posts
-- **Proper spacing** between posts and input area (160px bottom padding)
+- **Floating action button** for creating posts (orange, like message page)
+- **Collapsible input area** - only shows when button is clicked
+- **Dynamic spacing** - adjusts based on input area visibility
+- **More space for posts** - no permanent input area taking up space
 - **Responsive sizing** for all elements
 
 ### Tab Bar Specific:
