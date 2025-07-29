@@ -14,15 +14,19 @@ class MessageListPage extends StatefulWidget {
 
 class _MessageListPageState extends State<MessageListPage> {
   final MessageRepository repository = MessageRepository();
+  final ScrollController _scrollController = ScrollController();
   List<Chat> _chats = [];
   String _searchQuery = '';
   bool _isLoading = true;
   int _unreadCount = 0;
   Stream<List<Chat>>? _chatStream;
+  bool _isHeaderVisible = true;
+  double _lastScrollPosition = 0;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null) {
       _chatStream = repository.getUserChats(userId);
@@ -49,6 +53,35 @@ class _MessageListPageState extends State<MessageListPage> {
         _isLoading = false;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final currentPosition = _scrollController.position.pixels;
+    
+    // Add a small threshold to prevent jittery behavior
+    const scrollThreshold = 10.0;
+    
+    // Show header when scrolling up, hide when scrolling down
+    if (currentPosition > _lastScrollPosition + scrollThreshold && _isHeaderVisible) {
+      // Scrolling down - hide header
+      setState(() {
+        _isHeaderVisible = false;
+      });
+    } else if (currentPosition < _lastScrollPosition - scrollThreshold && !_isHeaderVisible) {
+      // Scrolling up - show header
+      setState(() {
+        _isHeaderVisible = true;
+      });
+    }
+    
+    _lastScrollPosition = currentPosition;
   }
 
   Future<Map<String, dynamic>?> _getUserInfo(String userId) async {
@@ -158,38 +191,49 @@ class _MessageListPageState extends State<MessageListPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Responsive header
-            Container(
-              height: headerHeight,
-              padding: EdgeInsets.fromLTRB(horizontalPadding, 8, horizontalPadding, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: _buildHeader(context, _unreadCount, isLandscape),
+            // Collapsible header with animation
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              height: _isHeaderVisible ? headerHeight : 0,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: _isHeaderVisible ? 1.0 : 0.0,
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(horizontalPadding, 8, horizontalPadding, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: _buildHeader(context, _unreadCount, isLandscape),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _unreadCount > 0
+                              ? Icons.notifications
+                              : Icons.notifications_none,
+                          color: _unreadCount > 0 
+                              ? Colors.orange 
+                              : (Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.white 
+                                  : Colors.black),
+                          size: isLandscape ? 24 : 28,
+                        ),
+                        onPressed: () {},
+                        tooltip: 'Notifications',
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: Icon(
-                      _unreadCount > 0
-                          ? Icons.notifications
-                          : Icons.notifications_none,
-                      color: _unreadCount > 0 
-                          ? Colors.orange 
-                          : (Theme.of(context).brightness == Brightness.dark 
-                              ? Colors.white 
-                              : Colors.black),
-                      size: isLandscape ? 24 : 28,
-                    ),
-                    onPressed: () {},
-                    tooltip: 'Notifications',
-                  ),
-                ],
+                ),
               ),
             ),
             
-            // Responsive spacing
-            SizedBox(height: isLandscape ? 12 : 20),
+            // Responsive spacing (only when header is visible)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: _isHeaderVisible ? (isLandscape ? 12 : 20) : 0,
+            ),
             
             // Responsive search bar
             Container(
@@ -246,7 +290,7 @@ class _MessageListPageState extends State<MessageListPage> {
             // Responsive spacing
             SizedBox(height: isLandscape ? 8 : 16),
             
-            // Chat list with responsive sizing
+            // Chat list with responsive sizing and scroll controller
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -264,7 +308,9 @@ class _MessageListPageState extends State<MessageListPage> {
                     )
                   : Scrollbar(
                       thumbVisibility: true,
+                      controller: _scrollController,
                       child: ListView.builder(
+                        controller: _scrollController,
                         itemCount: filteredChats.length,
                         itemBuilder: (context, index) {
                           final chat = filteredChats[index];
