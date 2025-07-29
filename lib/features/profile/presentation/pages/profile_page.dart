@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +9,8 @@ import '../../models/user_profile.dart';
 import 'edit_profile_page.dart';
 import '../../../swap/presentation/pages/swap_library_page.dart';
 import '../../../../core/widgets/theme_switch.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -75,6 +78,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       return const Center(
                         child: Text('Profile not found'),
                       );
+                    }
+
+                    // Check if profile needs completion
+                    if (userProfile.isProfileComplete == false) {
+                      return _buildProfileCompletionPrompt(context, userProfile);
                     }
 
                     return Container(
@@ -817,6 +825,90 @@ class _ProfilePageState extends State<ProfilePage> {
             child: const Text('Remove'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileCompletionPrompt(BuildContext context, UserProfile userProfile) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.person_add,
+                size: 80,
+                color: Color(0xFF225B4B),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Complete Your Profile',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : const Color(0xFF225B4B),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Welcome to SkillSwap! Please complete your profile to start swapping skills with others.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[300]
+                      : Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF225B4B),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditProfilePage(
+                          userProfile: userProfile,
+                          isNewUser: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Complete Profile',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  // Sign out using auth bloc
+                  context.read<AuthBloc>().add(const AuthSignOutRequested());
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                child: const Text(
+                  'Sign Out',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

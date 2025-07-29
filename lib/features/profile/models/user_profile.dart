@@ -15,6 +15,7 @@ class UserProfile {
   final bool notificationsEnabled;
   final Map<String, dynamic> privacySettings;
   final String? avatarUrl;
+  final bool? isProfileComplete;
 
   UserProfile({
     required this.uid,
@@ -31,6 +32,7 @@ class UserProfile {
     required this.notificationsEnabled,
     required this.privacySettings,
     this.avatarUrl,
+    this.isProfileComplete,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json, String id) {
@@ -59,6 +61,7 @@ class UserProfile {
       notificationsEnabled: json['notificationsEnabled'] ?? true,
       privacySettings: Map<String, dynamic>.from(json['privacySettings'] ?? {}),
       avatarUrl: json['avatarUrl'],
+      isProfileComplete: json['isProfileComplete'],
     );
   }
 
@@ -78,6 +81,7 @@ class UserProfile {
       'notificationsEnabled': notificationsEnabled,
       'privacySettings': privacySettings,
       'avatarUrl': avatarUrl,
+      'isProfileComplete': isProfileComplete,
     };
   }
 
@@ -96,6 +100,7 @@ class UserProfile {
     bool? notificationsEnabled,
     Map<String, dynamic>? privacySettings,
     String? avatarUrl,
+    bool? isProfileComplete,
   }) {
     return UserProfile(
       uid: uid ?? this.uid,
@@ -112,6 +117,7 @@ class UserProfile {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       privacySettings: privacySettings ?? this.privacySettings,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      isProfileComplete: isProfileComplete ?? this.isProfileComplete,
     );
   }
 } 

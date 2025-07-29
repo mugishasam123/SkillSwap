@@ -9,8 +9,9 @@ import '../../../../core/widgets/theme_switch.dart';
 
 class EditProfilePage extends StatefulWidget {
   final UserProfile userProfile;
+  final bool isNewUser;
 
-  const EditProfilePage({super.key, required this.userProfile});
+  const EditProfilePage({super.key, required this.userProfile, this.isNewUser = false});
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -794,14 +795,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
         availability: _selectedAvailability,
       );
 
+      // If this is a new user, set isProfileComplete to true
+      if (widget.isNewUser) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'isProfileComplete': true});
+        }
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully!'),
+          SnackBar(
+            content: Text(widget.isNewUser 
+                ? 'Profile completed successfully! Welcome to SkillSwap!' 
+                : 'Profile updated successfully!'),
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context);
+        
+        if (widget.isNewUser) {
+          // Navigate to home for new users
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          // Go back for existing users
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       if (mounted) {
