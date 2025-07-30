@@ -252,6 +252,8 @@ class _MessageListPageState extends State<MessageListPage> {
                     : Colors.black,
                       fontSize: isLandscape ? 14 : 16,
               ),
+              textInputAction: TextInputAction.search,
+              keyboardType: TextInputType.text,
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
                 hintText: 'Search here',

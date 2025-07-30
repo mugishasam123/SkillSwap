@@ -446,6 +446,8 @@ class _ForumPageState extends State<ForumPage> {
                       ? Colors.white 
                       : Colors.black,
                 ),
+                textInputAction: TextInputAction.send,
+                keyboardType: TextInputType.text,
                 decoration: InputDecoration(
                   hintText: "Type message here...",
                   border: InputBorder.none,

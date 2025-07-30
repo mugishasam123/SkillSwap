@@ -269,6 +269,8 @@ class _ChatPageState extends State<ChatPage> {
                               : Colors.black,
                           fontSize: isLandscape ? 14 : 16,
                         ),
+                        textInputAction: TextInputAction.send,
+                        keyboardType: TextInputType.text,
                         onSubmitted: _sendMessage,
                         decoration: InputDecoration(
                           hintText: 'Type message here...',
