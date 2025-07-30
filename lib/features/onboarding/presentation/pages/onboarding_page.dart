@@ -51,113 +51,99 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final page = _pages[_currentPage];
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                Image.asset('assets/images/logo.png', height: 200),
-                const SizedBox(height: 4),
-                // const Text(
-                //   'Learn. Teach. Thrive.',
-                //   style: TextStyle(
-                //     fontSize: 15,
-                //     color: Color(0xFF225B4B),
-                //     fontWeight: FontWeight.w500,
-                //   ),
-                // ),
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: _pages.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentPage = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      final page = _pages[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(page.imageAsset, height: 200),
-                            const SizedBox(height: 32),
-                            Text(
-                              page.title,
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF225B4B),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              page.description,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                                height: 1.5,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Dot indicators
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    _pages.length,
-                    (index) => _buildDot(index),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Navigation buttons
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      if (_currentPage != _pages.length - 1)
-                        Row(
-                          children: [
-                            TextButton(
-                              onPressed: _skip,
-                              child: const Text('Skip', style: TextStyle(color: Colors.grey)),
-                            ),
-                            const Spacer(),
-                            ElevatedButton(
-                              onPressed: _nextPage,
-                              child: const Icon(Icons.arrow_forward, color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      if (_currentPage == _pages.length - 1)
-                        ElevatedButton(
-                          onPressed: _goToAuth,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF225B4B),
-                            padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Image.asset('assets/images/logo.png', height: 200),
+            const SizedBox(height: 4),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _pages.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final page = _pages[index];
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(page.imageAsset, height: 200),
+                        const SizedBox(height: 32),
+                        Text(
+                          page.title,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF225B4B),
                           ),
-                          child: const Text('Get started',
-                            style: TextStyle(fontSize: 18, color: Colors.white)),
+                          textAlign: TextAlign.center,
                         ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                        const SizedBox(height: 16),
+                        Text(
+                          page.description,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
+            const SizedBox(height: 24),
+            // Dot indicators
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _pages.length,
+                (index) => _buildDot(index),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Navigation buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  if (_currentPage != _pages.length - 1)
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: _skip,
+                          child: const Text('Skip', style: TextStyle(color: Colors.grey)),
+                        ),
+                        const Spacer(),
+                        ElevatedButton(
+                          onPressed: _nextPage,
+                          child: const Icon(Icons.arrow_forward, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  if (_currentPage == _pages.length - 1)
+                    ElevatedButton(
+                      onPressed: _goToAuth,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF225B4B),
+                        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                      ),
+                      child: const Text('Get started',
+                        style: TextStyle(fontSize: 18, color: Colors.white)),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );

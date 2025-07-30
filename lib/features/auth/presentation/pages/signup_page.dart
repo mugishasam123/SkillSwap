@@ -11,45 +11,45 @@ class SignupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Green corner background
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/images/splash_corner.png',
-              width: 120,
-              height: 120,
-              fit: BoxFit.cover,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Green corner background
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Image.asset(
+                'assets/images/splash_corner.png',
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset('assets/images/logo.png', height: 250),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Create Account',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/images/logo.png', height: 250),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Create Account',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
-                            const SizedBox(height: 32),
-                            _SignupForm(),
-                          ],
-                        ),
                       ),
-                    ),
+                      const SizedBox(height: 32),
+                      _SignupForm(),
+                    ],
                   ),
-          ),
-        ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

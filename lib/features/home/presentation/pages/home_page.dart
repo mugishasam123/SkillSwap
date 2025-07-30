@@ -91,10 +91,9 @@ class _HomePageState extends State<HomePage> {
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final padding = mediaQuery.padding;
     
-    // Calculate responsive values with more precise system UI consideration
-    final headerHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
-    final bottomNavHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
-    final extraPadding = isLandscape ? 2.0 : 4.0; // Extra padding to prevent overflow
+    // Calculate responsive values with proper system UI consideration
+    final headerHeight = isLandscape ? 50.0 : 70.0;
+    final bottomNavHeight = isLandscape ? 50.0 : 70.0;
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -116,18 +115,18 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const ThemeSwitch(),
-                    SizedBox(height: isLandscape ? 4 : 8), // Reduced spacing
+                    SizedBox(height: isLandscape ? 4 : 8),
                     if (_selectedIndex != 1 && _selectedIndex != 3)
-                      SizedBox(height: isLandscape ? 8 : 16), // Reduced spacing
+                      SizedBox(height: isLandscape ? 8 : 16),
                   ],
                 ),
               ),
             ),
-            // Main content area with precise overflow handling
+            // Main content area with proper overflow handling
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(
-                  bottom: bottomNavHeight + padding.bottom + extraPadding
+                  bottom: bottomNavHeight + padding.bottom
                 ),
                 child: pages[_selectedIndex],
               ),
@@ -137,7 +136,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: null,
       bottomNavigationBar: Container(
-        height: bottomNavHeight + padding.bottom + extraPadding,
+        height: bottomNavHeight + padding.bottom,
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark 
               ? const Color(0xFF1E1E1E)

@@ -28,7 +28,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final padding = mediaQuery.padding;
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -94,8 +93,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     return SingleChildScrollView(
                       padding: EdgeInsets.symmetric(
-                        horizontal: isLandscape ? 12 : 16, // Reduced horizontal padding
-                        vertical: isLandscape ? 8 : 12 // Reduced vertical padding
+                        horizontal: isLandscape ? 12 : 16,
+                        vertical: isLandscape ? 8 : 12
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Row(
                           children: [
                             IconButton(
-                              icon: Icon(Icons.arrow_back, size: isLandscape ? 22 : 26), // Reduced icon size
+                              icon: Icon(Icons.arrow_back, size: isLandscape ? 22 : 26),
                               onPressed: () {
                                 if (widget.onBackToHome != null) {
                                   widget.onBackToHome!();
@@ -118,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             Text(
                               'Your Profile',
                               style: TextStyle(
-                                fontSize: isLandscape ? 18 : 22, // Reduced font size
+                                fontSize: isLandscape ? 18 : 22,
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).brightness == Brightness.dark
                                     ? Colors.white
@@ -127,28 +126,28 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             const Spacer(),
                             IconButton(
-                              icon: Icon(Icons.edit, size: isLandscape ? 18 : 22), // Reduced icon size
+                              icon: Icon(Icons.edit, size: isLandscape ? 18 : 22),
                               onPressed: () => _navigateToEditProfile(userProfile),
                             ),
                           ],
                         ),
-                        SizedBox(height: isLandscape ? 12 : 20), // Reduced spacing
+                        SizedBox(height: isLandscape ? 12 : 20),
 
                         // Profile Picture and Basic Info
                         _buildProfileSection(userProfile),
-                        SizedBox(height: isLandscape ? 12 : 20), // Reduced spacing
+                        SizedBox(height: isLandscape ? 12 : 20),
 
                         // Key Information Block
                         _buildKeyInfoSection(userProfile),
-                        SizedBox(height: isLandscape ? 12 : 20), // Reduced spacing
+                        SizedBox(height: isLandscape ? 12 : 20),
 
                         // Skill Library Section
                         _buildSkillLibrarySection(userProfile),
-                        SizedBox(height: isLandscape ? 12 : 20), // Reduced spacing
+                        SizedBox(height: isLandscape ? 12 : 20),
 
                         // Reviews Section
                         _buildReviewsSection(userProfile),
-                        SizedBox(height: isLandscape ? 16 : 24), // Reduced spacing
+                        SizedBox(height: isLandscape ? 16 : 24),
                         ],
                       ),
                     );

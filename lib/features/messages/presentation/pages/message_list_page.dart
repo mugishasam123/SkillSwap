@@ -174,12 +174,9 @@ class _MessageListPageState extends State<MessageListPage> {
     // Get screen dimensions and orientation
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final screenHeight = mediaQuery.size.height;
-    final screenWidth = mediaQuery.size.width;
     final padding = mediaQuery.padding;
     
     // Calculate responsive values
-    final topPadding = isLandscape ? padding.top + 8 : padding.top + 16;
     final horizontalPadding = isLandscape ? 24.0 : 16.0;
     final headerHeight = isLandscape ? 60.0 : 80.0;
     final searchHeight = isLandscape ? 50.0 : 60.0;
