@@ -102,7 +102,6 @@ class _ForumPageState extends State<ForumPage> {
     // Get screen dimensions and orientation
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final padding = mediaQuery.padding;
     
     // Calculate responsive values
     final headerHeight = isLandscape ? 60.0 : 80.0;
@@ -150,7 +149,7 @@ class _ForumPageState extends State<ForumPage> {
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              height: _showInputArea ? inputBarHeight + padding.bottom + 20 : 0,
+              height: _showInputArea ? inputBarHeight + 20 : 0,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 300),
                 opacity: _showInputArea ? 1.0 : 0.0,
@@ -212,7 +211,7 @@ class _ForumPageState extends State<ForumPage> {
           controller: _scrollController,
           child: ListView.builder(
             controller: _scrollController,
-            padding: EdgeInsets.only(bottom: _showInputArea ? 160 : 20), // Dynamic padding based on input area visibility
+            padding: EdgeInsets.only(bottom: _showInputArea ? 120 : 20), // Reduced dynamic padding to prevent overflow
             itemCount: discussions.length,
             itemBuilder: (context, index) {
               return _buildDiscussionCard(discussions[index]);
@@ -407,10 +406,9 @@ class _ForumPageState extends State<ForumPage> {
   Widget _buildMessageInputBar() {
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final padding = mediaQuery.padding;
     
     return Container(
-      height: isLandscape ? 70.0 : 80.0 + padding.bottom + 20,
+      height: isLandscape ? 70.0 : 80.0,
       padding: EdgeInsets.all(isLandscape ? 16.0 : 20.0),
       child: Container(
         decoration: BoxDecoration(

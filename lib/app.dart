@@ -26,6 +26,46 @@ class BannerFreeWidget extends StatelessWidget {
   }
 }
 
+// Custom layout wrapper to prevent overflow issues
+class OverflowSafeWidget extends StatelessWidget {
+  final Widget child;
+  
+  const OverflowSafeWidget({super.key, required this.child});
+  
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        // Ensure proper viewport sizing
+        viewInsets: EdgeInsets.zero,
+        // Remove any extra padding that might cause overflow
+        padding: EdgeInsets.zero,
+      ),
+      child: child,
+    );
+  }
+}
+
+// Custom builder to handle overflow issues in MaterialApp
+class OverflowSafeBuilder extends StatelessWidget {
+  final Widget child;
+  
+  const OverflowSafeBuilder({super.key, required this.child});
+  
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        // Ensure proper viewport sizing
+        viewInsets: EdgeInsets.zero,
+        // Remove any extra padding that might cause overflow
+        padding: EdgeInsets.zero,
+      ),
+      child: child,
+    );
+  }
+}
+
 class SkillSwapApp extends StatelessWidget {
   const SkillSwapApp({super.key});
 
@@ -39,28 +79,34 @@ class SkillSwapApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
           return BannerFreeWidget(
-            child: MaterialApp(
-              title: 'SkillSwap',
-              debugShowCheckedModeBanner: false, // Disable the debug banner
-              showSemanticsDebugger: false, // Disable semantics debugger
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode: themeState is ThemeLoaded && themeState.isDarkMode
-                  ? ThemeMode.dark
-                  : ThemeMode.light,
-              initialRoute: '/splash',
-              routes: {
-                '/splash': (context) => const SplashPage(),
-                '/onboarding': (context) => const OnboardingPage(),
-                '/login': (context) => const LoginPage(),
-                '/signup': (context) => const SignupPage(),
-                '/home': (context) => HomePage(arguments: ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?),
-                '/swap': (context) => const SwapPage(),
-                '/messages': (context) => MessageListPage(),
-                '/profile': (context) => const ProfilePage(),
-                '/settings': (context) => const SettingsPage(),
-                '/about': (context) => const AboutPage(),
-              },
+            child: OverflowSafeWidget(
+              child: MaterialApp(
+                title: 'SkillSwap',
+                debugShowCheckedModeBanner: false, // Disable the debug banner
+                showSemanticsDebugger: false, // Disable semantics debugger
+                builder: (context, child) {
+                  // Custom builder to ensure no overflow
+                  return OverflowSafeBuilder(child: child!);
+                },
+                theme: AppTheme.lightTheme,
+                darkTheme: AppTheme.darkTheme,
+                themeMode: themeState is ThemeLoaded && themeState.isDarkMode
+                    ? ThemeMode.dark
+                    : ThemeMode.light,
+                initialRoute: '/splash',
+                routes: {
+                  '/splash': (context) => const SplashPage(),
+                  '/onboarding': (context) => const OnboardingPage(),
+                  '/login': (context) => const LoginPage(),
+                  '/signup': (context) => const SignupPage(),
+                  '/home': (context) => HomePage(arguments: ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?),
+                  '/swap': (context) => const SwapPage(),
+                  '/messages': (context) => MessageListPage(),
+                  '/profile': (context) => const ProfilePage(),
+                  '/settings': (context) => const SettingsPage(),
+                  '/about': (context) => const AboutPage(),
+                },
+              ),
             ),
           );
         },

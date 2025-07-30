@@ -271,7 +271,7 @@ class _SuggestedSwapsPageState extends State<SuggestedSwapsPage> {
           
           _buildSkillGrid(),
           
-          const SizedBox(height: 100), // Bottom padding for FAB
+          const SizedBox(height: 20), // Reduced bottom padding to prevent overflow
         ],
       ),
     );

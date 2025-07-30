@@ -117,354 +117,357 @@ class _SwapPageState extends State<SwapPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.only(left: 0, bottom: 10),
-              child: Text(
-                'Send a Swap',
-                style: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.white 
-                      : Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ),
-            Text(
-              'What would you like to learn?',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.white 
-                    : textBlack,
-                fontFamily: 'Poppins',
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _learnController,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Poppins',
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.white 
-                    : textBlack,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Type here',
-                hintStyle: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.grey[400]
-                      : textGrey, 
-                  fontSize: 15, 
-                  fontFamily: 'Poppins'
-                ),
-                filled: true,
-                fillColor: Theme.of(context).brightness == Brightness.dark 
-                    ? const Color(0xFF2A2A2A)
-                    : lightGrey,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-              onChanged: (_) => setState(() {}),
-              onSubmitted: (value) {
-                final trimmed = value.trim();
-                if (trimmed.isNotEmpty && !_learnSkills.contains(trimmed)) {
-                  setState(() {
-                    _learnSkills.add(trimmed);
-                    _learnController.clear();
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: _learnSkills.map((skill) => Chip(
-                label: Text(
-                  skill, 
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 0, bottom: 10),
+                child: Text(
+                  'Send a Swap',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
                     color: Theme.of(context).brightness == Brightness.dark 
                         ? Colors.white 
                         : Colors.black,
-                  )
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-                deleteIcon: Icon(
-                  Icons.close, 
-                  size: 18,
+              ),
+              Text(
+                'What would you like to learn?',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
                   color: Theme.of(context).brightness == Brightness.dark 
                       ? Colors.white 
-                      : Colors.black,
+                      : textBlack,
+                  fontFamily: 'Poppins',
                 ),
-                onDeleted: () {
-                  setState(() {
-                    _learnSkills.remove(skill);
-                  });
-                },
-                backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                    ? const Color(0xFF2A2A2A)
-                    : lightGrey,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              )).toList(),
-            ),
-            const SizedBox(height: 28),
-            Text(
-              'When do you want to learn?',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.white 
-                    : textBlack,
-                fontFamily: 'Poppins',
               ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate ?? DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) {
-                        setState(() => _selectedDate = picked);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.dark 
-                            ? const Color(0xFF2A2A2A)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.grey[700]!
-                              : borderGrey
+              const SizedBox(height: 10),
+              TextField(
+                controller: _learnController,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Poppins',
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : textBlack,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Type here',
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400]
+                        : textGrey, 
+                    fontSize: 15, 
+                    fontFamily: 'Poppins'
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.dark 
+                      ? const Color(0xFF2A2A2A)
+                      : lightGrey,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+                onChanged: (_) => setState(() {}),
+                onSubmitted: (value) {
+                  final trimmed = value.trim();
+                  if (trimmed.isNotEmpty && !_learnSkills.contains(trimmed)) {
+                    setState(() {
+                      _learnSkills.add(trimmed);
+                      _learnController.clear();
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: _learnSkills.map((skill) => Chip(
+                  label: Text(
+                    skill, 
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.white 
+                          : Colors.black,
+                    )
+                  ),
+                  deleteIcon: Icon(
+                    Icons.close, 
+                    size: 18,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white 
+                        : Colors.black,
+                  ),
+                  onDeleted: () {
+                    setState(() {
+                      _learnSkills.remove(skill);
+                    });
+                  },
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                      ? const Color(0xFF2A2A2A)
+                      : lightGrey,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                )).toList(),
+              ),
+              const SizedBox(height: 28),
+              Text(
+                'When do you want to learn?',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : textBlack,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDate ?? DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setState(() => _selectedDate = picked);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? const Color(0xFF2A2A2A)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey[700]!
+                                : borderGrey
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today, 
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.grey[400]
+                                  : textGrey, 
+                              size: 20
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _selectedDate != null
+                                  ? DateFormat('MMM d, yyyy').format(_selectedDate!)
+                                  : 'Select date',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Theme.of(context).brightness == Brightness.dark 
+                                    ? Colors.white 
+                                    : textBlack,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today, 
-                            color: Theme.of(context).brightness == Brightness.dark 
-                                ? Colors.grey[400]
-                                : textGrey, 
-                            size: 20
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selectedDate != null
-                                ? DateFormat('MMM d, yyyy').format(_selectedDate!)
-                                : 'Select date',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Theme.of(context).brightness == Brightness.dark 
-                                  ? Colors.white 
-                                  : textBlack,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final picked = await showTimePicker(
-                        context: context,
-                        initialTime: _selectedTime ?? TimeOfDay.now(),
-                      );
-                      if (picked != null) {
-                        setState(() => _selectedTime = picked);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.dark 
-                            ? const Color(0xFF2A2A2A)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.grey[700]!
-                              : borderGrey
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: _selectedTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() => _selectedTime = picked);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? const Color(0xFF2A2A2A)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey[700]!
+                                : borderGrey
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.access_time, 
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.grey[400]
+                                  : textGrey, 
+                              size: 20
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _selectedTime != null
+                                  ? _selectedTime!.format(context)
+                                  : 'Select time',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Theme.of(context).brightness == Brightness.dark 
+                                    ? Colors.white 
+                                    : textBlack,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.access_time, 
-                            color: Theme.of(context).brightness == Brightness.dark 
-                                ? Colors.grey[400]
-                                : textGrey, 
-                            size: 20
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selectedTime != null
-                                ? _selectedTime!.format(context)
-                                : 'Select time',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Theme.of(context).brightness == Brightness.dark 
-                                  ? Colors.white 
-                                  : textBlack,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Google Meet
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/google_meet.png',
-                  height: 80,
-                  width: 170,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(width: 80),
-                SizedBox(
-                  height: 40,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedPlatform == 'google_meet' 
-                          ? primaryBlue 
-                          : (Theme.of(context).brightness == Brightness.dark 
-                              ? const Color(0xFF2A2A2A)
-                              : lightGrey),
-                      foregroundColor: _selectedPlatform == 'google_meet' 
-                          ? Colors.white 
-                          : (Theme.of(context).brightness == Brightness.dark 
-                              ? Colors.white 
-                              : textBlack),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 28),
-                      elevation: 0,
-                      textStyle: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() => _selectedPlatform = 'google_meet');
-                    },
-                    child: const Text('Select'),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Google Meet
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/google_meet.png',
+                    height: 80,
+                    width: 170,
+                    fit: BoxFit.contain,
                   ),
-                ),
-              ],
-            ),
-            // Zoom
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/zoom.png',
-                  height: 50,
-                  width: 100,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(width: 150),
-                SizedBox(
-                  height: 40,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedPlatform == 'zoom' 
-                          ? primaryBlue 
-                          : (Theme.of(context).brightness == Brightness.dark 
-                              ? const Color(0xFF2A2A2A)
-                              : lightGrey),
-                      foregroundColor: _selectedPlatform == 'zoom' 
-                          ? Colors.white 
-                          : (Theme.of(context).brightness == Brightness.dark 
-                              ? Colors.white 
-                              : textBlack),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                  const SizedBox(width: 80),
+                  SizedBox(
+                    height: 40,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _selectedPlatform == 'google_meet' 
+                            ? primaryBlue 
+                            : (Theme.of(context).brightness == Brightness.dark 
+                                ? const Color(0xFF2A2A2A)
+                                : lightGrey),
+                        foregroundColor: _selectedPlatform == 'google_meet' 
+                            ? Colors.white 
+                            : (Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.white 
+                                : textBlack),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        elevation: 0,
+                        textStyle: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 28),
-                      elevation: 0,
-                      textStyle: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),
+                      onPressed: () {
+                        setState(() => _selectedPlatform = 'google_meet');
+                      },
+                      child: const Text('Select'),
                     ),
-                    onPressed: () {
-                      setState(() => _selectedPlatform = 'zoom');
-                    },
-                    child: const Text('Select'),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: orange,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                ],
+              ),
+              // Zoom
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/zoom.png',
+                    height: 50,
+                    width: 100,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 150),
+                  SizedBox(
+                    height: 40,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _selectedPlatform == 'zoom' 
+                            ? primaryBlue 
+                            : (Theme.of(context).brightness == Brightness.dark 
+                                ? const Color(0xFF2A2A2A)
+                                : lightGrey),
+                        foregroundColor: _selectedPlatform == 'zoom' 
+                            ? Colors.white 
+                            : (Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.white 
+                                : textBlack),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        elevation: 0,
+                        textStyle: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                      textStyle: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),
+                      onPressed: () {
+                        setState(() => _selectedPlatform = 'zoom');
+                      },
+                      child: const Text('Select'),
                     ),
-                    onPressed: _canSendRequest
-                        ? () async {
-                            await _sendSwapRequest(context, receiverIdFromArgs);
-                          }
-                        : null,
-                    child: const Text('Send Request'),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-          ],
+                ],
+              ),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: orange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        textStyle: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
+                      ),
+                      onPressed: _canSendRequest
+                          ? () async {
+                              await _sendSwapRequest(context, receiverIdFromArgs);
+                            }
+                          : null,
+                      child: const Text('Send Request'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: Container(
@@ -486,20 +489,20 @@ class _SwapPageState extends State<SwapPage> {
             ),
           ],
         ),
-                  child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            currentIndex: _selectedIndex,
-            onTap: _onTabTapped,
-            selectedItemColor: Theme.of(context).brightness == Brightness.dark 
-                ? const Color(0xFF3E8E7E)
-                : const Color(0xFF225B4B),
-            unselectedItemColor: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white70
-                : Colors.black,
-            showUnselectedLabels: true,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          currentIndex: _selectedIndex,
+          onTap: _onTabTapped,
+          selectedItemColor: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF3E8E7E)
+              : const Color(0xFF225B4B),
+          unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white70
+              : Colors.black,
+          showUnselectedLabels: true,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
