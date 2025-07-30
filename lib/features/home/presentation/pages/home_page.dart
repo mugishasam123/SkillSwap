@@ -91,9 +91,10 @@ class _HomePageState extends State<HomePage> {
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final padding = mediaQuery.padding;
     
-    // Calculate responsive values with proper system UI consideration
-    final headerHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
-    final bottomNavHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
+    // Calculate responsive values with more precise system UI consideration
+    final headerHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
+    final bottomNavHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
+    final extraPadding = isLandscape ? 2.0 : 4.0; // Extra padding to prevent overflow
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -115,17 +116,19 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const ThemeSwitch(),
-                    const SizedBox(height: 8),
+                    SizedBox(height: isLandscape ? 4 : 8), // Reduced spacing
                     if (_selectedIndex != 1 && _selectedIndex != 3)
-                      const SizedBox(height: 16),
+                      SizedBox(height: isLandscape ? 8 : 16), // Reduced spacing
                   ],
                 ),
               ),
             ),
-            // Main content area with proper overflow handling
+            // Main content area with precise overflow handling
             Expanded(
               child: Container(
-                margin: EdgeInsets.only(bottom: bottomNavHeight + padding.bottom),
+                margin: EdgeInsets.only(
+                  bottom: bottomNavHeight + padding.bottom + extraPadding
+                ),
                 child: pages[_selectedIndex],
               ),
             ),
@@ -134,7 +137,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: null,
       bottomNavigationBar: Container(
-        height: bottomNavHeight + padding.bottom,
+        height: bottomNavHeight + padding.bottom + extraPadding,
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark 
               ? const Color(0xFF1E1E1E)

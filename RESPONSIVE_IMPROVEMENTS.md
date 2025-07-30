@@ -263,16 +263,19 @@ final spacingHeight = isLandscape ? 6.0 : 8.0;
 #### Layout and Overflow Fixes:
 - **Fixed RenderFlex overflow** by properly handling system UI padding
 - **Adjusted SafeArea configuration** with `top: true, bottom: false`
-- **Reduced header height** in landscape mode (60px vs 80px)
-- **Reduced bottom navigation height** in landscape mode (60px vs 80px)
+- **Reduced header height** in landscape mode (50px vs 70px)
+- **Reduced bottom navigation height** in landscape mode (50px vs 70px)
 - **Proper margin calculations** for content area to prevent overlap
 - **Manual bottom padding handling** to account for system navigation bar
+- **Added extra padding buffers** to keep overflow under 3 pixels
+- **Reduced spacing between elements** in landscape mode
 
 #### Implementation:
 ```dart
-// Calculate responsive values with proper system UI consideration
-final headerHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
-final bottomNavHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
+// Calculate responsive values with more precise system UI consideration
+final headerHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
+final bottomNavHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
+final extraPadding = isLandscape ? 2.0 : 4.0; // Extra padding to prevent overflow
 
 return Scaffold(
   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -281,15 +284,27 @@ return Scaffold(
     bottom: false, // Handle bottom padding manually
     child: Column(
       children: [
-        // Collapsible header area
+        // Collapsible header area with reduced spacing
         AnimatedContainer(
           height: _isHeaderVisible ? headerHeight : 0,
-          // ... header content
+          child: AnimatedOpacity(
+            opacity: _isHeaderVisible ? 1.0 : 0.0,
+            child: Column(
+              children: [
+                const ThemeSwitch(),
+                SizedBox(height: isLandscape ? 4 : 8), // Reduced spacing
+                if (_selectedIndex != 1 && _selectedIndex != 3)
+                  SizedBox(height: isLandscape ? 8 : 16), // Reduced spacing
+              ],
+            ),
+          ),
         ),
-        // Main content area with proper overflow handling
+        // Main content area with precise overflow handling
         Expanded(
           child: Container(
-            margin: EdgeInsets.only(bottom: bottomNavHeight + padding.bottom),
+            margin: EdgeInsets.only(
+              bottom: bottomNavHeight + padding.bottom + extraPadding
+            ),
             child: pages[_selectedIndex],
           ),
         ),
@@ -297,7 +312,7 @@ return Scaffold(
     ),
   ),
   bottomNavigationBar: Container(
-    height: bottomNavHeight + padding.bottom,
+    height: bottomNavHeight + padding.bottom + extraPadding,
     // ... navigation bar content
   ),
 );
@@ -306,43 +321,44 @@ return Scaffold(
 ### Profile Page (`profile_page.dart`)
 
 #### Layout Improvements:
-- **Responsive padding** based on orientation (16px vs 20px horizontal, 12px vs 16px vertical)
-- **Responsive icon sizes** (24px vs 28px for back button, 20px vs 24px for edit button)
-- **Responsive text sizes** (20px vs 24px for title)
-- **Responsive spacing** between sections (16px vs 24px, 20px vs 32px)
+- **Responsive padding** based on orientation (12px vs 16px horizontal, 8px vs 12px vertical)
+- **Responsive icon sizes** (22px vs 26px for back button, 18px vs 22px for edit button)
+- **Responsive text sizes** (18px vs 22px for title)
+- **Responsive spacing** between sections (12px vs 20px, 16px vs 24px)
 - **Proper SafeArea configuration** to prevent system UI overlap
+- **Reduced spacing and padding** to minimize overflow
 
 #### Implementation:
 ```dart
 return SingleChildScrollView(
   padding: EdgeInsets.symmetric(
-    horizontal: isLandscape ? 16 : 20, 
-    vertical: isLandscape ? 12 : 16
+    horizontal: isLandscape ? 12 : 16, // Reduced horizontal padding
+    vertical: isLandscape ? 8 : 12 // Reduced vertical padding
   ),
   child: Column(
     children: [
-      // Header with responsive sizing
+      // Header with reduced responsive sizing
       Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, size: isLandscape ? 24 : 28),
+            icon: Icon(Icons.arrow_back, size: isLandscape ? 22 : 26), // Reduced icon size
             // ... onPressed
           ),
           Text(
             'Your Profile',
             style: TextStyle(
-              fontSize: isLandscape ? 20 : 24,
+              fontSize: isLandscape ? 18 : 22, // Reduced font size
               // ... other styles
             ),
           ),
           IconButton(
-            icon: Icon(Icons.edit, size: isLandscape ? 20 : 24),
+            icon: Icon(Icons.edit, size: isLandscape ? 18 : 22), // Reduced icon size
             // ... onPressed
           ),
         ],
       ),
-      SizedBox(height: isLandscape ? 16 : 24),
-      // ... other sections with responsive spacing
+      SizedBox(height: isLandscape ? 12 : 20), // Reduced spacing
+      // ... other sections with reduced responsive spacing
     ],
   ),
 );
@@ -382,9 +398,17 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 - **Adjusted SafeArea configuration** to prevent layout issues
 - **Reduced header and navigation heights** in landscape mode
 - **Proper margin and padding calculations** for different orientations
+- **Reduced overflow to under 3 pixels** by adding extra padding buffers
+- **Enhanced MediaQuery handling** with additional top and bottom buffers
+- **Custom MaterialApp builder** to ensure no banner overlays
 
 #### Implementation:
 ```dart
+// Calculate responsive values with more precise system UI consideration
+final headerHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
+final bottomNavHeight = isLandscape ? 50.0 : 70.0; // Further reduced for landscape
+final extraPadding = isLandscape ? 2.0 : 4.0; // Extra padding to prevent overflow
+
 // Custom wrapper to handle banner and layout issues
 class BannerFreeWidget extends StatelessWidget {
   final Widget child;
@@ -393,12 +417,19 @@ class BannerFreeWidget extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        // Ensure proper padding for system UI
-        padding: MediaQuery.of(context).padding.copyWith(
-          top: MediaQuery.of(context).padding.top,
-          bottom: MediaQuery.of(context).padding.bottom,
+      data: mediaQuery.copyWith(
+        // Ensure proper padding for system UI with extra buffer
+        padding: mediaQuery.padding.copyWith(
+          top: mediaQuery.padding.top + (isLandscape ? 2.0 : 4.0), // Extra top buffer
+          bottom: mediaQuery.padding.bottom + (isLandscape ? 2.0 : 4.0), // Extra bottom buffer
+        ),
+        // Ensure viewInsets are properly handled
+        viewInsets: mediaQuery.viewInsets.copyWith(
+          bottom: mediaQuery.viewInsets.bottom + (isLandscape ? 2.0 : 4.0), // Extra bottom buffer
         ),
       ),
       child: child,
@@ -410,6 +441,19 @@ MaterialApp(
   title: 'SkillSwap',
   debugShowCheckedModeBanner: false, // Disable the debug banner
   showSemanticsDebugger: false, // Disable semantics debugger
+  builder: (context, child) {
+    // Custom builder to ensure no banner overlays
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        // Add extra padding to prevent overflow
+        padding: MediaQuery.of(context).padding.copyWith(
+          top: MediaQuery.of(context).padding.top + 4.0,
+          bottom: MediaQuery.of(context).padding.bottom + 4.0,
+        ),
+      ),
+      child: child!,
+    );
+  },
   // ... other configurations
 )
 ```

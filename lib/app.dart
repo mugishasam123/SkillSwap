@@ -22,12 +22,19 @@ class BannerFreeWidget extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        // Ensure proper padding for system UI
-        padding: MediaQuery.of(context).padding.copyWith(
-          top: MediaQuery.of(context).padding.top,
-          bottom: MediaQuery.of(context).padding.bottom,
+      data: mediaQuery.copyWith(
+        // Ensure proper padding for system UI with extra buffer
+        padding: mediaQuery.padding.copyWith(
+          top: mediaQuery.padding.top + (isLandscape ? 2.0 : 4.0), // Extra top buffer
+          bottom: mediaQuery.padding.bottom + (isLandscape ? 2.0 : 4.0), // Extra bottom buffer
+        ),
+        // Ensure viewInsets are properly handled
+        viewInsets: mediaQuery.viewInsets.copyWith(
+          bottom: mediaQuery.viewInsets.bottom + (isLandscape ? 2.0 : 4.0), // Extra bottom buffer
         ),
       ),
       child: child,
@@ -52,6 +59,19 @@ class SkillSwapApp extends StatelessWidget {
               title: 'SkillSwap',
               debugShowCheckedModeBanner: false, // Disable the debug banner
               showSemanticsDebugger: false, // Disable semantics debugger
+              builder: (context, child) {
+                // Custom builder to ensure no banner overlays
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    // Add extra padding to prevent overflow
+                    padding: MediaQuery.of(context).padding.copyWith(
+                      top: MediaQuery.of(context).padding.top + 4.0,
+                      bottom: MediaQuery.of(context).padding.bottom + 4.0,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: themeState is ThemeLoaded && themeState.isDarkMode
