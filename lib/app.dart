@@ -28,6 +28,7 @@ class SkillSwapApp extends StatelessWidget {
         builder: (context, themeState) {
           return MaterialApp(
             title: 'SkillSwap',
+            debugShowCheckedModeBanner: false, // Disable the debug banner
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeState is ThemeLoaded && themeState.isDarkMode

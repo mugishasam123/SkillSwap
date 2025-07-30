@@ -1,7 +1,7 @@
 # Responsive Improvements for Message Pages
 
 ## Overview
-The message pages, forum page, and home page have been updated to be fully responsive and landscape-friendly. These improvements ensure that the UI elements don't overlap and the headers don't block content when the device is rotated to landscape mode. Additionally, **collapsible header** features have been added for better content visibility.
+The message pages, forum page, and home page have been updated to be fully responsive and landscape-friendly. These improvements ensure that the UI elements don't overlap and the headers don't block content when the device is rotated to landscape mode. Additionally, **collapsible header** features have been added for better content visibility. The debug banner has also been disabled to prevent the yellow and black diagonal stripe from appearing in landscape mode.
 
 ## Changes Made
 
@@ -276,6 +276,22 @@ final spacingHeight = isLandscape ? 6.0 : 8.0;
 final appBarHeight = isLandscape ? 50.0 : 56.0;
 final avatarRadius = isLandscape ? 16.0 : 20.0;
 final inputHeight = isLandscape ? 45.0 : 55.0;
+```
+
+### App Configuration (`app.dart`)
+
+#### Debug Banner Fix:
+- **Disabled debug banner** that was showing yellow and black diagonal stripe
+- **Prevents banner from appearing** in landscape mode on home and profile pages
+- **Clean UI** without development artifacts in all orientations
+
+#### Implementation:
+```dart
+MaterialApp(
+  title: 'SkillSwap',
+  debugShowCheckedModeBanner: false, // Disable the debug banner
+  // ... other configurations
+)
 ```
 
 ## Benefits

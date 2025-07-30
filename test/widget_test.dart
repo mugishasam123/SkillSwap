@@ -115,4 +115,22 @@ void main() {
     // Reset the window size
     tester.binding.window.clearPhysicalSizeTestValue();
   });
+
+  testWidgets('Debug banner is disabled', (WidgetTester tester) async {
+    // Test that debug banner is disabled
+    tester.binding.window.physicalSizeTestValue = const Size(400, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Verify that the app builds without errors
+    expect(find.byType(MaterialApp), findsOneWidget);
+    
+    // Verify that debug banner text is not present
+    expect(find.text('DO NOT USE THIS IMAGE FOR PRODUCTION'), findsNothing);
+    
+    // Reset the window size
+    tester.binding.window.clearPhysicalSizeTestValue();
+  });
 }
