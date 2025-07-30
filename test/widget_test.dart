@@ -1,10 +1,9 @@
-// test/widget_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SkillSwap basic widget test', (WidgetTester tester) async {
-    // Build a simple test widget
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -16,7 +15,6 @@ void main() {
       ),
     );
 
-    // Verify our test widget is working
     expect(find.text('SkillSwap'), findsOneWidget);
     expect(find.text('Welcome to SkillSwap'), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
@@ -25,7 +23,7 @@ void main() {
   testWidgets('Form validation simulation', (WidgetTester tester) async {
     String? validationError;
     
-    // Simulate form validation logic
+
     String validateEmail(String? value) {
       if (value == null || value.isEmpty) {
         return 'Email is required';
@@ -59,12 +57,10 @@ void main() {
       ),
     );
 
-    // Test validation logic
     expect(validateEmail(''), 'Email is required');
     expect(validateEmail('invalid'), 'Invalid email format');
     expect(validateEmail('test@example.com'), '');
     
-    // Verify UI elements exist
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.text('Login'), findsOneWidget);
   });
