@@ -16,7 +16,7 @@ SkillSwap is a Flutter-based mobile app that connects students and professionals
 - **Persistence:** User preferences (e.g., theme) stored with SharedPreferences.
 - **Responsive UI:** Adapts to device orientation and input methods.
 - **Validation:** User-friendly error handling and form validation.
-- **Firebase Integration:** All data stored and synced in real-time with Firestore.
+- **Firebase Integration:** All data is stored and synced in real-time with Firestore.
 
 ---
 
@@ -75,16 +75,6 @@ SkillSwap is a Flutter-based mobile app that connects students and professionals
 
 ---
 
-## 🔒 Security
-
-- **Current Firestore Rules:**  
-  ```js
-  allow read, write: if request.time < timestamp.date(2025, 7, 29);
-  ```
-  > _Note: For production, update to `if request.auth != null;` to require authentication._
-
----
-
 ## 📦 Folder Structure
 
 ```
@@ -132,6 +122,8 @@ This project is licensed under the MIT License.
 
 - Flutter & Dart teams
 - Firebase
+- Aaron Izang
+- God'sfavour Chukwudi
 - All contributors and testers
 
 ---
