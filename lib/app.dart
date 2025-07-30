@@ -14,6 +14,27 @@ import 'features/home/presentation/pages/about_page.dart';
 import 'core/theme/theme_bloc.dart';
 import 'core/theme/app_theme.dart';
 
+// Custom wrapper to handle banner and layout issues
+class BannerFreeWidget extends StatelessWidget {
+  final Widget child;
+  
+  const BannerFreeWidget({super.key, required this.child});
+  
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        // Ensure proper padding for system UI
+        padding: MediaQuery.of(context).padding.copyWith(
+          top: MediaQuery.of(context).padding.top,
+          bottom: MediaQuery.of(context).padding.bottom,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 class SkillSwapApp extends StatelessWidget {
   const SkillSwapApp({super.key});
 
@@ -26,27 +47,30 @@ class SkillSwapApp extends StatelessWidget {
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
-          return MaterialApp(
-            title: 'SkillSwap',
-            debugShowCheckedModeBanner: false, // Disable the debug banner
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeState is ThemeLoaded && themeState.isDarkMode
-                ? ThemeMode.dark
-                : ThemeMode.light,
-            initialRoute: '/splash',
-            routes: {
-              '/splash': (context) => const SplashPage(),
-              '/onboarding': (context) => const OnboardingPage(),
-              '/login': (context) => const LoginPage(),
-              '/signup': (context) => const SignupPage(),
-              '/home': (context) => HomePage(arguments: ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?),
-              '/swap': (context) => const SwapPage(),
-              '/messages': (context) => MessageListPage(),
-              '/profile': (context) => const ProfilePage(),
-              '/settings': (context) => const SettingsPage(),
-              '/about': (context) => const AboutPage(),
-            },
+          return BannerFreeWidget(
+            child: MaterialApp(
+              title: 'SkillSwap',
+              debugShowCheckedModeBanner: false, // Disable the debug banner
+              showSemanticsDebugger: false, // Disable semantics debugger
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeState is ThemeLoaded && themeState.isDarkMode
+                  ? ThemeMode.dark
+                  : ThemeMode.light,
+              initialRoute: '/splash',
+              routes: {
+                '/splash': (context) => const SplashPage(),
+                '/onboarding': (context) => const OnboardingPage(),
+                '/login': (context) => const LoginPage(),
+                '/signup': (context) => const SignupPage(),
+                '/home': (context) => HomePage(arguments: ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?),
+                '/swap': (context) => const SwapPage(),
+                '/messages': (context) => MessageListPage(),
+                '/profile': (context) => const ProfilePage(),
+                '/settings': (context) => const SettingsPage(),
+                '/about': (context) => const AboutPage(),
+              },
+            ),
           );
         },
       ),

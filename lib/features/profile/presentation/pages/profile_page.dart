@@ -26,8 +26,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final padding = mediaQuery.padding;
+    
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
+        top: true,
+        bottom: true,
         child: StreamBuilder<UserProfile?>(
                 stream: _repository.getCurrentUserProfile(),
                 builder: (context, snapshot) {
@@ -85,64 +92,64 @@ class _ProfilePageState extends State<ProfilePage> {
                       return _buildProfileCompletionPrompt(context, userProfile);
                     }
 
-                    return Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isLandscape ? 16 : 20, 
+                        vertical: isLandscape ? 12 : 16
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                        // Header with back button
+                        Row(
                           children: [
-                          // Header with back button
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.arrow_back, size: 28),
-                                onPressed: () {
-                                  if (widget.onBackToHome != null) {
-                                    widget.onBackToHome!();
-                                  } else {
-                                    // Fallback to home navigation
-                                    Navigator.of(context).pushReplacementNamed('/home');
-                                  }
-                                },
+                            IconButton(
+                              icon: Icon(Icons.arrow_back, size: isLandscape ? 24 : 28),
+                              onPressed: () {
+                                if (widget.onBackToHome != null) {
+                                  widget.onBackToHome!();
+                                } else {
+                                  // Fallback to home navigation
+                                  Navigator.of(context).pushReplacementNamed('/home');
+                                }
+                              },
+                            ),
+                            const Spacer(),
+                            Text(
+                              'Your Profile',
+                              style: TextStyle(
+                                fontSize: isLandscape ? 20 : 24,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
                               ),
-                              const Spacer(),
-                              Text(
-                                'Your Profile',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).brightness == Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
-                              ),
-                              const Spacer(),
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 24),
-                                onPressed: () => _navigateToEditProfile(userProfile),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Profile Picture and Basic Info
-                          _buildProfileSection(userProfile),
-                          const SizedBox(height: 24),
-
-                          // Key Information Block
-                          _buildKeyInfoSection(userProfile),
-                          const SizedBox(height: 24),
-
-                          // Skill Library Section
-                          _buildSkillLibrarySection(userProfile),
-                          const SizedBox(height: 24),
-
-                          // Reviews Section
-                          _buildReviewsSection(userProfile),
-                          const SizedBox(height: 32),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: Icon(Icons.edit, size: isLandscape ? 20 : 24),
+                              onPressed: () => _navigateToEditProfile(userProfile),
+                            ),
                           ],
                         ),
+                        SizedBox(height: isLandscape ? 16 : 24),
+
+                        // Profile Picture and Basic Info
+                        _buildProfileSection(userProfile),
+                        SizedBox(height: isLandscape ? 16 : 24),
+
+                        // Key Information Block
+                        _buildKeyInfoSection(userProfile),
+                        SizedBox(height: isLandscape ? 16 : 24),
+
+                        // Skill Library Section
+                        _buildSkillLibrarySection(userProfile),
+                        SizedBox(height: isLandscape ? 16 : 24),
+
+                        // Reviews Section
+                        _buildReviewsSection(userProfile),
+                        SizedBox(height: isLandscape ? 20 : 32),
+                        ],
                       ),
                     );
                   } catch (e) {

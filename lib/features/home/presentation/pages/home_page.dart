@@ -89,67 +89,72 @@ class _HomePageState extends State<HomePage> {
     final pages = _pagesBuilder((i) => setState(() => _selectedIndex = i));
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final padding = mediaQuery.padding;
     
-    // Calculate responsive values
-    final headerHeight = isLandscape ? 80.0 : 100.0; // Increased to include theme switch and spacing
+    // Calculate responsive values with proper system UI consideration
+    final headerHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
+    final bottomNavHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
     
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Collapsible header area with theme switch and spacing
-              AnimatedContainer(
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        top: true,
+        bottom: false, // Handle bottom padding manually
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Collapsible header area with theme switch and spacing
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              height: _isHeaderVisible ? headerHeight : 0,
+              child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                height: _isHeaderVisible ? headerHeight : 0,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 300),
-                  opacity: _isHeaderVisible ? 1.0 : 0.0,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const ThemeSwitch(),
-                      const SizedBox(height: 8),
-                      if (_selectedIndex != 1 && _selectedIndex != 3)
-                        const SizedBox(height: 16),
-                    ],
-                  ),
+                opacity: _isHeaderVisible ? 1.0 : 0.0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ThemeSwitch(),
+                    const SizedBox(height: 8),
+                    if (_selectedIndex != 1 && _selectedIndex != 3)
+                      const SizedBox(height: 16),
+                  ],
                 ),
               ),
-              Expanded(child: pages[_selectedIndex]),
-            ],
-          ),
-        ),
-        floatingActionButton: null,
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? const Color(0xFF1E1E1E)
-                : Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF000000)
-                    : const Color(0x11000000),
-                blurRadius: 8,
-                offset: const Offset(0, -2),
+            // Main content area with proper overflow handling
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(bottom: bottomNavHeight + padding.bottom),
+                child: pages[_selectedIndex],
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: null,
+      bottomNavigationBar: Container(
+        height: bottomNavHeight + padding.bottom,
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF1E1E1E)
+              : Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF000000)
+                  : const Color(0x11000000),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: padding.bottom),
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.transparent,

@@ -133,4 +133,22 @@ void main() {
     // Reset the window size
     tester.binding.window.clearPhysicalSizeTestValue();
   });
+
+  testWidgets('Layout works properly in landscape mode without overflow', (WidgetTester tester) async {
+    // Test landscape mode layout
+    tester.binding.window.physicalSizeTestValue = const Size(800, 400); // Landscape
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Verify that the app builds without errors
+    expect(find.byType(MaterialApp), findsOneWidget);
+    
+    // Verify that no overflow errors occur
+    expect(tester.takeException(), isNull);
+    
+    // Reset the window size
+    tester.binding.window.clearPhysicalSizeTestValue();
+  });
 }

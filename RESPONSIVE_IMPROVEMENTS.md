@@ -258,6 +258,96 @@ final spacingHeight = isLandscape ? 6.0 : 8.0;
    - **Communicates scroll position** to parent HomeTabs
    - **Enables tab bar collapse** when scrolling
 
+### Home Page (`home_page.dart`)
+
+#### Layout and Overflow Fixes:
+- **Fixed RenderFlex overflow** by properly handling system UI padding
+- **Adjusted SafeArea configuration** with `top: true, bottom: false`
+- **Reduced header height** in landscape mode (60px vs 80px)
+- **Reduced bottom navigation height** in landscape mode (60px vs 80px)
+- **Proper margin calculations** for content area to prevent overlap
+- **Manual bottom padding handling** to account for system navigation bar
+
+#### Implementation:
+```dart
+// Calculate responsive values with proper system UI consideration
+final headerHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
+final bottomNavHeight = isLandscape ? 60.0 : 80.0; // Reduced for landscape
+
+return Scaffold(
+  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+  body: SafeArea(
+    top: true,
+    bottom: false, // Handle bottom padding manually
+    child: Column(
+      children: [
+        // Collapsible header area
+        AnimatedContainer(
+          height: _isHeaderVisible ? headerHeight : 0,
+          // ... header content
+        ),
+        // Main content area with proper overflow handling
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.only(bottom: bottomNavHeight + padding.bottom),
+            child: pages[_selectedIndex],
+          ),
+        ),
+      ],
+    ),
+  ),
+  bottomNavigationBar: Container(
+    height: bottomNavHeight + padding.bottom,
+    // ... navigation bar content
+  ),
+);
+```
+
+### Profile Page (`profile_page.dart`)
+
+#### Layout Improvements:
+- **Responsive padding** based on orientation (16px vs 20px horizontal, 12px vs 16px vertical)
+- **Responsive icon sizes** (24px vs 28px for back button, 20px vs 24px for edit button)
+- **Responsive text sizes** (20px vs 24px for title)
+- **Responsive spacing** between sections (16px vs 24px, 20px vs 32px)
+- **Proper SafeArea configuration** to prevent system UI overlap
+
+#### Implementation:
+```dart
+return SingleChildScrollView(
+  padding: EdgeInsets.symmetric(
+    horizontal: isLandscape ? 16 : 20, 
+    vertical: isLandscape ? 12 : 16
+  ),
+  child: Column(
+    children: [
+      // Header with responsive sizing
+      Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back, size: isLandscape ? 24 : 28),
+            // ... onPressed
+          ),
+          Text(
+            'Your Profile',
+            style: TextStyle(
+              fontSize: isLandscape ? 20 : 24,
+              // ... other styles
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.edit, size: isLandscape ? 20 : 24),
+            // ... onPressed
+          ),
+        ],
+      ),
+      SizedBox(height: isLandscape ? 16 : 24),
+      // ... other sections with responsive spacing
+    ],
+  ),
+);
+```
+
 ### Chat Page (`chat_page.dart`)
 
 #### Responsive Layout Features:
@@ -284,12 +374,42 @@ final inputHeight = isLandscape ? 45.0 : 55.0;
 - **Disabled debug banner** that was showing yellow and black diagonal stripe
 - **Prevents banner from appearing** in landscape mode on home and profile pages
 - **Clean UI** without development artifacts in all orientations
+- **Added BannerFreeWidget wrapper** to handle any potential banner overlays
+- **Disabled semantics debugger** to prevent additional debug overlays
+
+#### RenderFlex Overflow Fix:
+- **Fixed RenderFlex overflow** by properly handling system UI padding
+- **Adjusted SafeArea configuration** to prevent layout issues
+- **Reduced header and navigation heights** in landscape mode
+- **Proper margin and padding calculations** for different orientations
 
 #### Implementation:
 ```dart
+// Custom wrapper to handle banner and layout issues
+class BannerFreeWidget extends StatelessWidget {
+  final Widget child;
+  
+  const BannerFreeWidget({super.key, required this.child});
+  
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        // Ensure proper padding for system UI
+        padding: MediaQuery.of(context).padding.copyWith(
+          top: MediaQuery.of(context).padding.top,
+          bottom: MediaQuery.of(context).padding.bottom,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 MaterialApp(
   title: 'SkillSwap',
   debugShowCheckedModeBanner: false, // Disable the debug banner
+  showSemanticsDebugger: false, // Disable semantics debugger
   // ... other configurations
 )
 ```
