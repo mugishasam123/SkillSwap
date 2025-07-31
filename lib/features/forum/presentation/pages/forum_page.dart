@@ -5,7 +5,9 @@ import '../../data/forum_repository.dart';
 import 'post_details_page.dart';
 
 class ForumPage extends StatefulWidget {
-  const ForumPage({super.key});
+  final Function(bool)? onScrollChanged;
+  
+  const ForumPage({super.key, this.onScrollChanged});
 
   @override
   State<ForumPage> createState() => _ForumPageState();
@@ -17,6 +19,8 @@ class _ForumPageState extends State<ForumPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _showInputBar = false;
   final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
+  bool _showHeader = true;
 
   void _sendMessage() {
     final message = _messageController.text.trim();
@@ -60,9 +64,26 @@ class _ForumPageState extends State<ForumPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    
+    // Add scroll listener for landscape mode
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 50 && _showHeader) {
+        setState(() => _showHeader = false);
+        widget.onScrollChanged?.call(false);
+      } else if (_scrollController.offset <= 50 && !_showHeader) {
+        setState(() => _showHeader = true);
+        widget.onScrollChanged?.call(true);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _messageController.dispose();
     _focusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -77,24 +98,26 @@ class _ForumPageState extends State<ForumPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header - smaller in landscape
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20, 
-              vertical: isLandscape ? 8 : 12,
-            ),
-            child: Text(
-              "Community Discussions",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: isLandscape ? 20 : 26,
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.white 
-                    : Color(0xFF121717),
-                fontFamily: 'Poppins',
+          // Header - hidden when scrolling in landscape
+          if (!isLandscape || _showHeader) ...[
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 20, 
+                vertical: isLandscape ? 8 : 12,
+              ),
+              child: Text(
+                "Community Discussions",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: isLandscape ? 20 : 26,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white 
+                      : Color(0xFF121717),
+                  fontFamily: 'Poppins',
+                ),
               ),
             ),
-          ),
+          ],
           // Discussion list
           Expanded(child: _buildDiscussionList(isLandscape)),
           // Input section - either + button or input bar
@@ -154,6 +177,7 @@ class _ForumPageState extends State<ForumPage> {
         return Scrollbar(
           thumbVisibility: true,
           child: ListView.builder(
+            controller: _scrollController,
             padding: EdgeInsets.only(
               bottom: _showInputBar 
                   ? (isLandscape ? 80 : 100) 
