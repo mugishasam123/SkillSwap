@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1080492400567',
     projectId: 'skillswap-b3f3a',
     storageBucket: 'skillswap-b3f3a.firebasestorage.app',
-    iosBundleId: 'com.example.myApp',
+    iosBundleId: 'com.skillswap.app',
   );
 
 }
