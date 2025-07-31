@@ -130,4 +130,4 @@ This project is licensed under the MIT License.
 
 ## 📱 Download
 
-- [APK Release Link or QR Code Here]
+https://github.com/mugishasam123/SkillSwap/releases/download/v1.2/app-release.apk

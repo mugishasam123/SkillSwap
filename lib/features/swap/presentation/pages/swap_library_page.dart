@@ -290,16 +290,16 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
   // Build Swap Received Tab
   Widget _buildSwapReceivedTab(String currentUserId) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('swapRequests')
+                      stream: FirebaseFirestore.instance
+                          .collection('swapRequests')
           .where('receiverId', isEqualTo: currentUserId)
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          .orderBy('createdAt', descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(
             child: Text(
               'No swaps received yet.',
@@ -310,17 +310,17 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
               ),
             ),
           );
-        }
-        final requests = snapshot.data!.docs.where((doc) {
+                        }
+                        final requests = snapshot.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>?;
           if (data == null) return false;
           final senderName = (data['senderName'] ?? '').toString().toLowerCase();
           final learn = (data['learn'] ?? '').toString().toLowerCase();
           final status = data['status'] ?? 'pending';
           print('DEBUG: Swap request ${doc.id} - Status: $status, Sender: $senderName, Learn: $learn');
-          return senderName.contains(_search) || learn.contains(_search);
-        }).toList();
-        if (requests.isEmpty) {
+                          return senderName.contains(_search) || learn.contains(_search);
+                        }).toList();
+                        if (requests.isEmpty) {
           return Center(
             child: Text(
               'No swaps match your search.',
@@ -331,12 +331,12 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
               ),
             ),
           );
-        }
-        return ListView.separated(
-          itemCount: requests.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 18),
-          itemBuilder: (context, i) {
-            final doc = requests[i];
+                        }
+                        return ListView.separated(
+                          itemCount: requests.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 18),
+                          itemBuilder: (context, i) {
+                            final doc = requests[i];
             final data = doc.data() as Map<String, dynamic>?;
             if (data == null) {
               return const SizedBox(height: 100, child: Center(child: Text('Invalid data')));
@@ -345,12 +345,12 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
             final senderAvatar = data['senderAvatar'];
             final learn = data['learn'] ?? '';
             final status = data['status'] ?? 'pending';
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundImage: senderAvatar != null ? NetworkImage(senderAvatar) : null,
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CircleAvatar(
+                                  radius: 28,
+                                  backgroundImage: senderAvatar != null ? NetworkImage(senderAvatar) : null,
                   child: senderAvatar == null ? Text(
                     senderName[0], 
                     style: TextStyle(
@@ -359,24 +359,24 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                       color: Colors.white,
                     )
                   ) : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        senderName,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        senderName,
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                          fontFamily: 'Poppins',
                           color: Theme.of(context).brightness == Brightness.dark 
                               ? Colors.white 
                               : Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
                       Builder(
                         builder: (context) {
                           // Use the skills stored in the swap request document
@@ -402,8 +402,8 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                               Text(
                                 '$senderName wants to learn $learn and is good at $skillsOffered',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: 'Poppins',
+                                              fontSize: 14,
+                                              fontFamily: 'Poppins',
                                   color: Theme.of(context).brightness == Brightness.dark 
                                       ? Colors.grey[300]
                                       : Colors.grey[600],
@@ -425,41 +425,41 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                   ),
                                 ),
                             ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (status == 'declined')
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFBDBDBD),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text('Declined', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                            )
-                          else if (status == 'accepted')
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF4CAF50),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                            )
-                          else ...[
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF19A7CE),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                              ),
-                              onPressed: () async {
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          if (status == 'declined')
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFBDBDBD),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: const Text('Declined', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                                            )
+                                          else if (status == 'accepted')
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF4CAF50),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: const Text('Accepted', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                                            )
+                                          else ...[
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: const Color(0xFF19A7CE),
+                                                foregroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(20),
+                                                ),
+                                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                              ),
+                                              onPressed: () async {
                                 try {
                                   print('DEBUG: Declining swap request ${doc.id}');
                                   final repository = SwapRepository();
@@ -484,21 +484,21 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                     ),
                                   );
                                 }
-                              },
-                              child: const Text('Decline', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                            ),
-                            const SizedBox(width: 12),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFF7931A),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                              ),
-                              onPressed: () async {
-                                try {
+                                              },
+                                              child: const Text('Decline', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: const Color(0xFFF7931A),
+                                                foregroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(20),
+                                                ),
+                                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                              ),
+                                              onPressed: () async {
+                                                try {
                                   // Get the swap request data
                                   final date = data['date'];
                                   final time = data['time'];
@@ -529,71 +529,71 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                     
                                     // Send confirmation emails
                                     // Get user data for email
-                                    final requesterDoc = await FirebaseFirestore.instance
-                                        .collection('users')
+                                                  final requesterDoc = await FirebaseFirestore.instance
+                                                      .collection('users')
                                         .doc(requesterId)
-                                        .get();
-                                    final receiverDoc = await FirebaseFirestore.instance
-                                        .collection('users')
+                                                      .get();
+                                                  final receiverDoc = await FirebaseFirestore.instance
+                                                      .collection('users')
                                         .doc(receiverId)
-                                        .get();
-                                    
-                                    final requesterData = requesterDoc.data();
-                                    final receiverData = receiverDoc.data();
-                                    
-                                    if (requesterData != null && receiverData != null) {
-                                      await EmailService.sendSwapConfirmationEmail(
-                                        requesterEmail: requesterData['email'] ?? '',
-                                        receiverEmail: receiverData['email'] ?? '',
-                                        requesterName: requesterData['name'] ?? 'User',
-                                        receiverName: receiverData['name'] ?? 'User',
-                                        requesterLocation: requesterData['location'] ?? 'Not specified',
-                                        receiverLocation: receiverData['location'] ?? 'Not specified',
-                                        meetingDate: meetingDate,
-                                        meetingTime: meetingTime,
+                                                      .get();
+                                                  
+                                                  final requesterData = requesterDoc.data();
+                                                  final receiverData = receiverDoc.data();
+                                                  
+                                                  if (requesterData != null && receiverData != null) {
+                                                    await EmailService.sendSwapConfirmationEmail(
+                                                      requesterEmail: requesterData['email'] ?? '',
+                                                      receiverEmail: receiverData['email'] ?? '',
+                                                      requesterName: requesterData['name'] ?? 'User',
+                                                      receiverName: receiverData['name'] ?? 'User',
+                                                      requesterLocation: requesterData['location'] ?? 'Not specified',
+                                                      receiverLocation: receiverData['location'] ?? 'Not specified',
+                                                      meetingDate: meetingDate,
+                                                      meetingTime: meetingTime,
                                         platform: platform == 'google_meet' ? 'Google Meet' : 'Zoom',
-                                        skillToLearn: skillToLearn,
-                                      );
+                                                      skillToLearn: skillToLearn,
+                                                    );
                                     }
-                                  }
-                                  
-                                  // Show confirmation dialog
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('Swap Accepted!'),
+                                                  }
+                                                  
+                                                  // Show confirmation dialog
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) => AlertDialog(
+                                                      title: const Text('Swap Accepted!'),
                                       content: const Text('Swap accepted and confirmation emails sent to both parties.'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.of(context).pop(),
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                } catch (error) {
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () => Navigator.of(context).pop(),
+                                                          child: const Text('OK'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                } catch (error) {
                                   print('DEBUG: Error accepting swap request: $error');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Error accepting swap: $error'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                              child: const Text('Accept', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('Error accepting swap: $error'),
+                                                      backgroundColor: Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              child: const Text('Accept', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
     );
   }
 
@@ -679,7 +679,7 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                         style: const TextStyle(
                           fontSize: 24, 
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+          color: Colors.white,
                         )
                       ) : null,
                     ),
@@ -778,10 +778,10 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                   child: const Text('Pending', style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
                                 ),
                             ],
-                          ),
-                        ],
-                      ),
-                    ),
+            ),
+          ],
+        ),
+      ),
                   ],
                 );
               },
@@ -791,4 +791,4 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
       },
     );
   }
-}
+} 

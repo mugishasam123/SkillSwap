@@ -101,7 +101,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
   void _viewSwap(Swap swap) async {
     // Increment view count
     _repository.incrementViews(swap.id);
-
+    
     print('=== ALL SWAPS DEBUG ===');
     print('DEBUG: swap.userId = ${swap.userId}');
     print('DEBUG: swap.userName = ${swap.userName}');
@@ -122,8 +122,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
 
     if (userProfile != null && mounted) {
       print('DEBUG: Showing UserProfileDialog with full profile');
-      showDialog(
-        context: context,
+    showDialog(
+      context: context,
         builder: (context) => UserProfileDialog(userProfile: userProfile),
       );
     } else {
@@ -223,22 +223,22 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.filterSkill != null ? 'Filtered Skills' : 'All Swaps',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 26,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
                       color: Theme.of(context).brightness == Brightness.dark 
                           ? Colors.white 
                           : Color(0xFF121717),
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
+              fontFamily: 'Poppins',
+            ),
+          ),
                   if (widget.filterSkill != null) ...[
                     SizedBox(height: 8),
                     Row(
@@ -251,8 +251,8 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                             border: Border.all(color: Color(0xFF225B4B).withOpacity(0.3)),
                           ),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
+            mainAxisSize: MainAxisSize.min,
+            children: [
                               Icon(
                                 Icons.filter_list,
                                 size: 16,
@@ -706,7 +706,7 @@ class _AllSwapsPageState extends State<AllSwapsPage> {
                                 value:
                                     loadingProgress.expectedTotalBytes != null
                                     ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
+                                        loadingProgress.expectedTotalBytes!
                                     : null,
                               ),
                             );
@@ -841,7 +841,7 @@ class _SwapDetailsDialog extends StatelessWidget {
                             ? swap.location
                             : 'Location not specified',
                         style: TextStyle(
-                          fontSize: 14, 
+                          fontSize: 14,
                           color: Theme.of(context).brightness == Brightness.dark 
                               ? Colors.grey[400]
                               : Colors.grey[600]
@@ -908,7 +908,7 @@ class _SwapDetailsDialog extends StatelessWidget {
                                   value:
                                       loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes!
                                       : null,
                                 ),
                               );
@@ -989,7 +989,7 @@ class _SwapDetailsDialog extends StatelessWidget {
                 children: swap.tags
                     .map(
                       (tag) => Chip(
-                        label: Text(tag),
+                  label: Text(tag),
                         backgroundColor: Theme.of(context).brightness == Brightness.dark 
                             ? Colors.grey[700]
                             : Colors.grey[200],
@@ -1152,7 +1152,7 @@ class _FullScreenImageView extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
                             ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
+                                loadingProgress.expectedTotalBytes!
                             : null,
                         color: Colors.white,
                       ),
@@ -1187,4 +1187,4 @@ class _FullScreenImageView extends StatelessWidget {
       ),
     );
   }
-}
+} 
