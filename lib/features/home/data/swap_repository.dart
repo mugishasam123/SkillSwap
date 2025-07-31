@@ -428,6 +428,46 @@ class SwapRepository {
     }
   }
 
+  // Accept a swap request
+  Future<void> acceptSwapRequest(String requestId, String requesterId, String receiverId) async {
+    try {
+      // Update the swap request status
+      await _firestore.collection('swapRequests').doc(requestId).update({
+        'status': 'accepted',
+        'acceptedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Increment swap score for both users
+      await _firestore.collection('users').doc(requesterId).update({
+        'swapScore': FieldValue.increment(1),
+      });
+      
+      await _firestore.collection('users').doc(receiverId).update({
+        'swapScore': FieldValue.increment(1),
+      });
+
+      print('DEBUG: Swap request $requestId accepted successfully');
+    } catch (e) {
+      print('DEBUG: Error accepting swap request: $e');
+      throw e;
+    }
+  }
+
+  // Decline a swap request
+  Future<void> declineSwapRequest(String requestId) async {
+    try {
+      await _firestore.collection('swapRequests').doc(requestId).update({
+        'status': 'declined',
+        'declinedAt': FieldValue.serverTimestamp(),
+      });
+
+      print('DEBUG: Swap request $requestId declined successfully');
+    } catch (e) {
+      print('DEBUG: Error declining swap request: $e');
+      throw e;
+    }
+  }
+
   // Get time ago from timestamp
   String getTimeAgo(DateTime timestamp) {
     final now = DateTime.now();
