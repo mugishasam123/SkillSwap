@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
 import '../../../../features/home/data/email_service.dart';
+import '../../../../features/home/data/swap_repository.dart';
 
 class SwapLibraryPage extends StatefulWidget {
   const SwapLibraryPage({super.key});
@@ -314,6 +316,8 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
           if (data == null) return false;
           final senderName = (data['senderName'] ?? '').toString().toLowerCase();
           final learn = (data['learn'] ?? '').toString().toLowerCase();
+          final status = data['status'] ?? 'pending';
+          print('DEBUG: Swap request ${doc.id} - Status: $status, Sender: $senderName, Learn: $learn');
           return senderName.contains(_search) || learn.contains(_search);
         }).toList();
         if (requests.isEmpty) {
@@ -456,7 +460,30 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                               ),
                               onPressed: () async {
-                                await FirebaseFirestore.instance.collection('swapRequests').doc(doc.id).update({'status': 'declined'});
+                                try {
+                                  print('DEBUG: Declining swap request ${doc.id}');
+                                  final repository = SwapRepository();
+                                  await repository.declineSwapRequest(doc.id);
+                                  
+                                  // Force a rebuild to show the updated status
+                                  setState(() {});
+                                  
+                                  print('DEBUG: Swap request ${doc.id} declined successfully');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Swap request declined'),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  print('DEBUG: Error declining swap request: $e');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error declining request: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               },
                               child: const Text('Decline', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
                             ),
@@ -477,6 +504,17 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                   final time = data['time'];
                                   final platform = data['platform'];
                                   final skillToLearn = data['learn'];
+                                  final requesterId = data['requesterId'];
+                                  final receiverId = data['receiverId'];
+                                  
+                                  // Use the repository method to accept the swap
+                                  print('DEBUG: Accepting swap request ${doc.id}');
+                                  final repository = SwapRepository();
+                                  await repository.acceptSwapRequest(doc.id, requesterId, receiverId);
+                                  
+                                  // Force a rebuild to show the updated status
+                                  setState(() {});
+                                  print('DEBUG: Swap request ${doc.id} accepted successfully');
                                   
                                   if (date != null && time != null && platform != null && skillToLearn != null) {
                                     // Format the date and time
@@ -493,11 +531,11 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                     // Get user data for email
                                     final requesterDoc = await FirebaseFirestore.instance
                                         .collection('users')
-                                        .doc(data['requesterId'])
+                                        .doc(requesterId)
                                         .get();
                                     final receiverDoc = await FirebaseFirestore.instance
                                         .collection('users')
-                                        .doc(data['receiverId'])
+                                        .doc(receiverId)
                                         .get();
                                     
                                     final requesterData = requesterDoc.data();
@@ -524,7 +562,7 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: const Text('Swap Accepted!'),
-                                      content: const Text('Confirmation emails sent to both parties.'),
+                                      content: const Text('Swap accepted and confirmation emails sent to both parties.'),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.of(context).pop(),
@@ -534,7 +572,7 @@ class _SwapLibraryPageState extends State<SwapLibraryPage> with SingleTickerProv
                                     ),
                                   );
                                 } catch (error) {
-                                  print('Error accepting swap: $error');
+                                  print('DEBUG: Error accepting swap request: $error');
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text('Error accepting swap: $error'),
