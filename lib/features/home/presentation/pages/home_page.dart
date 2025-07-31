@@ -162,6 +162,7 @@ class HomeTabs extends StatefulWidget {
 class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _currentFilterSkill;
+  bool _showTabBar = true;
 
   @override
   void initState() {
@@ -196,64 +197,75 @@ class _HomeTabsState extends State<HomeTabs> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? Colors.grey[800]
-                : Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: TabBar(
-            controller: _tabController,
-            labelColor: Colors.white,
-            unselectedLabelColor: const Color(0xFF617D8A),
-            labelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
-              fontSize: 14,
+        // Tab bar - hidden when scrolling in landscape
+        if (!isLandscape || _showTabBar) ...[
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[800]
+                  : Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
             ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-              fontSize: 14,
-            ),
-            indicator: BoxDecoration(
-              color: const Color(0xFF225B4B),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: Colors.transparent,
-            onTap: (index) {
-              // Handle manual tab clicks
-              if (index == 1) { // All tab
-                if (_currentFilterSkill != null) {
-                  // If there's a filter active, clear it
-                  setState(() {
-                    _currentFilterSkill = null;
-                  });
-                  print('DEBUG: HomeTabs - Manually clicked All tab, clearing filter');
+            child: TabBar(
+              controller: _tabController,
+              labelColor: Colors.white,
+              unselectedLabelColor: const Color(0xFF617D8A),
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                fontSize: 14,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                fontSize: 14,
+              ),
+              indicator: BoxDecoration(
+                color: const Color(0xFF225B4B),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              onTap: (index) {
+                // Handle manual tab clicks
+                if (index == 1) { // All tab
+                  if (_currentFilterSkill != null) {
+                    // If there's a filter active, clear it
+                    setState(() {
+                      _currentFilterSkill = null;
+                    });
+                    print('DEBUG: HomeTabs - Manually clicked All tab, clearing filter');
+                  }
                 }
-              }
-            },
-            tabs: const [
-              Tab(text: 'Suggested'),
-              Tab(text: 'All'),
-              Tab(text: 'Forum'),
-            ],
+              },
+              tabs: const [
+                Tab(text: 'Suggested'),
+                Tab(text: 'All'),
+                Tab(text: 'Forum'),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
               SuggestedSwapsPage(),
               AllSwapsPage(filterSkill: _currentFilterSkill),
-              ForumPage(),
+              ForumPage(
+                onScrollChanged: (showHeader) {
+                  setState(() {
+                    _showTabBar = showHeader;
+                  });
+                },
+              ),
             ],
           ),
         ),

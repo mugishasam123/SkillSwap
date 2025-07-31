@@ -5,7 +5,9 @@ import '../../data/forum_repository.dart';
 import 'post_details_page.dart';
 
 class ForumPage extends StatefulWidget {
-  const ForumPage({super.key});
+  final Function(bool)? onScrollChanged;
+  
+  const ForumPage({super.key, this.onScrollChanged});
 
   @override
   State<ForumPage> createState() => _ForumPageState();
@@ -15,6 +17,10 @@ class _ForumPageState extends State<ForumPage> {
   final TextEditingController _messageController = TextEditingController();
   final ForumRepository _repository = ForumRepository();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _showInputBar = false;
+  final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
+  bool _showHeader = true;
 
   void _sendMessage() {
     final message = _messageController.text.trim();
@@ -24,6 +30,10 @@ class _ForumPageState extends State<ForumPage> {
           : message;
       _repository.createDiscussion(title: title, description: message);
       _messageController.clear();
+      setState(() {
+        _showInputBar = false;
+      });
+      _focusNode.unfocus();
     }
   }
 
@@ -40,26 +50,66 @@ class _ForumPageState extends State<ForumPage> {
     );
   }
 
+  void _toggleInputBar() {
+    setState(() {
+      _showInputBar = !_showInputBar;
+    });
+    if (_showInputBar) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _focusNode.requestFocus();
+      });
+    } else {
+      _focusNode.unfocus();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Add scroll listener for landscape mode
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 50 && _showHeader) {
+        setState(() => _showHeader = false);
+        widget.onScrollChanged?.call(false);
+      } else if (_scrollController.offset <= 50 && !_showHeader) {
+        setState(() => _showHeader = true);
+        widget.onScrollChanged?.call(true);
+      }
+    });
+  }
+
   @override
   void dispose() {
     _messageController.dispose();
+    _focusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    
+    return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+          ? const Color(0xFF121212)
+          : Colors.white,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header - hidden when scrolling in landscape
+          if (!isLandscape || _showHeader) ...[
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child:               Text(
+              padding: EdgeInsets.symmetric(
+                horizontal: 20, 
+                vertical: isLandscape ? 8 : 12,
+              ),
+              child: Text(
                 "Community Discussions",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 26,
+                  fontSize: isLandscape ? 20 : 26,
                   color: Theme.of(context).brightness == Brightness.dark 
                       ? Colors.white 
                       : Color(0xFF121717),
@@ -67,21 +117,28 @@ class _ForumPageState extends State<ForumPage> {
                 ),
               ),
             ),
-            Expanded(child: _buildDiscussionList()),
           ],
-        ),
-        // Only keep the message input bar at the bottom
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: _buildMessageInputBar(),
-        ),
-      ],
+          // Discussion list
+          Expanded(child: _buildDiscussionList(isLandscape)),
+          // Input section - either + button or input bar
+          if (_showInputBar) _buildMessageInputBar(isLandscape),
+        ],
+      ),
+      floatingActionButton: _showInputBar 
+          ? null 
+          : FloatingActionButton(
+              onPressed: _toggleInputBar,
+              backgroundColor: Colors.yellow[600],
+              child: Icon(
+                Icons.add,
+                color: Colors.black,
+                size: 28,
+              ),
+            ),
     );
   }
 
-  Widget _buildDiscussionList() {
+  Widget _buildDiscussionList(bool isLandscape) {
     return StreamBuilder<List<Discussion>>(
       stream: _repository.getDiscussions(),
       builder: (context, snapshot) {
@@ -104,11 +161,11 @@ class _ForumPageState extends State<ForumPage> {
         if (discussions.isEmpty) {
           return Center(
             child: Padding(
-              padding: EdgeInsets.all(32),
+              padding: EdgeInsets.all(isLandscape ? 16 : 32),
               child: Text(
                 'No discussions yet. Start the conversation!',
                 style: TextStyle(
-                  fontSize: 16, 
+                  fontSize: isLandscape ? 14 : 16, 
                   color: Theme.of(context).brightness == Brightness.dark 
                       ? Colors.grey[400]
                       : Colors.grey[600]
@@ -120,10 +177,15 @@ class _ForumPageState extends State<ForumPage> {
         return Scrollbar(
           thumbVisibility: true,
           child: ListView.builder(
-            padding: EdgeInsets.only(bottom: 100),
+            controller: _scrollController,
+            padding: EdgeInsets.only(
+              bottom: _showInputBar 
+                  ? (isLandscape ? 80 : 100) 
+                  : (isLandscape ? 16 : 80),
+            ),
             itemCount: discussions.length,
             itemBuilder: (context, index) {
-              return _buildDiscussionCard(discussions[index]);
+              return _buildDiscussionCard(discussions[index], isLandscape);
             },
           ),
         );
@@ -131,15 +193,18 @@ class _ForumPageState extends State<ForumPage> {
     );
   }
 
-  Widget _buildDiscussionCard(Discussion discussion) {
+  Widget _buildDiscussionCard(Discussion discussion, bool isLandscape) {
     final currentUser = _auth.currentUser;
     final isLiked = discussion.likedBy.contains(currentUser?.uid);
 
     return GestureDetector(
       onTap: () => _openPostDetails(discussion),
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-        padding: EdgeInsets.all(20),
+        margin: EdgeInsets.symmetric(
+          vertical: isLandscape ? 8 : 14, 
+          horizontal: 20,
+        ),
+        padding: EdgeInsets.all(isLandscape ? 12 : 20),
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark 
               ? const Color(0xFF2A2A2A)
@@ -169,9 +234,9 @@ class _ForumPageState extends State<ForumPage> {
               children: [
                 CircleAvatar(
                   backgroundImage: AssetImage(discussion.avatar),
-                  radius: 24,
+                  radius: isLandscape ? 18 : 24,
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: isLandscape ? 12 : 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,32 +245,32 @@ class _ForumPageState extends State<ForumPage> {
                         discussion.title,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: isLandscape ? 14 : 18,
                           color: Theme.of(context).brightness == Brightness.dark 
                               ? Colors.white 
                               : Colors.black,
                         ),
-                        maxLines: 2,
+                        maxLines: isLandscape ? 1 : 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: isLandscape ? 2 : 4),
                       Row(
                         children: [
                           Text(
                             discussion.author,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: isLandscape ? 10 : 12,
                               fontWeight: FontWeight.w500,
                               color: Theme.of(context).brightness == Brightness.dark 
                                   ? Colors.grey[300]
                                   : Colors.black,
                             ),
                           ),
-                          SizedBox(width: 12),
+                          SizedBox(width: isLandscape ? 8 : 12),
                           Text(
                             _repository.getTimeAgo(discussion.timestamp),
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: isLandscape ? 10 : 12,
                               color: Theme.of(context).brightness == Brightness.dark 
                                   ? Colors.grey[400]
                                   : Colors.grey[600],
@@ -218,20 +283,20 @@ class _ForumPageState extends State<ForumPage> {
                 ),
               ],
             ),
-            SizedBox(height: 14),
+            SizedBox(height: isLandscape ? 8 : 14),
             Text(
               discussion.description,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: isLandscape ? 12 : 14,
                 fontWeight: FontWeight.w500,
                 color: Theme.of(context).brightness == Brightness.dark 
                     ? Colors.white 
                     : Colors.black87,
               ),
-              maxLines: 3,
+              maxLines: isLandscape ? 2 : 3,
               overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: isLandscape ? 12 : 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -244,13 +309,13 @@ class _ForumPageState extends State<ForumPage> {
                           Icon(
                             isLiked ? Icons.favorite : Icons.favorite_border,
                             color: isLiked ? Colors.red : Colors.grey,
-                            size: 18,
+                            size: isLandscape ? 16 : 18,
                           ),
-                          SizedBox(width: 6),
+                          SizedBox(width: isLandscape ? 4 : 6),
                           Text(
                             '${discussion.likes}',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: isLandscape ? 10 : 12,
                               fontWeight: FontWeight.w500,
                               color: Theme.of(context).brightness == Brightness.dark 
                                   ? Colors.white 
@@ -260,19 +325,19 @@ class _ForumPageState extends State<ForumPage> {
                         ],
                       ),
                     ),
-                    SizedBox(width: 20),
+                    SizedBox(width: isLandscape ? 16 : 20),
                     Row(
                       children: [
                         Icon(
                           Icons.chat_bubble_outline,
-                          size: 18,
+                          size: isLandscape ? 16 : 18,
                           color: Colors.grey,
                         ),
-                        SizedBox(width: 6),
+                        SizedBox(width: isLandscape ? 4 : 6),
                         Text(
                           '${discussion.replies}',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: isLandscape ? 10 : 12,
                             fontWeight: FontWeight.w500,
                             color: Theme.of(context).brightness == Brightness.dark 
                                 ? Colors.white 
@@ -281,19 +346,19 @@ class _ForumPageState extends State<ForumPage> {
                         ),
                       ],
                     ),
-                    SizedBox(width: 20),
+                    SizedBox(width: isLandscape ? 16 : 20),
                     Row(
                       children: [
                         Icon(
                           Icons.remove_red_eye,
-                          size: 18,
+                          size: isLandscape ? 16 : 18,
                           color: Colors.grey,
                         ),
-                        SizedBox(width: 6),
+                        SizedBox(width: isLandscape ? 4 : 6),
                         Text(
                           '${discussion.views}',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: isLandscape ? 10 : 12,
                             fontWeight: FontWeight.w500,
                             color: Theme.of(context).brightness == Brightness.dark 
                                 ? Colors.white 
@@ -312,75 +377,84 @@ class _ForumPageState extends State<ForumPage> {
     );
   }
 
-  Widget _buildMessageInputBar() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark 
-              ? const Color(0xFF2A2A2A)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.black12, 
-              blurRadius: 12
-            )
-          ],
-        ),
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Icon(
-                Icons.emoji_emotions_outlined,
-                color: Colors.grey,
-                size: 32,
-              ),
+  Widget _buildMessageInputBar(bool isLandscape) {
+    return Container(
+      padding: EdgeInsets.all(isLandscape ? 12 : 20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF2A2A2A)
+            : Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black12, 
+            blurRadius: 12,
+            offset: Offset(0, -2),
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          // Close button
+          IconButton(
+            onPressed: _toggleInputBar,
+            icon: Icon(
+              Icons.close,
+              color: Colors.grey,
+              size: isLandscape ? 20 : 24,
             ),
-            Expanded(
-              child: TextField(
-                controller: _messageController,
-                style: TextStyle(
-                  fontSize: 18,
+          ),
+          // Emoji button
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.emoji_emotions_outlined,
+              color: Colors.grey,
+              size: isLandscape ? 20 : 24,
+            ),
+          ),
+          // Text input
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              focusNode: _focusNode,
+              style: TextStyle(
+                fontSize: isLandscape ? 14 : 16,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
+              ),
+              decoration: InputDecoration(
+                hintText: "Type your post here...",
+                border: InputBorder.none,
+                hintStyle: TextStyle(
                   color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.white 
-                      : Colors.black,
+                      ? Colors.grey[400]
+                      : Color(0xFFBDBDBD),
+                  fontFamily: 'Poppins',
+                  fontSize: isLandscape ? 14 : 16,
                 ),
-                decoration: InputDecoration(
-                  hintText: "Type message here...",
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).brightness == Brightness.dark 
-                        ? Colors.grey[400]
-                        : Color(0xFFBDBDBD),
-                    fontFamily: 'Poppins',
-                    fontSize: 18,
-                  ),
-                ),
-                onSubmitted: (_) => _sendMessage(),
               ),
+              onSubmitted: (_) => _sendMessage(),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12.0,
-                vertical: 4.0,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFF1721B),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: Icon(Icons.send, color: Colors.white, size: 24),
-                  onPressed: _sendMessage,
-                ),
-              ),
+          ),
+          // Send button
+          Container(
+            decoration: BoxDecoration(
+              color: Color(0xFFF1721B),
+              shape: BoxShape.circle,
             ),
-          ],
-        ),
+            child: IconButton(
+              icon: Icon(
+                Icons.send, 
+                color: Colors.white, 
+                size: isLandscape ? 20 : 24,
+              ),
+              onPressed: _sendMessage,
+            ),
+          ),
+        ],
       ),
     );
   }
